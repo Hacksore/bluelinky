@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { lockVehicle}  = require('./index');
+const { lockVehicle, startVehicle }  = require('./index');
 
 const config = {
 	email: process.env.EMAIL,
@@ -9,7 +9,7 @@ const config = {
 }
 
 async function test() {
-	const test = await lockVehicle(config);
+	const test = await startVehicle(config);
 
 	console.log(test)
 }
