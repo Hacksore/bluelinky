@@ -9,7 +9,9 @@ const config = {
 }
 
 async function test() {
-	lockVehicle(config);
+	const test = await lockVehicle(config);
+
+	console.log(test)
 }
 
 test();
