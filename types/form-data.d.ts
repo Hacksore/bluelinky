@@ -1,0 +1,34 @@
+export = form_data;
+declare class form_data {
+  static DEFAULT_CONTENT_TYPE: string;
+  static LINE_BREAK: string;
+  constructor(options: any);
+  addListener(type: any, listener: any): any;
+  append(field: any, value: any, options: any): void;
+  destroy(): void;
+  emit(type: any, args: any): any;
+  end(): void;
+  eventNames(): any;
+  getBoundary(): any;
+  getHeaders(userHeaders: any): any;
+  getLength(cb: any): void;
+  getLengthSync(): any;
+  getMaxListeners(): any;
+  hasKnownLength(): any;
+  listenerCount(type: any): any;
+  listeners(type: any): any;
+  off(type: any, listener: any): any;
+  on(type: any, listener: any): any;
+  once(type: any, listener: any): any;
+  pause(): void;
+  pipe(dest: any, options: any): any;
+  prependListener(type: any, listener: any): any;
+  prependOnceListener(type: any, listener: any): any;
+  rawListeners(type: any): any;
+  removeAllListeners(type: any, ...args: any[]): any;
+  removeListener(type: any, listener: any): any;
+  resume(): void;
+  setMaxListeners(n: any): any;
+  submit(params: any, cb: any): any;
+  write(data: any): void;
+}
