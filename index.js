@@ -1,6 +1,1 @@
-const { lockVehicle, startVehicle } = require('./lib/wrapper');
-
-module.exports = {
-	lockVehicle,
-	startVehicle
-}
+module.exports = require('./lib/wrapper');
