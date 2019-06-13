@@ -3,21 +3,18 @@ An API wrapper for Hyundai bluelink
 
 # Example
 ```javascript
-const bluelinky = require('bluelinky');
+const BlueLinky = require('bluelinky');
 
-const token = await bluelinky.getToken({
-	email: process.env.EMAIL,
+const bluelinky = new BlueLinky({
+	username: process.env.EMAIL,
 	password: process.env.PASSWORD,
 	vin: process.env.VIN,
 	pin: process.env.PIN
 });
 
-const test = await bluelinky.lockVehicle(token, {
-	email: process.env.EMAIL,
-	vin: process.env.VIN,
-	pin: process.env.PIN
-});
-console.log(test);
+const response = await bluelinky.lockVehicle();
+
+console.log(response);
 ```
 
 ## Supported Features
@@ -27,13 +24,17 @@ console.log(test);
 - [X] Stop
 - [X] Health
 - [X] Flash Lights
-- [X] Status
-- [ ] Valet Mode?
-- [ ] Speed Alert?
-- [ ] Geofencing?
+- [X] Panic
+- [X] API Stats
+- [X] Vehicle Status
+- [X] Account Info
+- [X] Account Messages
+- [X] Enrollment Status
+- [X] Vehicle Service Info
+- [X] Pin Status
 
+## Responses
+You can find JSON response captures in the docs folder for analysing
 
 ## Observations
 Seems the API has daily limits for commands, unsure of the numbers yet.
-
-`You have exceeded the daily remote service request limit. Your last request was not processed`
