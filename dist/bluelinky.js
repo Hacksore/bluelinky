@@ -53,10 +53,7 @@ var endpoints = {
 function buildFormData(config) {
     var form = new FormData();
     for (var key in config) {
-        var value = config[key];
-        if (typeof (value) === 'boolean') {
-            value = value.toString();
-        }
+        var value = config[key].toString();
         form.append(key, value);
     }
     return form;

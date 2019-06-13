@@ -36,16 +36,10 @@ interface HyundaiResponse {
   RESPONSE_STRING: JSON
 }
 
-
 function buildFormData(config) {
   const form = new FormData();
   for (const key in config) {
-    let value = config[key];
-
-    if(typeof(value) === 'boolean'){
-      value = value.toString();
-    }
-
+    let value = config[key].toString();
     form.append(key, value);
   }
   return form;

@@ -14,7 +14,7 @@ async function test() {
 	// const res = await bluelinky.lockVehicle();
 	// console.log(res);
 
-	const res = await bluelinky.vehicleStatus();
+	const res = await bluelinky.lockVehicle();
 
 	console.log(JSON.stringify(res));
 }
