@@ -5,11 +5,11 @@ interface AuthConfig {
     pin: string | null;
 }
 interface StartConfig {
-    airCtrl: boolean;
+    airCtrl: boolean | string;
     igniOnDuration: number;
     airTempvalue: number;
-    defrost: boolean;
-    heating1: boolean;
+    defrost: boolean | string;
+    heating1: boolean | string;
 }
 interface HyundaiResponse {
     E_IFRESULT: string;
@@ -20,16 +20,22 @@ declare class BlueLinky {
     private authConfig;
     private token;
     constructor(authConfig: AuthConfig);
-    setAuthConfig(config: AuthConfig): void;
     getToken(): Promise<String>;
-    unlockVehicle(): Promise<HyundaiResponse>;
-    lockVehicle(): Promise<HyundaiResponse>;
-    startVehicle(config: StartConfig): Promise<HyundaiResponse>;
-    stopVehicle(): Promise<HyundaiResponse>;
-    flashVehicleLights(): Promise<HyundaiResponse>;
-    vehiclePanic(): Promise<HyundaiResponse>;
-    vehicleHealth(): Promise<HyundaiResponse>;
-    apiUsageStatus(): Promise<HyundaiResponse>;
-    _request(endpoint: any, data: any): Promise<HyundaiResponse>;
+    unlockVehicle(): Promise<HyundaiResponse | null>;
+    lockVehicle(): Promise<HyundaiResponse | null>;
+    startVehicle(config: StartConfig): Promise<HyundaiResponse | null>;
+    stopVehicle(): Promise<HyundaiResponse | null>;
+    flashVehicleLights(): Promise<HyundaiResponse | null>;
+    vehiclePanic(): Promise<HyundaiResponse | null>;
+    vehicleHealth(): Promise<HyundaiResponse | null>;
+    apiUsageStatus(): Promise<HyundaiResponse | null>;
+    messages(): Promise<HyundaiResponse | null>;
+    accountInfo(): Promise<HyundaiResponse | null>;
+    enrollmentStatus(): Promise<HyundaiResponse | null>;
+    serviceInfo(): Promise<HyundaiResponse | null>;
+    pinStatus(): Promise<HyundaiResponse | null>;
+    subscriptionStatus(): Promise<HyundaiResponse | null>;
+    vehicleStatus(): Promise<HyundaiResponse | null>;
+    _request(endpoint: any, data: any): Promise<HyundaiResponse | null>;
 }
 export = BlueLinky;

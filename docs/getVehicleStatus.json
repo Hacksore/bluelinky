@@ -1,0 +1,48 @@
+{
+  "E_IFRESULT": "Z:Success",
+  "E_IFFAILMSG": "",
+  "RESPONSE_STRING": {
+    "hataTID": "NjzXZDPkRA6IWrZMJepJlA",
+    "vehicleStatus": {
+      "dateTime": "2019-06-13T01:45:19Z",
+      "acc": false,
+      "trunkOpen": false,
+      "doorLock": true,
+      "defrostStatus": "false",
+      "transCond": true,
+      "doorLockStatus": "true",
+      "doorOpen": {
+        "frontRight": 0,
+        "frontLeft": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "airCtrlOn": false,
+      "airTemp": { "unit": 0, "hvacTempType": 1, "value": "0" },
+      "battery": {
+        "batSignalReferenceValue": {},
+        "batSoc": 84,
+        "batState": 0,
+        "sjbDeliveryMode": 1
+      },
+      "ign3": false,
+      "ignitionStatus": "false",
+      "lowFuelLight": false,
+      "sideBackWindowHeat": 0,
+      "dte": { "unit": 3, "value": 230 },
+      "engine": false,
+      "defrost": false,
+      "hoodOpen": false,
+      "airConditionStatus": "false",
+      "steerWheelHeat": 0,
+      "tirePressureLamp": {
+        "tirePressureWarningLampRearLeft": 0,
+        "tirePressureWarningLampFrontLeft": 0,
+        "tirePressureWarningLampFrontRight": 0,
+        "tirePressureWarningLampAll": 0,
+        "tirePressureWarningLampRearRight": 0
+      },
+      "trunkOpenStatus": "false"
+    }
+  }
+}

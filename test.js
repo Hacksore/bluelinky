@@ -14,15 +14,9 @@ async function test() {
 	// const res = await bluelinky.lockVehicle();
 	// console.log(res);
 
-	const res = await bluelinky.startVehicle({
-		airCtrl: true,
-		igniOnDuration: 1,
-  	airTempvalue: 70,
-		defrost: false,
-		heating1: false
-	});
+	const res = await bluelinky.vehicleStatus();
 
-	console.log(res);
+	console.log(JSON.stringify(res));
 }
 
 test();

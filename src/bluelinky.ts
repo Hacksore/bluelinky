@@ -8,6 +8,11 @@ const endpoints = {
   remoteAction: 'https://owners.hyundaiusa.com/bin/common/remoteAction',
   usageStats: 'https://owners.hyundaiusa.com/bin/common/usagestats',
   health: 'https://owners.hyundaiusa.com/bin/common/VehicleHealthServlet',
+  messageCenter: 'https://owners.hyundaiusa.com/bin/common/MessageCenterServlet',
+  myAccount: 'https://owners.hyundaiusa.com/bin/common/MyAccountServlet',
+  status: 'https://owners.hyundaiusa.com/bin/common/enrollmentFeature',
+  enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
+  subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
 
 interface AuthConfig {
@@ -18,11 +23,11 @@ interface AuthConfig {
 };
 
 interface StartConfig {
-  airCtrl: boolean,
+  airCtrl: boolean|string,
   igniOnDuration: number,
   airTempvalue: number,
-  defrost: boolean,
-  heating1: boolean
+  defrost: boolean|string,
+  heating1: boolean|string
 }
 
 interface HyundaiResponse {
@@ -35,22 +40,48 @@ interface HyundaiResponse {
 function buildFormData(config) {
   const form = new FormData();
   for (const key in config) {
-    form.append(key, config[key]);
+    let value = config[key];
+
+    if(typeof(value) === 'boolean'){
+      value = value.toString();
+    }
+
+    form.append(key, value);
   }
   return form;
 }
 
+class BlueLinkUser {
+
+}
+
+interface VehicleConfig {
+  vinNumber: string|null;
+}
+
+class Vehicle {
+  //private vinNumber: string|null;
+
+
+  constructor(config: VehicleConfig) {
+
+  }
+
+}
+
 class BlueLinky {
 
-  private authConfig: AuthConfig = {vin: null, username: null, pin: null, password: null};
+  private authConfig: AuthConfig = {
+    vin: null,
+    username: null,
+    pin: null, 
+    password: null
+  };
+
   private token: String|null = null;
 
   constructor(authConfig: AuthConfig) {
-    this.setAuthConfig(authConfig);
-  }
-
-  setAuthConfig(config: AuthConfig): void {
-    this.authConfig = config;
+    this.authConfig = authConfig;
   }
  
   async getToken(): Promise<String> {
@@ -88,7 +119,7 @@ class BlueLinky {
 
   }
 
-  async unlockVehicle(): Promise<HyundaiResponse> {
+  async unlockVehicle(): Promise<HyundaiResponse|null> {
 
     const formData = {
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -100,7 +131,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async lockVehicle(): Promise<HyundaiResponse> {
+  async lockVehicle(): Promise<HyundaiResponse|null> {
 
     const formData = {
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -112,7 +143,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async startVehicle(config: StartConfig): Promise<HyundaiResponse> {
+  async startVehicle(config: StartConfig): Promise<HyundaiResponse|null> {
 
     const formData = Object.assign({
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -124,7 +155,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async stopVehicle(): Promise<HyundaiResponse> {
+  async stopVehicle(): Promise<HyundaiResponse|null> {
 
     const formData = {
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -136,7 +167,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async flashVehicleLights(): Promise<HyundaiResponse> {
+  async flashVehicleLights(): Promise<HyundaiResponse|null> {
 
     const formData = buildFormData({
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -148,7 +179,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async vehiclePanic(): Promise<HyundaiResponse> {
+  async vehiclePanic(): Promise<HyundaiResponse|null> {
 
     const formData = buildFormData({
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
@@ -160,7 +191,7 @@ class BlueLinky {
     return this._request(endpoints.remoteAction, formData);
   }
 
-  async vehicleHealth(): Promise<HyundaiResponse> {
+  async vehicleHealth(): Promise<HyundaiResponse|null> {
 
     const formData = {
       vin: this.authConfig.vin,
@@ -172,7 +203,7 @@ class BlueLinky {
     return this._request(endpoints.health, formData);
   }
 
-  async apiUsageStatus(): Promise<HyundaiResponse> {
+  async apiUsageStatus(): Promise<HyundaiResponse|null> {
 
     const formData = {
       startdate: 20140401,
@@ -184,7 +215,80 @@ class BlueLinky {
     return this._request(endpoints.usageStats, formData);
   }
 
-  async _request(endpoint, data): Promise<HyundaiResponse> {
+  async messages(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'messagecenterservices'
+    };
+
+    return this._request(endpoints.messageCenter, formData);
+  }
+
+  async accountInfo(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'getOwnerInfoDashboard'
+    };
+
+    return this._request(endpoints.myAccount, formData);
+  }
+
+  async enrollmentStatus(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'getEnrollment'
+    };
+
+    return this._request(endpoints.enrollmentStatus, formData);
+  }
+
+  async serviceInfo(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'getOwnersVehiclesInfoService'
+    };
+
+    return this._request(endpoints.myAccount, formData);
+  }
+
+  async pinStatus(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'getpinstatus'
+    };
+
+    return this._request(endpoints.myAccount, formData);
+  }
+
+  async subscriptionStatus(): Promise<HyundaiResponse|null> {
+
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      service: 'getproductCatalogDetails'
+    };
+
+    return this._request(endpoints.subscriptions, formData);
+  }
+
+  async vehicleStatus(): Promise<HyundaiResponse|null> {
+   
+    const formData = {
+      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+      services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MADE A PRO TYPO.... services (plural)
+      gen: 2,
+      regId: this.authConfig.vin,
+      refresh: false
+    };
+
+    return this._request(endpoints.status, formData);
+  }
+
+  async _request(endpoint, data): Promise<HyundaiResponse|null> {
 
     if(this.token === null) {
       this.token = await this.getToken();
@@ -198,12 +302,17 @@ class BlueLinky {
     }, data);
 
     const formData = buildFormData(merged);
+
     const response = await got(endpoint, {
       method: 'POST',
       body: formData,
     });
-
-    return JSON.parse(response.body);
+    
+    try {
+      return JSON.parse(response.body);
+    } catch (e) {
+      return null;
+    }
   }
 }
 
