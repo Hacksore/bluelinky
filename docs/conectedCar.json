@@ -1,0 +1,12 @@
+{
+  "E_IFRESULT": "Z:Success",
+  "E_IFFAILMSG": "",
+  "Token": {
+    "access_token": "REDACTED",
+    "refresh_token": "REDACTED",
+    "expires_in": "28799",
+    "username": "REDACTED"
+  },
+  "erroCode": "200",
+  "s_name": "REDACTED"
+}

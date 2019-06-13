@@ -1,1 +1,1 @@
-module.exports = require('./lib/wrapper');
+module.exports = require('./dist/bluelinky');
