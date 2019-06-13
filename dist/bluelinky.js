@@ -43,24 +43,46 @@ var endpoints = {
     remoteAction: 'https://owners.hyundaiusa.com/bin/common/remoteAction',
     usageStats: 'https://owners.hyundaiusa.com/bin/common/usagestats',
     health: 'https://owners.hyundaiusa.com/bin/common/VehicleHealthServlet',
+    messageCenter: 'https://owners.hyundaiusa.com/bin/common/MessageCenterServlet',
+    myAccount: 'https://owners.hyundaiusa.com/bin/common/MyAccountServlet',
+    status: 'https://owners.hyundaiusa.com/bin/common/enrollmentFeature',
+    enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
+    subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
 ;
 function buildFormData(config) {
     var form = new FormData();
     for (var key in config) {
-        form.append(key, config[key]);
+        var value = config[key];
+        if (typeof (value) === 'boolean') {
+            value = value.toString();
+        }
+        form.append(key, value);
     }
     return form;
 }
+var BlueLinkUser = /** @class */ (function () {
+    function BlueLinkUser() {
+    }
+    return BlueLinkUser;
+}());
+var Vehicle = /** @class */ (function () {
+    //private vinNumber: string|null;
+    function Vehicle(config) {
+    }
+    return Vehicle;
+}());
 var BlueLinky = /** @class */ (function () {
     function BlueLinky(authConfig) {
-        this.authConfig = { vin: null, username: null, pin: null, password: null };
+        this.authConfig = {
+            vin: null,
+            username: null,
+            pin: null,
+            password: null
+        };
         this.token = null;
-        this.setAuthConfig(authConfig);
+        this.authConfig = authConfig;
     }
-    BlueLinky.prototype.setAuthConfig = function (config) {
-        this.authConfig = config;
-    };
     BlueLinky.prototype.getToken = function () {
         return __awaiter(this, void 0, void 0, function () {
             var response, now, csrfToken, formData, json;
@@ -213,6 +235,93 @@ var BlueLinky = /** @class */ (function () {
             });
         });
     };
+    BlueLinky.prototype.messages = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'messagecenterservices'
+                };
+                return [2 /*return*/, this._request(endpoints.messageCenter, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.accountInfo = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'getOwnerInfoDashboard'
+                };
+                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.enrollmentStatus = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'getEnrollment'
+                };
+                return [2 /*return*/, this._request(endpoints.enrollmentStatus, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.serviceInfo = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'getOwnersVehiclesInfoService'
+                };
+                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.pinStatus = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'getpinstatus'
+                };
+                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.subscriptionStatus = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    service: 'getproductCatalogDetails'
+                };
+                return [2 /*return*/, this._request(endpoints.subscriptions, formData)];
+            });
+        });
+    };
+    BlueLinky.prototype.vehicleStatus = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var formData;
+            return __generator(this, function (_a) {
+                formData = {
+                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+                    services: 'getVehicleStatus',
+                    gen: 2,
+                    regId: this.authConfig.vin,
+                    refresh: false
+                };
+                return [2 /*return*/, this._request(endpoints.status, formData)];
+            });
+        });
+    };
     BlueLinky.prototype._request = function (endpoint, data) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, merged, formData, response;
@@ -239,7 +348,14 @@ var BlueLinky = /** @class */ (function () {
                             })];
                     case 3:
                         response = _b.sent();
-                        return [2 /*return*/, JSON.parse(response.body)];
+                        try {
+                            return [2 /*return*/, JSON.parse(response.body)];
+                        }
+                        catch (e) {
+                            console.log(response.body);
+                            return [2 /*return*/, null];
+                        }
+                        return [2 /*return*/];
                 }
             });
         });

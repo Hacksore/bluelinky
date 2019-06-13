@@ -1,0 +1,13 @@
+{
+  "E_IFRESULT": "E:Failure",
+  "E_IFFAILMSG": "Bad Gateway",
+  "RESPONSE_STRING": {
+    "errorSubCode": "GEN",
+    "systemName": "HATA",
+    "functionName": "remoteStart",
+    "errorSubMessage": "HATA remoteStart service failed while performing the operation RemoteStart",
+    "errorMessage": "Were sorry, but we could not complete your request. Please try again later.",
+    "errorCode": 502,
+    "serviceName": "RemoteStart"
+  }
+}

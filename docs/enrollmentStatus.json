@@ -1,0 +1,580 @@
+{
+  "E_IFRESULT": "Z:Success",
+  "E_IFFAILMSG": "",
+  "ENROLLMENT_DETAILS": {
+    "enrolledVehicleDetails": [
+      {
+        "packageDetails": [
+          {
+            "assetNumber": "1-9793675869",
+            "displayCategory": "Connected Care",
+            "packageId": "1-5MAJBS",
+            "term": "36",
+            "renewalDate": "20220104000000",
+            "packageType": "Connected Care",
+            "startDate": "20190104000000"
+          },
+          {
+            "assetNumber": "1-9793675929",
+            "displayCategory": "Remote",
+            "packageId": "1-5MAJLE",
+            "term": "36",
+            "renewalDate": "20220104000000",
+            "packageType": "Remote",
+            "startDate": "20190104000000"
+          },
+          {
+            "assetNumber": "1-9793675989",
+            "displayCategory": "Guidance",
+            "packageId": "1-5MAJGH",
+            "term": "36",
+            "renewalDate": "20220104000000",
+            "packageType": "Guidance",
+            "startDate": "20190104000000"
+          }
+        ],
+        "vehicleDetails": {
+          "svrStatus": "NONE",
+          "fatcAvailable": "Y",
+          "color": "GRAY",
+          "brandIndicator": "H",
+          "ims": "0",
+          "deviceStatus": "ENROLLED",
+          "setOffPeak": "0",
+          "mapProvider": "GOOGLE",
+          "interiorColor": "NNB",
+          "svdDay": "03",
+          "accessoryCode": "AVN 5.0",
+          "trim": "ULTIMATE",
+          "modelCode": "SANTA FE",
+          "nadid": "6573041553",
+          "mit": "7500",
+          "regid": "REDACTED",
+          "vin": "REDACTED",
+          "blueLink": "Y",
+          "waypointInd": "YES",
+          "billingInd": "YEARLY",
+          "userProfileStatus": "NA",
+          "seatConfigurations": {},
+          "sideMirrorHeatCapable": "YES",
+          "ownersuccession": "1",
+          "odometer": "4897",
+          "imat": "7500",
+          "nickName": "SANTA FE 2019",
+          "evStatus": "N",
+          "modelYear": "2019",
+          "transmissiontype": "AUTO",
+          "steeringWheelHeatCapable": "YES",
+          "bluelinkEnrolled": true,
+          "setChargeSchedule": "0",
+          "vehicleGeneration": "2",
+          "rearWindowHeatCapable": "YES",
+          "preferredDealerCode": "TX040",
+          "hmaModel": "TM",
+          "series": "SANTA FE",
+          "enrollmentStatus": "ACTIVE",
+          "starttype": "BUTTON",
+          "sapColorCode": "S2C",
+          "bluelinkEnabled": true,
+          "odometerUpdateDate": "20190612184445"
+        },
+        "roleDetails": [
+          { "roleCode": "OWN", "roleName": "OWNER" },
+          { "roleCode": "SUB", "roleName": "SUBSCRIBER" }
+        ],
+        "responseHeaderMap": {}
+      }
+    ],
+    "addressDetails": [
+      {
+        "city": "Dallas",
+        "street": "REDACTED",
+        "additional": "REDACTED",
+        "postalCode": "REDACTED",
+        "type": "PRIMARY",
+        "region": "TX"
+      }
+    ],
+    "user": {
+      "accountId": "3089613",
+      "firstName": "Sean",
+      "lastName": "Boult",
+      "phonesOptIn": [
+        {
+          "number": "REDACTED",
+          "primaryPhoneIndicator": "YES",
+          "fccOptIn": "YES",
+          "type": "MOBILE"
+        }
+      ],
+      "loginId": "REDACTED",
+      "tncFlag": "Y",
+      "phones": [{ "number": "REDACTED", "type": "cell", "order": 1 }],
+      "idmId": "HQQFPEN7",
+      "userId": "REDACTED",
+      "notificationEmail": "REDACTED",
+      "email": "REDACTED"
+    }
+  },
+  "FEATURE_DETAILS": {
+    "roles": [
+      { "roleCode": "OWN", "roleName": "OWNER" },
+      { "roleCode": "SUB", "roleName": "SUBSCRIBER" }
+    ],
+    "featureDetails": [
+      {
+        "hataFeatureName": "ACN",
+        "featureName": "AUTOMATIC COLLISION NOTIFICATION (ACN)",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "1"
+      },
+      {
+        "hataFeatureName": "SOS",
+        "featureName": "SOS EMERGENCY ASSISTANCE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "2"
+      },
+      {
+        "hataFeatureName": "SVR",
+        "featureName": "STOLEN VEHICLE RECOVERY",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "3"
+      },
+      {
+        "hataFeatureName": "PAN",
+        "featureName": "PANIC NOTIFICATION",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "4"
+      },
+      {
+        "hataFeatureName": "SVN",
+        "featureName": "ALARM NOTIFICATION",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "5"
+      },
+      {
+        "hataFeatureName": "RHL",
+        "featureName": "HORN AND LIGHTS",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "6"
+      },
+      {
+        "hataFeatureName": "RLO",
+        "featureName": "LIGHTS ONLY",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "7"
+      },
+      {
+        "hataFeatureName": "RSC",
+        "featureName": "REMOTE START",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "8"
+      },
+      {
+        "hataFeatureName": "RDO",
+        "featureName": "DOOR LOCK",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "9"
+      },
+      {
+        "hataFeatureName": "ODD",
+        "featureName": "On-Demand Diagnostics",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "10"
+      },
+      {
+        "hataFeatureName": "DTC",
+        "featureName": "AUTOMATIC DTC",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "11"
+      },
+      {
+        "hataFeatureName": "SVD",
+        "featureName": "MONTHLY VEHICLE HEALTH REPORT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "12"
+      },
+      {
+        "hataFeatureName": "DRI",
+        "featureName": "DRIVING INFORMATION REPORT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "13"
+      },
+      {
+        "featureName": "MAINTENANCE ALERT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "14"
+      },
+      {
+        "featureName": "RECALL ALERT",
+        "featureStatus": "ON",
+        "featureId": "15"
+      },
+      { "featureName": "GEO-FENCE", "featureStatus": "ON", "featureId": "16" },
+      {
+        "featureName": "CURFEW ALERT",
+        "featureStatus": "ON",
+        "featureId": "17"
+      },
+      {
+        "featureName": "SPEED ALERT",
+        "featureStatus": "ON",
+        "featureId": "18"
+      },
+      {
+        "hataFeatureName": "RFC",
+        "featureName": "FIND CAR SERVICE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "19"
+      },
+      {
+        "hataFeatureName": "VSI",
+        "featureName": "VEHICLE SLOWDOWN",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "20"
+      },
+      {
+        "hataFeatureName": "SLS",
+        "featureName": "SERVICE LINK",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "21"
+      },
+      {
+        "hataFeatureName": "LOS",
+        "featureName": "LOCAL SEARCH",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "22"
+      },
+      {
+        "hataFeatureName": "STC",
+        "featureName": "SEND TO CAR POI",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "23"
+      },
+      {
+        "hataFeatureName": "VRS",
+        "featureName": "VOICE RECOGNITION",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "24"
+      },
+      {
+        "featureName": "ALERT SERVICE",
+        "featureStatus": "ON",
+        "featureId": "25"
+      },
+      {
+        "featureName": "VALET ALERT",
+        "featureStatus": "ON",
+        "featureId": "26"
+      },
+      {
+        "hataFeatureName": "CCP",
+        "featureName": "CONNECTED CARE PACKAGE",
+        "hataCategoryName": "PACKAGE",
+        "featureStatus": "ON",
+        "featureId": "27"
+      },
+      {
+        "hataFeatureName": "RSP",
+        "featureName": "REMOTE SERVICE PACKAGE",
+        "hataCategoryName": "PACKAGE",
+        "featureStatus": "ON",
+        "featureId": "28"
+      },
+      {
+        "hataFeatureName": "SSP",
+        "featureName": "SECURITY SERVICE PACKAGE",
+        "hataCategoryName": "PACKAGE",
+        "featureStatus": "ON",
+        "featureId": "29"
+      },
+      {
+        "hataFeatureName": "DSP",
+        "featureName": "DISCOVER SERVICE PACKAGE",
+        "hataCategoryName": "PACKAGE",
+        "featureStatus": "ON",
+        "featureId": "30"
+      },
+      {
+        "hataFeatureName": "DTP",
+        "featureName": "DATA PACKAGE",
+        "hataCategoryName": "PACKAGE",
+        "featureStatus": "ON",
+        "featureId": "31"
+      },
+      {
+        "hataFeatureName": "SVDDay",
+        "featureName": "SET MVR DATE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "32"
+      },
+      {
+        "hataFeatureName": "ADC",
+        "featureName": "APP DOWNLOAD CENTER",
+        "hataCategoryName": "DOWNLOAD APP",
+        "featureStatus": "ON",
+        "featureId": "33"
+      },
+      {
+        "hataFeatureName": "RSA",
+        "featureName": "ENHANCED ROADSIDE ASSISTANCE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "34"
+      },
+      {
+        "hataFeatureName": "RVS",
+        "featureName": "REMOTE VEHICLE STATUS CHECK SERVICE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "35"
+      },
+      {
+        "featureName": "UPDATE USER ACCOUNT",
+        "featureStatus": "ON",
+        "featureId": "36"
+      },
+      {
+        "featureName": "ADD SECONDARY DRIVERS",
+        "featureStatus": "ON",
+        "featureId": "37"
+      },
+      {
+        "featureName": "MANAGE PREFERRED DEALER",
+        "featureStatus": "ON",
+        "featureId": "38"
+      },
+      {
+        "featureName": "COMMUNICATION PREFERENCES",
+        "featureStatus": "ON",
+        "featureId": "39"
+      },
+      {
+        "featureName": "ALERT AND NOTIFICATION SETTINGS",
+        "featureStatus": "ON",
+        "featureId": "40"
+      },
+      {
+        "featureName": "UPDATE CREDIT CARD INFORMATION FOR B/L",
+        "featureStatus": "ON",
+        "featureId": "41"
+      },
+      {
+        "featureName": "UPDATE CREDIT CARD INFORMATION FOR APPS",
+        "featureStatus": "ON",
+        "featureId": "42"
+      },
+      {
+        "featureName": "B/L ENROLLMENT",
+        "featureStatus": "ON",
+        "featureId": "43"
+      },
+      {
+        "featureName": "B/L UNENROLLMENT",
+        "featureStatus": "ON",
+        "featureId": "44"
+      },
+      {
+        "featureName": "B/L UPGRADE",
+        "featureStatus": "ON",
+        "featureId": "45"
+      },
+      {
+        "featureName": "B/L DOWNGRADE",
+        "featureStatus": "ON",
+        "featureId": "46"
+      },
+      {
+        "featureName": "ENHANCED POI SEARCH",
+        "featureStatus": "ON",
+        "featureId": "47"
+      },
+      {
+        "featureName": "SCHEDULE  APPOINTMENTS(X-Time)",
+        "featureStatus": "ON",
+        "featureId": "48"
+      },
+      {
+        "hataFeatureName": "RDO",
+        "featureName": "DOOR UNLOCK",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "49"
+      },
+      {
+        "hataFeatureName": "RSC",
+        "featureName": "REMOTE STOP",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "50"
+      },
+      {
+        "featureName": "CURFEW ALERT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "51"
+      },
+      {
+        "featureName": "VALET ALERT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "52"
+      },
+      {
+        "featureName": "GEO-FENCE ALERT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "53"
+      },
+      {
+        "featureName": "SPEED ALERT",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "54"
+      },
+      {
+        "featureName": "MAINTENANCE PREFERENCE SET",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "55"
+      },
+      {
+        "featureName": "START REMOTE ELECTRIC CHARGE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "56"
+      },
+      {
+        "featureName": "STOP REMOTE ELECTRIC CHARGE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "57"
+      },
+      {
+        "featureName": "SET ELECTRIC CHARGE SCHEDULE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "58"
+      },
+      {
+        "featureName": "CHARGE ALARM  PREFERENCE SET",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "59"
+      },
+      {
+        "featureName": "ELECTRIC CHARGE STATUS INQUIRY",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "60"
+      },
+      {
+        "hataFeatureName": "RSC",
+        "featureName": "REMOTE START TERMINATE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "61"
+      },
+      {
+        "hataFeatureName": "EVS",
+        "featureName": "REMOTE CLIMATE CONTROL START",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "62"
+      },
+      {
+        "hataFeatureName": "EVS",
+        "featureName": "REMOTE CLIMATE CONTROL STOP",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "VBR",
+        "featureId": "63"
+      },
+      {
+        "hataFeatureName": "ROA",
+        "featureName": "REAR OCCUPANCY ALARM",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "ON",
+        "featureId": "64"
+      },
+      {
+        "hataFeatureName": "SOC",
+        "featureName": "TARGET STATE OF CHARGE ",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "SUBSCRIPTION",
+        "featureId": "65"
+      },
+      {
+        "featureName": "VEHICLE CURRENT STATUS UPDATE",
+        "hataCategoryName": "SERVICE",
+        "featureStatus": "OFF",
+        "reasonCode": "SUBSCRIPTION",
+        "featureId": "66"
+      }
+    ],
+    "responseHeaderMap": {}
+  },
+  "VEHICLE_APP_STATUS": {
+    "vehicleAppDetails": [
+      {
+        "appVersion": "1.3.2",
+        "appType": "1",
+        "appName": "LOCATION SHARING",
+        "appStatus": "NOT APPLICABLE"
+      },
+      {
+        "appVersion": "0.22",
+        "appType": "2",
+        "appName": "CAR CARE",
+        "appStatus": "NOT APPLICABLE"
+      },
+      {
+        "appVersion": "1.7.0",
+        "downloadDate": "20190104111008",
+        "appType": "3",
+        "appName": "ALERT SERVICES",
+        "appStatus": "DOWNLOADED"
+      },
+      {
+        "appVersion": "4.9.0",
+        "appType": "4",
+        "appName": "AHA",
+        "appStatus": "NOT APPLICABLE"
+      },
+      {
+        "appVersion": "1.0.49",
+        "appType": "5",
+        "appName": "SOUND HOUND",
+        "appStatus": "NOT APPLICABLE"
+      }
+    ]
+  }
+}
