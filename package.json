@@ -1,6 +1,6 @@
 {
   "name": "bluelinky",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -12,11 +12,11 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^8.0.0",
     "form-data": "^2.3.3",
     "got": "^9.6.0"
   },
   "devDependencies": {
+    "dotenv": "^8.0.0",
     "@types/form-data": "^2.2.1",
     "@types/got": "^9.4.4",
     "ts-loader": "^6.0.2",
