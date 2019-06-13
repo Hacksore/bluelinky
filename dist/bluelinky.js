@@ -352,7 +352,6 @@ var BlueLinky = /** @class */ (function () {
                             return [2 /*return*/, JSON.parse(response.body)];
                         }
                         catch (e) {
-                            console.log(response.body);
                             return [2 /*return*/, null];
                         }
                         return [2 /*return*/];
