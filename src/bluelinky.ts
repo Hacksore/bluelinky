@@ -306,9 +306,7 @@ class Vehicle {
         result = featureDetails
       }
 
-      const res = { result, errorMessage, status };
-      //console.log(response.body);
-      return res;
+      return { result, errorMessage, status };
       
       // const oldObj = JSON.parse(response.body);
 
