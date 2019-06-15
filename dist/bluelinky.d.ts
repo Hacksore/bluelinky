@@ -1,8 +1,8 @@
+/// <reference types="node" />
+import { EventEmitter } from 'events';
 interface AuthConfig {
-    vin: string | null;
     username: string | null;
     password: string | null;
-    pin: string | null;
 }
 interface StartConfig {
     airCtrl: boolean | string;
@@ -12,22 +12,43 @@ interface StartConfig {
     heating1: boolean | string;
 }
 interface HyundaiResponse {
-    E_IFRESULT: string;
-    E_IFFAILMSG: string;
-    RESPONSE_STRING: JSON;
+    status: string;
+    result: any;
+    errorMessage?: string | null;
+    ENROLLMENT_DETAILS?: any;
+    FEATURE_DETAILS?: any;
 }
-declare class BlueLinky {
-    private authConfig;
-    private token;
-    constructor(authConfig: AuthConfig);
-    getToken(): Promise<String>;
-    unlockVehicle(): Promise<HyundaiResponse | null>;
-    lockVehicle(): Promise<HyundaiResponse | null>;
+interface TokenResponse {
+    access_token: string;
+    refresh_token: string;
+    expires_in: string;
+    username: string;
+}
+interface VehicleConfig {
+    vin: string | null;
+    pin: string | null;
+    username: string | null;
+    token: string | null;
+    bluelinky: BlueLinky;
+}
+declare class Vehicle {
+    vin: string | null;
+    pin: string | null;
+    username: string | null;
+    token: string | null;
+    eventEmitter: EventEmitter;
+    bluelinky: BlueLinky;
+    currentFeatures: {};
+    constructor(config: VehicleConfig);
+    onInit(): Promise<void>;
+    hasFeature(featureName: string): boolean;
+    unlock(): Promise<HyundaiResponse | null>;
+    lock(): Promise<HyundaiResponse | null>;
     startVehicle(config: StartConfig): Promise<HyundaiResponse | null>;
     stopVehicle(): Promise<HyundaiResponse | null>;
-    flashVehicleLights(): Promise<HyundaiResponse | null>;
-    vehiclePanic(): Promise<HyundaiResponse | null>;
-    vehicleHealth(): Promise<HyundaiResponse | null>;
+    flashLights(): Promise<HyundaiResponse | null>;
+    panic(): Promise<HyundaiResponse | null>;
+    health(): Promise<HyundaiResponse | null>;
     apiUsageStatus(): Promise<HyundaiResponse | null>;
     messages(): Promise<HyundaiResponse | null>;
     accountInfo(): Promise<HyundaiResponse | null>;
@@ -35,7 +56,22 @@ declare class BlueLinky {
     serviceInfo(): Promise<HyundaiResponse | null>;
     pinStatus(): Promise<HyundaiResponse | null>;
     subscriptionStatus(): Promise<HyundaiResponse | null>;
-    vehicleStatus(): Promise<HyundaiResponse | null>;
+    status(): Promise<HyundaiResponse | null>;
     _request(endpoint: any, data: any): Promise<HyundaiResponse | null>;
 }
-export = BlueLinky;
+export declare function login(authConfig: AuthConfig): Promise<BlueLinky>;
+declare class BlueLinky {
+    private authConfig;
+    private _accessToken;
+    private _tokenExpires;
+    private _vehicles;
+    constructor(authConfig: AuthConfig);
+    accessToken: string | null;
+    tokenExpires: number;
+    getVehicles(): Vehicle[];
+    getVehicle(vin: string): Vehicle | undefined;
+    registerVehicle(vin: string, pin: string): Promise<Vehicle | null>;
+    handleTokenRefresh(): Promise<void>;
+    getToken(): Promise<TokenResponse>;
+}
+export {};

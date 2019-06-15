@@ -7,36 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var got = require("got");
-var FormData = require("form-data");
-var endpoints = {
+Object.defineProperty(exports, "__esModule", { value: true });
+const got = require("got");
+const FormData = require("form-data");
+const events_1 = require("events");
+const endpoints = {
     getToken: 'https://owners.hyundaiusa.com/etc/designs/ownercommon/us/token.json?reg=',
     validateToken: 'https://owners.hyundaiusa.com/libs/granite/csrf/token.json',
     auth: 'https://owners.hyundaiusa.com/bin/common/connectCar',
@@ -49,313 +24,308 @@ var endpoints = {
     enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
     subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
-;
 function buildFormData(config) {
-    var form = new FormData();
-    for (var key in config) {
-        var value = config[key].toString();
+    const form = new FormData();
+    for (const key in config) {
+        const value = config[key].toString();
         form.append(key, value);
     }
     return form;
 }
-var BlueLinkUser = /** @class */ (function () {
-    function BlueLinkUser() {
+class Vehicle {
+    constructor(config) {
+        this.currentFeatures = {};
+        this.vin = config.vin;
+        this.pin = config.pin;
+        this.username = config.username;
+        this.token = config.token;
+        this.eventEmitter = new events_1.EventEmitter();
+        this.bluelinky = config.bluelinky;
+        this.onInit();
     }
-    return BlueLinkUser;
-}());
-var Vehicle = /** @class */ (function () {
-    //private vinNumber: string|null;
-    function Vehicle(config) {
+    onInit() {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.vin + ' is loading...');
+            const response = yield this.enrollmentStatus();
+            console.log(response);
+            if (response.result === 'E:Failure' || response.result.featureDetails !== undefined) {
+                response.result.featureDetails.forEach(item => {
+                    this.currentFeatures[item.featureName] = (item.featureStatus === 'ON' ? true : false);
+                });
+            }
+            // we tell the vehicle it's loaded :D
+            this.eventEmitter.emit('ready');
+        });
     }
-    return Vehicle;
-}());
-var BlueLinky = /** @class */ (function () {
-    function BlueLinky(authConfig) {
+    hasFeature(featureName) {
+        return this.currentFeatures[featureName];
+    }
+    unlock() {
+        if (!this.hasFeature('DOOR UNLOCK')) {
+            throw new Error('Vehicle does not have the unlock feature');
+        }
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: this.vin,
+            service: 'remoteunlock'
+        };
+        return this._request(endpoints.remoteAction, formData);
+    }
+    lock() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: 'H00002548087V' + this.vin,
+            service: 'remotelock'
+        };
+        return this._request(endpoints.remoteAction, formData);
+    }
+    startVehicle(config) {
+        const formData = Object.assign({
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: this.vin,
+            service: 'ignitionstart'
+        }, config);
+        return this._request(endpoints.remoteAction, formData);
+    }
+    stopVehicle() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: this.vin,
+            service: 'ignitionstop'
+        };
+        return this._request(endpoints.remoteAction, formData);
+    }
+    flashLights() {
+        const formData = buildFormData({
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: this.vin,
+            service: 'light'
+        });
+        return this._request(endpoints.remoteAction, formData);
+    }
+    panic() {
+        const formData = buildFormData({
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            gen: 2,
+            regId: this.vin,
+            service: 'horn'
+        });
+        return this._request(endpoints.remoteAction, formData);
+    }
+    health() {
+        const formData = {
+            vin: this.vin,
+            url: 'https://owners.hyundaiusa.com/us/en/page/vehicle-health.html',
+            service: 'getRecMaintenanceTimeline'
+        };
+        return this._request(endpoints.health, formData);
+    }
+    apiUsageStatus() {
+        const formData = {
+            startdate: 20140401,
+            enddate: 20190611,
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getUsageStats'
+        };
+        return this._request(endpoints.usageStats, formData);
+    }
+    messages() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'messagecenterservices'
+        };
+        return this._request(endpoints.messageCenter, formData);
+    }
+    accountInfo() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getOwnerInfoDashboard'
+        };
+        return this._request(endpoints.myAccount, formData);
+    }
+    enrollmentStatus() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getEnrollment'
+        };
+        return this._request(endpoints.enrollmentStatus, formData);
+    }
+    serviceInfo() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getOwnersVehiclesInfoService'
+        };
+        return this._request(endpoints.myAccount, formData);
+    }
+    pinStatus() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getpinstatus'
+        };
+        return this._request(endpoints.myAccount, formData);
+    }
+    subscriptionStatus() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            service: 'getproductCatalogDetails'
+        };
+        return this._request(endpoints.subscriptions, formData);
+    }
+    status() {
+        const formData = {
+            url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
+            services: 'getVehicleStatus',
+            gen: 2,
+            regId: this.vin,
+            refresh: false // I think this forces the their API to connect to the vehicle and pull the status
+        };
+        return this._request(endpoints.status, formData);
+    }
+    _request(endpoint, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // handle token refresh if we need to
+            yield this.bluelinky.handleTokenRefresh();
+            const merged = Object.assign({
+                vin: this.vin,
+                username: this.username,
+                pin: this.pin,
+                token: this.token
+            }, data);
+            const formData = buildFormData(merged);
+            const response = yield got(endpoint, {
+                method: 'POST',
+                body: formData,
+            });
+            try {
+                let { RESPONSE_STRING: result, E_IFFAILMSG: errorMessage, E_IFRESULT: status, ENROLLMENT_DETAILS: enrollmentStatus, FEATURE_DETAILS: featureDetails } = JSON.parse(response.body);
+                if (featureDetails !== undefined) {
+                    result = featureDetails;
+                }
+                const res = { result, errorMessage, status };
+                //console.log(response.body);
+                return res;
+                // const oldObj = JSON.parse(response.body);
+                // const newObj = {
+                //   result: oldObj.RESPONSE_STRING,
+                //   status: oldObj.E_IFRESULT,
+                //   errorMessage: null
+                // };
+                // if(oldObj.ENROLLMENT_DETAILS !== undefined) {
+                //   newObj.result = oldObj.ENROLLMENT_DETAILS;
+                // }
+                // if(oldObj.FEATURE_DETAILS !== undefined) {
+                //   newObj.result = oldObj.FEATURE_DETAILS;
+                // }
+                // if(newObj.status !== 'Z:Success') {
+                //   newObj.errorMessage = oldObj.E_IFFAILMSG;
+                // }
+            }
+            catch (e) {
+                return null;
+            }
+        });
+    }
+}
+function login(authConfig) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const instance = new BlueLinky(authConfig);
+        const request = yield instance.getToken();
+        const expires = Math.floor((+new Date() / 1000) + parseInt(request.expires_in, 10));
+        instance.accessToken = request.access_token;
+        instance.tokenExpires = expires;
+        return instance;
+    });
+}
+exports.login = login;
+class BlueLinky {
+    constructor(authConfig) {
         this.authConfig = {
-            vin: null,
             username: null,
-            pin: null,
             password: null
         };
-        this.token = null;
+        this._accessToken = null;
+        this._tokenExpires = null;
+        this._vehicles = [];
         this.authConfig = authConfig;
     }
-    BlueLinky.prototype.getToken = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var response, now, csrfToken, formData, json;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        now = Math.floor(+new Date() / 1000);
-                        return [4 /*yield*/, got(endpoints.getToken + now, {
-                                method: 'GET',
-                                json: true
-                            })];
-                    case 1:
-                        response = _a.sent();
-                        csrfToken = response.body.token;
-                        return [4 /*yield*/, got(endpoints.validateToken, {
-                                method: 'GET',
-                                headers: {
-                                    Cookie: "csrf_token=" + csrfToken + ";"
-                                }
-                            })];
-                    case 2:
-                        response = _a.sent();
-                        formData = buildFormData({
-                            ':cq_csrf_token': csrfToken,
-                            'username': this.authConfig.username,
-                            'password': this.authConfig.password,
-                            'url': 'https://owners.hyundaiusa.com/us/en/index.html'
-                        });
-                        return [4 /*yield*/, got(endpoints.auth, {
-                                method: 'POST',
-                                body: formData
-                            })];
-                    case 3:
-                        response = _a.sent();
-                        json = JSON.parse(response.body);
-                        return [2 /*return*/, json.Token.access_token];
+    get accessToken() {
+        return this._accessToken;
+    }
+    set accessToken(token) {
+        this._accessToken = token;
+    }
+    set tokenExpires(unixtime) {
+        this._tokenExpires = unixtime;
+    }
+    get tokenExpires() {
+        return this._tokenExpires || 0;
+    }
+    getVehicles() {
+        return this._vehicles;
+    }
+    getVehicle(vin) {
+        return this._vehicles.find(item => vin === item.vin);
+    }
+    registerVehicle(vin, pin) {
+        if (!this.getVehicle(vin)) {
+            const vehicle = new Vehicle({
+                vin: vin,
+                pin: pin,
+                username: this.authConfig.username,
+                token: this.accessToken,
+                bluelinky: this
+            });
+            this._vehicles.push(vehicle);
+            return new Promise((resolve, reject) => {
+                vehicle.eventEmitter.on('ready', () => resolve(vehicle));
+            });
+        }
+        return Promise.resolve(null);
+    }
+    // I thiunk this would be good enough as teh vehcile class will check when the token expires before doing a request
+    // if it is at or over the time it should tell it's dad to get a new token
+    handleTokenRefresh() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const currentTime = Math.floor((+new Date() / 1000));
+            // refresh 60 seconds before timeout
+            if (currentTime >= (this.tokenExpires - 60)) {
+                console.log('token is expired, refreshing access token');
+                yield this.getToken();
+            }
+        });
+    }
+    getToken() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let response;
+            const now = Math.floor(+new Date() / 1000);
+            response = yield got(endpoints.getToken + now, {
+                method: 'GET',
+                json: true
+            });
+            const csrfToken = response.body.token;
+            response = yield got(endpoints.validateToken, {
+                method: 'GET',
+                headers: {
+                    Cookie: `csrf_token=${csrfToken};`
                 }
             });
-        });
-    };
-    BlueLinky.prototype.unlockVehicle = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    service: 'remoteunlock'
-                };
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
+            const formData = buildFormData({
+                ':cq_csrf_token': csrfToken,
+                'username': this.authConfig.username,
+                'password': this.authConfig.password,
+                'url': 'https://owners.hyundaiusa.com/us/en/index.html'
             });
-        });
-    };
-    BlueLinky.prototype.lockVehicle = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: 'H00002548087V' + this.authConfig.vin,
-                    service: 'remotelock'
-                };
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
+            response = yield got(endpoints.auth, {
+                method: 'POST',
+                body: formData
             });
+            const json = JSON.parse(response.body);
+            return json.Token;
         });
-    };
-    BlueLinky.prototype.startVehicle = function (config) {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = Object.assign({
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    service: 'ignitionstart'
-                }, config);
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.stopVehicle = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    service: 'ignitionstop'
-                };
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.flashVehicleLights = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = buildFormData({
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    service: 'light'
-                });
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.vehiclePanic = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = buildFormData({
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    service: 'horn'
-                });
-                return [2 /*return*/, this._request(endpoints.remoteAction, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.vehicleHealth = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    vin: this.authConfig.vin,
-                    username: this.authConfig.username,
-                    url: 'https://owners.hyundaiusa.com/us/en/page/vehicle-health.html',
-                    service: 'getRecMaintenanceTimeline'
-                };
-                return [2 /*return*/, this._request(endpoints.health, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.apiUsageStatus = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    startdate: 20140401,
-                    enddate: 20190611,
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getUsageStats'
-                };
-                return [2 /*return*/, this._request(endpoints.usageStats, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.messages = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'messagecenterservices'
-                };
-                return [2 /*return*/, this._request(endpoints.messageCenter, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.accountInfo = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getOwnerInfoDashboard'
-                };
-                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.enrollmentStatus = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getEnrollment'
-                };
-                return [2 /*return*/, this._request(endpoints.enrollmentStatus, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.serviceInfo = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getOwnersVehiclesInfoService'
-                };
-                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.pinStatus = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getpinstatus'
-                };
-                return [2 /*return*/, this._request(endpoints.myAccount, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.subscriptionStatus = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    service: 'getproductCatalogDetails'
-                };
-                return [2 /*return*/, this._request(endpoints.subscriptions, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype.vehicleStatus = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var formData;
-            return __generator(this, function (_a) {
-                formData = {
-                    url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-                    services: 'getVehicleStatus',
-                    gen: 2,
-                    regId: this.authConfig.vin,
-                    refresh: false
-                };
-                return [2 /*return*/, this._request(endpoints.status, formData)];
-            });
-        });
-    };
-    BlueLinky.prototype._request = function (endpoint, data) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, merged, formData, response;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (!(this.token === null)) return [3 /*break*/, 2];
-                        _a = this;
-                        return [4 /*yield*/, this.getToken()];
-                    case 1:
-                        _a.token = _b.sent();
-                        _b.label = 2;
-                    case 2:
-                        merged = Object.assign({
-                            vin: this.authConfig.vin,
-                            username: this.authConfig.username,
-                            pin: this.authConfig.pin,
-                            token: this.token
-                        }, data);
-                        formData = buildFormData(merged);
-                        return [4 /*yield*/, got(endpoint, {
-                                method: 'POST',
-                                body: formData,
-                            })];
-                    case 3:
-                        response = _b.sent();
-                        try {
-                            return [2 /*return*/, JSON.parse(response.body)];
-                        }
-                        catch (e) {
-                            return [2 /*return*/, null];
-                        }
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    return BlueLinky;
-}());
-module.exports = BlueLinky;
+    }
+}

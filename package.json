@@ -1,13 +1,14 @@
 {
   "name": "bluelinky",
-  "version": "3.0.2",
+  "version": "4.0.0-alpha-af",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
     "lint": "tslint --formatters-dir ./node_modules/tslint-formatter-beauty -t beauty -p .",
-    "dev": "npm-run-all --parallel watch serve",
-    "watch": "rollup -w -c"
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && node test.js",
+    "watch": "tsc -w"
   },
   "author": "",
   "license": "MIT",
@@ -16,10 +17,8 @@
     "got": "^9.6.0"
   },
   "devDependencies": {
-    "dotenv": "^8.0.0",
     "@types/form-data": "^2.2.1",
     "@types/got": "^9.4.4",
-    "ts-loader": "^6.0.2",
     "tslint": "^5.17.0",
     "tslint-formatter-beauty": "^3.0.0",
     "typescript": "^3.5.1"
