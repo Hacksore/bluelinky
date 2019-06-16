@@ -368,19 +368,6 @@ class Vehicle {
   }
 }
 
-export async function login(authConfig: AuthConfig): Promise<BlueLinky> {
-
-  const instance = new BlueLinky(authConfig);
-  const request = await instance.getToken();
-
-  const expires = Math.floor((+new Date()/1000) + parseInt(request.expires_in, 10));
-
-  instance.accessToken = request.access_token;
-  instance.tokenExpires = expires;
-
-  return instance;
-}
-
 class BlueLinky {
 
   private authConfig: AuthConfig = {
@@ -394,6 +381,14 @@ class BlueLinky {
 
   constructor(authConfig: AuthConfig) {
     this.authConfig = authConfig;
+  }
+
+  async login(): Promise<void> {
+    const response = await this.getToken();
+    const expires = Math.floor((+new Date()/1000) + parseInt(response.expires_in, 10));
+  
+    this.accessToken = response.access_token;
+    this.tokenExpires = expires;
   }
 
   get accessToken(): string|null {
@@ -491,3 +486,5 @@ class BlueLinky {
 
   }
 }
+
+export = BlueLinky;

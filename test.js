@@ -7,12 +7,15 @@ const authCreds = {
 }
 
 const test = async () => {
-	const client = await BlueLinky.login(authCreds);
+
+	const client = new BlueLinky(authCreds);
+	// do login, we manage this?
+	await client.login();
+
 	const vehicle = await client.registerVehicle(config.vin, config.pin);
+	const status = await vehicle.status();
 
-	//const status = await vehicle.status();
-
-	console.log(vehicle.getFeatures());
-
+	console.log(status);
 }
+
 test();

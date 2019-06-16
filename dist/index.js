@@ -7,7 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 const got = require("got");
 const FormData = require("form-data");
 const events_1 = require("events");
@@ -295,17 +294,14 @@ class Vehicle {
         });
     }
 }
-function login(authConfig) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const instance = new BlueLinky(authConfig);
-        const request = yield instance.getToken();
-        const expires = Math.floor((+new Date() / 1000) + parseInt(request.expires_in, 10));
-        instance.accessToken = request.access_token;
-        instance.tokenExpires = expires;
-        return instance;
-    });
-}
-exports.login = login;
+// export async function login(authConfig: AuthConfig): Promise<BlueLinky> {
+//   const instance = new BlueLinky(authConfig);
+//   const request = await instance.getToken();
+//   const expires = Math.floor((+new Date()/1000) + parseInt(request.expires_in, 10));
+//   instance.accessToken = request.access_token;
+//   instance.tokenExpires = expires;
+//   return instance;
+// }
 class BlueLinky {
     constructor(authConfig) {
         this.authConfig = {
@@ -316,6 +312,14 @@ class BlueLinky {
         this._tokenExpires = null;
         this._vehicles = [];
         this.authConfig = authConfig;
+    }
+    login() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.getToken();
+            const expires = Math.floor((+new Date() / 1000) + parseInt(response.expires_in, 10));
+            this.accessToken = response.access_token;
+            this.tokenExpires = expires;
+        });
     }
     get accessToken() {
         return this._accessToken;
@@ -395,3 +399,4 @@ class BlueLinky {
         });
     }
 }
+module.exports = BlueLinky;

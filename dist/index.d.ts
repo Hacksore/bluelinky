@@ -14,7 +14,7 @@ interface StartConfig {
 interface HyundaiResponse {
     status: string;
     result: any;
-    errorMessage?: string;
+    errorMessage: string;
 }
 interface TokenResponse {
     access_token: string;
@@ -40,7 +40,7 @@ declare class Vehicle {
     readonly vin: string | null;
     readonly eventEmitter: EventEmitter;
     hasFeature(featureName: string): boolean;
-    getFeatures(): Object;
+    getFeatures(): object;
     unlock(): Promise<HyundaiResponse | null>;
     lock(): Promise<HyundaiResponse | null>;
     start(config: StartConfig): Promise<HyundaiResponse | null>;
@@ -58,13 +58,13 @@ declare class Vehicle {
     status(): Promise<HyundaiResponse | null>;
     _request(endpoint: any, data: any): Promise<any | null>;
 }
-export declare function login(authConfig: AuthConfig): Promise<BlueLinky>;
 declare class BlueLinky {
     private authConfig;
     private _accessToken;
     private _tokenExpires;
     private _vehicles;
     constructor(authConfig: AuthConfig);
+    login(): Promise<void>;
     accessToken: string | null;
     tokenExpires: number;
     readonly username: string | null;
@@ -74,4 +74,4 @@ declare class BlueLinky {
     handleTokenRefresh(): Promise<void>;
     getToken(): Promise<TokenResponse>;
 }
-export {};
+export = BlueLinky;
