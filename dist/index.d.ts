@@ -55,7 +55,7 @@ declare class Vehicle {
     serviceInfo(): Promise<HyundaiResponse | null>;
     pinStatus(): Promise<HyundaiResponse | null>;
     subscriptionStatus(): Promise<HyundaiResponse | null>;
-    status(): Promise<HyundaiResponse | null>;
+    status(refresh?: boolean): Promise<HyundaiResponse | null>;
     _request(endpoint: any, data: any): Promise<any | null>;
 }
 declare class BlueLinky {

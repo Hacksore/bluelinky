@@ -9,11 +9,11 @@ const authCreds = {
 const test = async () => {
 
 	const client = new BlueLinky(authCreds);
-	// do login, we manage this?
+	// do login
 	await client.login();
 
 	const vehicle = await client.registerVehicle(config.vin, config.pin);
-	const status = await vehicle.status();
+	const status = await vehicle.status(true);
 
 	console.log(status);
 }

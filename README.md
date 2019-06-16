@@ -1,20 +1,38 @@
-# Bluelinky
-An API wrapper for Hyundai bluelink
+<h1 align="center">Welcome to bluelinky 👋</h1>
+<p>
+  <img src="https://img.shields.io/badge/version-4.0.0-alpha-2-blue.svg?cacheSeconds=2592000" />
+</p>
+
+> An unoffcial API wrapper for Hyundai bluelink
+
+## Install
+
+```sh
+npm install
+```
+
 
 # Example
 ```javascript
 const BlueLinky = require('bluelinky');
 
-const bluelinky = new BlueLinky({
-	username: process.env.EMAIL,
-	password: process.env.PASSWORD,
-	vin: process.env.VIN,
-	pin: process.env.PIN
-});
+(async () => {
 
-const response = await bluelinky.lockVehicle();
+	const client = new BlueLinky({
+		username: 'someguy@gmail.com',
+		password: 'password'
+	);
 
-console.log(response);
+	// Perform the login so we can fetch a token
+	await client.login();
+
+	const vehicle = await client.registerVehicle('JH4KA7650MC002609', '1111');
+	const status = await vehicle.status(true);
+
+	console.log(status);
+
+})();
+
 ```
 
 ## Supported Features
@@ -38,3 +56,7 @@ You can find JSON response captures in the docs folder for analysing
 
 ## Observations
 Seems the API has daily limits for commands, unsure of the numbers yet.
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
