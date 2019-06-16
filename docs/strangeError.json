@@ -1,0 +1,10 @@
+{
+  "Exception": "API Gateway encountered an error. Error Message:  Downtime exception: Read timed out. Request Details: Service - vsRemoteFeature_MyH, Operation - /VEHICLE/STATUS, Invocation Time:7:59:50 PM, Date:Jun 15, 2019,  Client IP - 10.119.134.6, User - MyHOwAEMUser and Application:Owner Portal MyH"
+}
+
+
+API Gateway encountered an error. 
+Error Message:  Downtime exception: Read timed out. 
+Request Details: Service - vsRemoteFeature_MyH, 
+Operation - /VEHICLE/STATUS, Invocation Time:7:59:50 PM, Date:Jun 15, 2019,  Client IP - 10.119.134.6, 
+User - MyHOwAEMUser and Application:Owner Portal MyH"
