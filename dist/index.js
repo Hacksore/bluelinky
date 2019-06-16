@@ -254,13 +254,13 @@ class Vehicle {
             };
         });
     }
-    status() {
+    status(refresh = false) {
         return __awaiter(this, void 0, void 0, function* () {
             const response = yield this._request(endpoints.status, {
                 services: 'getVehicleStatus',
                 gen: 2,
                 regId: this.vin,
-                refresh: false // I think this forces the their API to connect to the vehicle and pull the status
+                refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
             });
             return {
                 result: response.RESPONSE_STRING.vehicleStatus,
@@ -294,14 +294,6 @@ class Vehicle {
         });
     }
 }
-// export async function login(authConfig: AuthConfig): Promise<BlueLinky> {
-//   const instance = new BlueLinky(authConfig);
-//   const request = await instance.getToken();
-//   const expires = Math.floor((+new Date()/1000) + parseInt(request.expires_in, 10));
-//   instance.accessToken = request.access_token;
-//   instance.tokenExpires = expires;
-//   return instance;
-// }
 class BlueLinky {
     constructor(authConfig) {
         this.authConfig = {

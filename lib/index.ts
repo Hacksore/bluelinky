@@ -321,13 +321,13 @@ class Vehicle {
     };
   }
 
-  async status(): Promise<HyundaiResponse|null> {
+  async status(refresh: boolean = false): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.status,  {
       services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
       gen: 2,
       regId: this.vin,
-      refresh: false // I think this forces the their API to connect to the vehicle and pull the status
+      refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });
 
     return {
@@ -386,7 +386,7 @@ class BlueLinky {
   async login(): Promise<void> {
     const response = await this.getToken();
     const expires = Math.floor((+new Date()/1000) + parseInt(response.expires_in, 10));
-  
+
     this.accessToken = response.access_token;
     this.tokenExpires = expires;
   }
