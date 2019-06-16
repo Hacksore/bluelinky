@@ -12,6 +12,8 @@
 		"member-access": false,
 		"quotemark": [true, "single"],
 		"forin": [false],
+		"whitespace": [false],
+		"prefer-object-spread": [false],
     "trailing-comma": [
       false,
       {
@@ -43,7 +45,7 @@
     "max-classes-per-file": false,
     "interface-name": false,
 		"member-ordering": false,
-		"object-literal-shorthand": [false, "never"]
+    "object-literal-shorthand": [false, "never"]
   },
   "rulesDirectory": [
     

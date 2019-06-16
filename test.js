@@ -1,22 +1,18 @@
-// TODO: remove dep
-require('dotenv').config();
+const config = require('./config.json');
+const BlueLinky = require('./dist/index');
 
-const BlueLinky = require('./index');
-
-const bluelinky = new BlueLinky({
-	username: process.env.EMAIL,
-	password: process.env.PASSWORD,
-	vin: process.env.VIN,
-	pin: process.env.PIN
-});
-
-async function test() {
-	// const res = await bluelinky.lockVehicle();
-	// console.log(res);
-
-	const res = await bluelinky.lockVehicle();
-
-	console.log(JSON.stringify(res));
+const authCreds = {
+	username: config.username,
+	password: config.password
 }
 
+const test = async () => {
+	const client = await BlueLinky.login(authCreds);
+	const vehicle = await client.registerVehicle(config.vin, config.pin);
+
+	//const status = await vehicle.status();
+
+	console.log(vehicle.getFeatures());
+
+}
 test();
