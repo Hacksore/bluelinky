@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rollup -c rollup.config.js",
     "lint": "tslint --formatters-dir ./node_modules/tslint-formatter-beauty -t beauty -p .",
     "prepublishOnly": "npm run build",
     "test": "npm run build && node test.js",
@@ -20,8 +20,15 @@
   "devDependencies": {
     "@types/form-data": "^2.2.1",
     "@types/got": "^9.4.4",
+    "rollup": "^1.15.6",
+    "rollup-plugin-license": "^0.9.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-resolve": "^5.0.3",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "rollup-plugin-uglify": "^6.0.0",
+    "tslib": "^1.10.0",
     "tslint": "^5.17.0",
     "tslint-formatter-beauty": "^3.0.0",
-    "typescript": "^3.5.1"
+    "typescript": "^3.5.2"
   }
 }

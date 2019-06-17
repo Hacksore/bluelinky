@@ -1,5 +1,5 @@
 const config = require('./config.json');
-const BlueLinky = require('./dist/index');
+const BlueLinky = require('./dist/bluelinky.js');
 
 const authCreds = {
 	username: config.username,
@@ -13,7 +13,7 @@ const test = async () => {
 	await client.login();
 
 	const vehicle = await client.registerVehicle(config.vin, config.pin);
-	const status = await vehicle.status(true);
+	const status = await vehicle.status();
 
 	console.log(status);
 }

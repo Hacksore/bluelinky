@@ -1,6 +1,6 @@
-import * as got from 'got';
-import * as FormData from 'form-data';
-import { EventEmitter } from 'events';
+import got from 'got';
+import FormData from 'form-data';
+import EventEmitter from 'events';
 
 const endpoints = {
   getToken: 'https://owners.hyundaiusa.com/etc/designs/ownercommon/us/token.json?reg=',
@@ -487,4 +487,4 @@ class BlueLinky {
   }
 }
 
-export = BlueLinky;
+export default BlueLinky;

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { EventEmitter } from 'events';
+import EventEmitter from 'events';
 interface AuthConfig {
     username: string | null;
     password: string | null;
@@ -74,4 +74,4 @@ declare class BlueLinky {
     handleTokenRefresh(): Promise<void>;
     getToken(): Promise<TokenResponse>;
 }
-export = BlueLinky;
+export default BlueLinky;
