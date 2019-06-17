@@ -1,5 +1,5 @@
 const config = require('./config.json');
-const BlueLinky = require('./dist/bluelinky.js');
+const BlueLinky = require('./dist/bluelinky');
 
 const authCreds = {
 	username: config.username,
