@@ -1,5 +1,5 @@
 const config = require('./config.json');
-const BlueLinky = require('./dist/bluelinky');
+const BlueLinky = require('./dist/index');
 
 const authCreds = {
 	username: config.username,
@@ -7,7 +7,7 @@ const authCreds = {
 }
 
 const test = async () => {
-
+	console.log(BlueLinky)
 	const client = new BlueLinky(authCreds);
 	// do login
 	await client.login();

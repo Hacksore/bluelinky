@@ -1,33 +1,6 @@
 /// <reference types="node" />
 import EventEmitter from 'events';
-interface AuthConfig {
-    username: string | null;
-    password: string | null;
-}
-interface StartConfig {
-    airCtrl?: boolean | string;
-    igniOnDuration: number;
-    airTempvalue?: number;
-    defrost?: boolean | string;
-    heating1?: boolean | string;
-}
-interface HyundaiResponse {
-    status: string;
-    result: any;
-    errorMessage: string;
-}
-interface TokenResponse {
-    access_token: string;
-    refresh_token: string;
-    expires_in: string;
-    username: string;
-}
-interface VehicleConfig {
-    vin: string | null;
-    pin: string | null;
-    token: string | null;
-    bluelinky: BlueLinky;
-}
+import { AuthConfig, StartConfig, HyundaiResponse, TokenResponse, VehicleConfig } from './interfaces';
 declare class Vehicle {
     private _vin;
     private _pin;

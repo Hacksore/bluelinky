@@ -1,29 +1,34 @@
-import typescript from "rollup-plugin-typescript2";
-import resolve from "rollup-plugin-node-resolve";
-import license from "rollup-plugin-license";
+import typescript from 'rollup-plugin-typescript2';
+import resolve from 'rollup-plugin-node-resolve';
+import license from 'rollup-plugin-license';
 import builtins from 'rollup-plugin-node-builtins';
-import pkg from './package.json'
+import commonjs from 'rollup-plugin-commonjs';
+import pkg from './package.json';
+import fs from 'fs';
+
+const licenseText = fs.readFileSync(__dirname + '/LICENSE');
 
 export default {
-	input: "lib/bluelinky.ts",
+	input: 'lib/index.ts',
 	output: {
-    format: "cjs",
-    name: "bluelinky",
-    file: "dist/bluelinky.js"
+    format: 'cjs',
+    name: 'index',
+		file: 'dist/index.js'		
   },
   external: [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
+		...Object.keys(pkg.dependencies || {}),
+		'events'
   ],
 	plugins: [
+		builtins(),
 		resolve({ preferBuiltins: true }),
-    typescript(),
-    builtins(),
+		typescript(),
+		commonjs(),
 		license({
 			banner: `
 				bluelinky (https://github.com/hacksore/bluelinky)
 
-				MIT License
+				${licenseText}
 				`
 		})
 	]

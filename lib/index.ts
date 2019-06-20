@@ -2,6 +2,14 @@ import got from 'got';
 import FormData from 'form-data';
 import EventEmitter from 'events';
 
+import {
+  AuthConfig,
+  StartConfig,
+  HyundaiResponse,
+  TokenResponse,
+  VehicleConfig
+} from './interfaces';
+
 const endpoints = {
   getToken: 'https://owners.hyundaiusa.com/etc/designs/ownercommon/us/token.json?reg=',
   validateToken: 'https://owners.hyundaiusa.com/libs/granite/csrf/token.json',
@@ -16,32 +24,6 @@ const endpoints = {
   subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
 
-interface AuthConfig {
-  username: string|null;
-  password: string|null;
-}
-
-interface StartConfig {
-  airCtrl?: boolean|string;
-  igniOnDuration: number;
-  airTempvalue?: number;
-  defrost?: boolean|string;
-  heating1?: boolean|string;
-}
-
-interface HyundaiResponse {
-  status: string;
-  result: any;
-  errorMessage: string;
-}
-
-interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: string;
-  username: string;
-}
-
 function buildFormData(config) {
   const form = new FormData();
   for (const key in config) {
@@ -51,13 +33,6 @@ function buildFormData(config) {
     }
   }
   return form;
-}
-
-interface VehicleConfig {
-  vin: string|null;
-  pin: string|null;
-  token: string|null;
-  bluelinky: BlueLinky;
 }
 
 class Vehicle {
