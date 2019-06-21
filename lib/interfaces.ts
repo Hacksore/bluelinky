@@ -34,38 +34,38 @@ export interface VehicleConfig {
 }
 
 export interface VehicleStatus {
-  dateTime: string,
-  acc: boolean,
-  trunkOpen: boolean,
-  doorLock: boolean,
-  defrostStatus: string,
-  transCond: boolean,
-  doorLockStatus: string,
-  doorOpen: { frontRight: number, frontLeft: number, backLeft: number, backRight: number },
-  airCtrlOn: boolean,
-  airTemp: { unit: number, hvacTempType: number, value: string },
-  battery: { 
-    batSignalReferenceValue: {},
-    batSoc: number,
-    batState: number,
-    sjbDeliveryMode: number 
-  },
-  ign3: boolean,
-  ignitionStatus: string,
-  lowFuelLight: boolean,
-  sideBackWindowHeat: number,
-  dte: { unit: number, value: number },
-  engine: boolean,
-  defrost: boolean,
-  hoodOpen: boolean,
-  airConditionStatus: string,
-  steerWheelHeat: number,
-  tirePressureLamp: { 
+  dateTime: string;
+  acc: boolean;
+  trunkOpen: boolean;
+  doorLock: boolean;
+  defrostStatus: string;
+  transCond: boolean;
+  doorLockStatus: string;
+  doorOpen: { frontRight: number, frontLeft: number, backLeft: number, backRight: number };
+  airCtrlOn: boolean;
+  airTemp: { unit: number, hvacTempType: number, value: string };
+  battery: {
+    batSignalReferenceValue: {};
+    batSoc: number;
+    batState: number;
+    sjbDeliveryMode: number
+  };
+  ign3: boolean;
+  ignitionStatus: string;
+  lowFuelLight: boolean;
+  sideBackWindowHeat: number;
+  dte: { unit: number, value: number };
+  engine: boolean;
+  defrost: boolean;
+  hoodOpen: boolean;
+  airConditionStatus: string;
+  steerWheelHeat: number;
+  tirePressureLamp: {
     tirePressureWarningLampRearLeft: number,
     tirePressureWarningLampFrontLeft: number,
     tirePressureWarningLampFrontRight: number,
     tirePressureWarningLampAll: number,
-    tirePressureWarningLampRearRight: number 
-  },
-  trunkOpenStatus: string
+    tirePressureWarningLampRearRight: number
+  };
+  trunkOpenStatus: string;
 }

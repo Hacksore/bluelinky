@@ -8,7 +8,6 @@ import {
   TokenResponse,
 } from './interfaces';
 
-
 class BlueLinky {
 
   private authConfig: AuthConfig = {
