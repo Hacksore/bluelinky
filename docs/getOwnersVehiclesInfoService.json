@@ -4,7 +4,7 @@
   "OwnerInfo": {
     "OwnerProfileInfo": [
       {
-        "Id": "3089613",
+        "Id": "0",
         "FirstName": "Sean",
         "LastName": "Boult",
         "Login": "REDACTED",
@@ -114,7 +114,7 @@
         "Id": "3084414",
         "VinNumber": "REDACTED",
         "ModelID": "1517",
-        "OwnerID": "3089613",
+        "OwnerID": "0",
         "Mileage": "2565",
         "NextServiceMileage": "7500",
         "MileagePerMonth": "1",
@@ -263,8 +263,8 @@
         "Ownr_Vehe_ID": "3019471",
         "Ownr_Role": "OW",
         "Ownr_Vehe_Role_ID": "3019467",
-        "VehicleID": "3084414",
-        "OwnerID": "3089613",
+        "VehicleID": "0",
+        "OwnerID": "0",
         "Vehe_ActiveInd": true
       }
     ],
@@ -365,7 +365,7 @@
       }
     ],
     "user": {
-      "accountId": "3089613",
+      "accountId": "0",
       "firstName": "Sean",
       "lastName": "Boult",
       "phonesOptIn": [
