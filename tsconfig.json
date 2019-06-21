@@ -1,11 +1,22 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "moduleResolution": "node",
     "target": "es6",
-    "declaration": true,
+    "module":"es2015",
     "strict": true,
+    "sourceMap": true,
     "noImplicitAny": false,
-    "strictFunctionTypes": false,
-		"outDir": "dist"
-	}
+    "declaration": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declarationDir": "dist/types",
+    "outDir": "dist",
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "lib"
+  ]
 }

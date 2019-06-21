@@ -1,372 +1,12 @@
-import * as got from 'got';
-import * as FormData from 'form-data';
-import { EventEmitter } from 'events';
-
-const endpoints = {
-  getToken: 'https://owners.hyundaiusa.com/etc/designs/ownercommon/us/token.json?reg=',
-  validateToken: 'https://owners.hyundaiusa.com/libs/granite/csrf/token.json',
-  auth: 'https://owners.hyundaiusa.com/bin/common/connectCar',
-  remoteAction: 'https://owners.hyundaiusa.com/bin/common/remoteAction',
-  usageStats: 'https://owners.hyundaiusa.com/bin/common/usagestats',
-  health: 'https://owners.hyundaiusa.com/bin/common/VehicleHealthServlet',
-  messageCenter: 'https://owners.hyundaiusa.com/bin/common/MessageCenterServlet',
-  myAccount: 'https://owners.hyundaiusa.com/bin/common/MyAccountServlet',
-  status: 'https://owners.hyundaiusa.com/bin/common/enrollmentFeature',
-  enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
-  subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
-};
-
-interface AuthConfig {
-  username: string|null;
-  password: string|null;
-}
-
-interface StartConfig {
-  airCtrl?: boolean|string;
-  igniOnDuration: number;
-  airTempvalue?: number;
-  defrost?: boolean|string;
-  heating1?: boolean|string;
-}
-
-interface HyundaiResponse {
-  status: string;
-  result: any;
-  errorMessage: string;
-}
-
-interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: string;
-  username: string;
-}
-
-function buildFormData(config) {
-  const form = new FormData();
-  for (const key in config) {
-    const value = config[key];
-    if(typeof value !== 'object') {
-      form.append(key, value.toString());
-    }
-  }
-  return form;
-}
-
-interface VehicleConfig {
-  vin: string|null;
-  pin: string|null;
-  token: string|null;
-  bluelinky: BlueLinky;
-}
-
-class Vehicle {
-  private _vin: string|null;
-  private _pin: string|null;
-  private _eventEmitter: EventEmitter;
-  private _bluelinky: BlueLinky;
-
-  private _currentFeatures = {};
-
-  constructor(config: VehicleConfig) {
-    this._vin = config.vin;
-    this._pin = config.pin;
-    this._eventEmitter = new EventEmitter();
-    this._bluelinky = config.bluelinky;
-
-    this.onInit();
-  }
-
-  addFeature(featureName, state) {
-    this._currentFeatures[featureName] = (state === 'ON' ? true : false);
-  }
-
-  async onInit() {
-    const response = await this.features();
-
-    if(response!.result === 'E:Failure' ||  response!.result !== undefined) {
-
-      response!.result.forEach(item => {
-        this.addFeature(item.featureName, item.featureStatus);
-      });
-
-    }
-    // we tell the vehicle it's loaded :D
-    this._eventEmitter.emit('ready');
-  }
-
-  get vin(): string|null {
-    return this._vin;
-  }
-
-  get eventEmitter(): EventEmitter {
-    return this._eventEmitter;
-  }
-
-  hasFeature(featureName: string): boolean {
-    return this._currentFeatures[featureName];
-  }
-
-  getFeatures(): object {
-    return this._currentFeatures;
-  }
-
-  async unlock(): Promise<HyundaiResponse|null> {
-
-    if(!this.hasFeature('DOOR UNLOCK')) {
-      throw new Error('Vehicle does not have the unlock feature');
-    }
-
-    const formData = {
-      gen: 2,
-      regId: this.vin,
-      service: 'remoteunlock'
-    };
-
-    const response = await this._request(endpoints.remoteAction, formData);
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async lock(): Promise<HyundaiResponse|null> {
-
-    if(!this.hasFeature('DOOR LOCK')) {
-      throw new Error('Vehicle does not have the lock feature');
-    }
-
-    const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
-      service: 'remotelock'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async start(config: StartConfig): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
-      service: 'ignitionstart',
-      ...config
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async stop(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
-      service: 'ignitionstop'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-
-  }
-
-  async flashLights(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
-      service: 'light'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async panic(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
-      service: 'horn'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async health(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.health, {
-      service: 'getRecMaintenanceTimeline'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-
-  }
-
-  async apiUsageStatus(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.usageStats,  {
-      startdate: 20140401, // TODO: make these paramters
-      enddate: 20190611, // TODO: make these paramters
-      service: 'getUsageStats'
-    });
-
-    return {
-      result: response.RESPONSE_STRING.OUT_DATA,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async messages(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.messageCenter, {
-      service: 'messagecenterservices'
-    });
-
-    return {
-      result: response.RESPONSE_STRING.results,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async accountInfo(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.myAccount,  {
-      service: 'getOwnerInfoDashboard'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async features(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.enrollmentStatus,  {
-      service: 'getEnrollment'
-    });
-
-    return {
-      result: response.FEATURE_DETAILS.featureDetails,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async serviceInfo(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.myAccount, {
-      service: 'getOwnersVehiclesInfoService'
-    });
-
-    return {
-      result: response.OwnerInfo,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async pinStatus(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.myAccount, {
-      service: 'getpinstatus'
-    });
-
-    return {
-      result: response.RESPONSE_STRING,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-
-  }
-
-  async subscriptionStatus(): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.subscriptions, {
-      service: 'getproductCatalogDetails'
-    });
-
-    return {
-      result: response.RESPONSE_STRING.OUT_DATA.PRODUCTCATALOG,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-  }
-
-  async status(refresh: boolean = false): Promise<HyundaiResponse|null> {
-
-    const response = await this._request(endpoints.status,  {
-      services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
-      gen: 2,
-      regId: this.vin,
-      refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
-    });
-
-    return {
-      result: response.RESPONSE_STRING.vehicleStatus,
-      status: response.E_IFRESULT,
-      errorMessage: response.E_IFFAILMSG
-    };
-
-  }
-
-  async _request(endpoint, data): Promise<any|null> {
-
-    // handle token refresh if we need to
-    await this._bluelinky.handleTokenRefresh();
-
-    const merged = Object.assign({
-      vin: this.vin,
-      username: this._bluelinky.username,
-      pin: this._pin,
-      url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-      token: this._bluelinky.accessToken
-    }, data);
-
-    const formData = buildFormData(merged);
-
-    const response = await got(endpoint, {
-      method: 'POST',
-      body: formData,
-    });
-
-    try {
-
-      return JSON.parse(response.body);
-
-    } catch (e) {
-      return null;
-    }
-  }
-}
+import got from 'got';
+import { endpoints } from './endpoints';
+import Vehicle from './vehicle';
+import { buildFormData } from './util';
+
+import {
+  AuthConfig,
+  TokenResponse,
+} from './interfaces';
 
 class BlueLinky {
 
@@ -375,36 +15,38 @@ class BlueLinky {
     password: null
   };
 
-  private _accessToken: string|null = null;
-  private _tokenExpires: number|null = null;
-  private _vehicles: Array<Vehicle> = [];
+  private accessToken: string|null = null;
+  private tokenExpires: number = 0;
+  private vehicles: Array<Vehicle> = [];
 
   constructor(authConfig: AuthConfig) {
     this.authConfig = authConfig;
   }
 
-  async login(): Promise<void> {
+  async login(): Promise<object> {
     const response = await this.getToken();
     const expires = Math.floor((+new Date()/1000) + parseInt(response.expires_in, 10));
 
     this.accessToken = response.access_token;
     this.tokenExpires = expires;
+
+    return response;
   }
 
-  get accessToken(): string|null {
-    return this._accessToken;
+  getAccessToken(): string|null {
+    return this.accessToken;
   }
 
-  set accessToken(token: string|null) {
-    this._accessToken = token;
+  setAccessToken(token: string|null) {
+    this.accessToken = token;
   }
 
-  set tokenExpires(unixtime: number) {
-    this._tokenExpires = unixtime;
+  setTokenExpires(unixtime: number) {
+    this.tokenExpires = unixtime;
   }
 
-  get tokenExpires(): number {
-    return this._tokenExpires || 0;
+  getTokenExpires(): number {
+    return this.tokenExpires || 0;
   }
 
   get username(): string|null {
@@ -412,11 +54,11 @@ class BlueLinky {
   }
 
   getVehicles() {
-    return this._vehicles;
+    return this.vehicles;
   }
 
   getVehicle(vin: string): Vehicle|undefined {
-    return this._vehicles.find(item => vin === item.vin);
+    return this.vehicles.find(item => vin === item.getVinNumber());
   }
 
   registerVehicle(vin: string, pin: string): Promise<Vehicle|null> {
@@ -429,10 +71,10 @@ class BlueLinky {
         bluelinky: this
       });
 
-      this._vehicles.push(vehicle);
+      this.vehicles.push(vehicle);
 
       return new Promise((resolve, reject) => {
-        vehicle.eventEmitter.on('ready', () => resolve(vehicle));
+        vehicle.getEventEmitter().on('ready', () => resolve(vehicle));
       });
     }
 
@@ -487,4 +129,4 @@ class BlueLinky {
   }
 }
 
-export = BlueLinky;
+export default BlueLinky;
