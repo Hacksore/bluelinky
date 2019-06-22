@@ -1,6 +1,6 @@
 const config = require('./config.json');
-//const BlueLinky = require('bluelinky');
-const BlueLinky = require('./dist/index');
+const BlueLinky = require('bluelinky');
+//const BlueLinky = require('./dist/index');
 
 
 const authCreds = {
@@ -14,7 +14,7 @@ const test = async () => {
 
 	// do login
 	const auth = await client.login();
-
+	
 	// we register and wait for a vehicle to get its features
 	const vehicle = await client.registerVehicle(config.vin, config.pin);
 
