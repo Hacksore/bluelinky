@@ -1,2 +1,5 @@
 lib/
 config.json
+.env
+.DS_Store
+.rpt2_cache
