@@ -1,12 +1,9 @@
-<h1 align="center">Welcome to bluelinky 👋</h1>
-<p>
-  <img src="https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg" />
-  <img src="https://img.shields.io/npm/v/bluelinky.svg" />
-  <img src="https://img.shields.io/david/hacksore/bluelinky.svg" />
-  <img src="https://img.shields.io/david/dev/hacksore/bluelinky.svg" />
-</p>
+# bluelinky
 
 > An unoffcial API wrapper for Hyundai bluelink
+
+![CI](https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg)
+![npm](https://img.shields.io/npm/v/bluelinky.svg)
 
 ## Install
 

@@ -81,15 +81,14 @@ class BlueLinky {
     return Promise.resolve(null);
   }
 
-  // I think this would be good enough as teh vehcile class will check when the token expires before doing a request
-  // if it is at or over the time it should tell it's dad to get a new token
+  // We should fetch a new token if we have elapsed the max time
   async handleTokenRefresh() {
     const currentTime = Math.floor((+new Date()/1000));
 
-    // refresh 60 seconds before timeout
-    if(currentTime >= (this.tokenExpires - 60)) {
-      console.log('token is expired, refreshing access token');
-      await this.getToken();
+    // Refresh 60 seconds before timeout just for good measure
+    if (currentTime >= (this.tokenExpires - 60)) {
+      console.log('Token is expired, refreshing access token');
+      const result = await this.getToken();
     }
   }
 
@@ -123,9 +122,12 @@ class BlueLinky {
       body: formData
     });
 
-    const json = JSON.parse(response.body);
-    return json.Token;
-
+    try {
+      const json = JSON.parse(response.body);
+      return json.Token;
+    } catch {
+      throw new Error(response.body);
+    }
   }
 }
 

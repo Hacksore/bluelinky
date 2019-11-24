@@ -1,11 +1,12 @@
 {
   "name": "bluelinky",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.js",
+    "dev": "rollup -w -c rollup.config.js",
     "lint": "tslint --formatters-dir ./node_modules/tslint-formatter-beauty -t beauty -p .",
     "prepublishOnly": "npm run build",
     "test": "npm run build && node test.js",

@@ -1,7 +1,6 @@
 const config = require('./config.json');
-//const BlueLinky = require('bluelinky');
+// const BlueLinky = require('bluelinky');
 const BlueLinky = require('./dist/index');
-
 
 const authCreds = {
 	username: config.username,
@@ -21,8 +20,6 @@ const test = async () => {
 	// call the status method
 	const status = await vehicle.status();
 	console.log(status);
-	//console.log('Distance left in vehicle', status.result.dte.value)
-
 }
 
 test();

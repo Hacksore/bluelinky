@@ -305,12 +305,14 @@ export default class Vehicle {
       body: formData,
     });
 
+    if (response.body.includes('PIN Locked')) {
+      throw new Error('PIN is locked, please correct the isssue before trying again.');
+    }
+
     try {
-
       return JSON.parse(response.body);
-
     } catch (e) {
-      return null;
+      return response.body;
     }
   }
 }
