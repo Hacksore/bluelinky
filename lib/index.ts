@@ -8,6 +8,7 @@ import {
   TokenResponse,
 } from './interfaces';
 
+import logger from './logger';
 class BlueLinky {
 
   private authConfig: AuthConfig = {
@@ -25,8 +26,11 @@ class BlueLinky {
 
   async login(): Promise<object> {
     const response = await this.getToken();
-    const expires = Math.floor((+new Date()/1000) + parseInt(response.expires_in, 10));
+    const currentTime = Math.floor(+new Date()/1000);
+    const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
 
+    logger.info(`Logged in to bluelink, token expires at ${expires}`);
+    logger.info(`Current time: ${currentTime}`);
     this.accessToken = response.access_token;
     this.tokenExpires = expires;
 
@@ -83,12 +87,17 @@ class BlueLinky {
 
   // We should fetch a new token if we have elapsed the max time
   async handleTokenRefresh() {
+    logger.debug('token time: ' + this.tokenExpires);
     const currentTime = Math.floor((+new Date()/1000));
+    const tokenDelta = -(currentTime - (this.tokenExpires));
 
     // Refresh 60 seconds before timeout just for good measure
-    if (currentTime >= (this.tokenExpires - 60)) {
-      console.log('Token is expired, refreshing access token');
+    if (currentTime <= 60) {
+      logger.info('Token is about to expire, refreshing access token 60 seconds early');
       const result = await this.getToken();
+      logger.debug(`Token is refreshed ${JSON.stringify(result)}`);
+    } else {
+      logger.debug(`Token is still valid: ${tokenDelta}`);
     }
   }
 
@@ -102,6 +111,7 @@ class BlueLinky {
     });
 
     const csrfToken = response.body.token;
+    logger.debug(`Fetching CSRF Token ${csrfToken}`);
 
     response = await got(endpoints.validateToken, {
       method: 'GET',
@@ -124,6 +134,8 @@ class BlueLinky {
 
     try {
       const json = JSON.parse(response.body);
+      logger.debug(`Fetching JSON Auth Token, RESPONSE: ${JSON.stringify(json)}`);
+
       return json.Token;
     } catch {
       throw new Error(response.body);

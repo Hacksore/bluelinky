@@ -11,6 +11,8 @@ import {
   VehicleStatus
 } from './interfaces';
 
+import logger from './logger';
+
 export default class Vehicle {
   private vin: string|null;
   private pin: string|null;
@@ -286,6 +288,7 @@ export default class Vehicle {
   }
 
   private async _request(endpoint, data): Promise<any|null> {
+    logger.debug(`[${endpoint}] ${JSON.stringify(data)}`);
 
     // handle token refresh if we need to
     await this.bluelinky.handleTokenRefresh();
@@ -304,6 +307,8 @@ export default class Vehicle {
       method: 'POST',
       body: formData,
     });
+
+    logger.debug(JSON.stringify(response.body));
 
     if (response.body.includes('PIN Locked')) {
       throw new Error('PIN is locked, please correct the isssue before trying again.');
