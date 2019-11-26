@@ -9,6 +9,7 @@
   "rules": {
     "curly": false,
     "ordered-imports": false,
+    "no-shadowed-variable": false,
 		"member-access": false,
 		"quotemark": [true, "single"],
 		"forin": [false],
