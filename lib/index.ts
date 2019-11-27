@@ -92,7 +92,7 @@ class BlueLinky {
     const tokenDelta = -(currentTime - (this.tokenExpires));
 
     // Refresh 60 seconds before timeout just for good measure
-    if (currentTime <= 60) {
+    if (tokenDelta <= 60) {
       logger.info('Token is about to expire, refreshing access token 60 seconds early');
       const result = await this.getToken();
       logger.debug(`Token is refreshed ${JSON.stringify(result)}`);
