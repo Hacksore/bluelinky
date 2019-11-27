@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import { endpoints } from './endpoints';
+import allEndpoints from './endpoints';
 import got from 'got';
 import { buildFormData } from './util';
 
@@ -13,7 +13,9 @@ import {
 
 import logger from './logger';
 
-export default class Vehicle {
+const endpoints = allEndpoints['US'];
+
+export default class AmericanVehicle {
   private vin: string|null;
   private pin: string|null;
   private eventEmitter: EventEmitter;

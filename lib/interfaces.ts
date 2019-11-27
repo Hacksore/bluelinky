@@ -33,6 +33,19 @@ export interface VehicleConfig {
   bluelinky: BlueLinky;
 }
 
+export interface CanadaVehicleConfig {
+  vin: string|null;
+  pin: string|null;
+  token: string|null;
+  bluelinky: BlueLinky;
+}
+
+export interface RegisterVehicleConfig {
+  vin: string;
+  pin: string;
+  region: string|null;
+}
+
 export interface VehicleStatus {
   dateTime: string;
   acc: boolean;

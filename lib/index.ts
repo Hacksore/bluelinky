@@ -1,14 +1,17 @@
 import got from 'got';
-import { endpoints } from './endpoints';
-import Vehicle from './vehicle';
+import allEndpoints from './endpoints';
+import AmericanVehicle from './americanVehicle';
+import CanadianVehicle from './canadianVehicle';
 import { buildFormData } from './util';
 
 import {
   AuthConfig,
   TokenResponse,
+  RegisterVehicleConfig,
 } from './interfaces';
 
 import logger from './logger';
+
 class BlueLinky {
 
   private authConfig: AuthConfig = {
@@ -18,7 +21,7 @@ class BlueLinky {
 
   private accessToken: string|null = null;
   private tokenExpires: number = 0;
-  private vehicles: Array<Vehicle> = [];
+  private vehicles: Array<CanadianVehicle|AmericanVehicle> = [];
 
   constructor(authConfig: AuthConfig) {
     this.authConfig = authConfig;
@@ -65,12 +68,12 @@ class BlueLinky {
     return this.vehicles.find(item => vin === item.getVinNumber());
   }
 
-  registerVehicle(vin: string, pin: string): Promise<Vehicle|null> {
+  registerVehicle(config: RegisterVehicleConfig): Promise<Vehicle|null> {
 
-    if(!this.getVehicle(vin)) {
-      const vehicle = new Vehicle({
-        vin: vin,
-        pin: pin,
+    if(!this.getVehicle(config.vin)) {
+      const vehicle = new AmericanVehicle({
+        vin: config.vin,
+        pin: config.pin,
         token: this.accessToken,
         bluelinky: this
       });
