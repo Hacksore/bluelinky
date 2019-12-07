@@ -13,14 +13,13 @@ import {
 
 import logger from './logger';
 
-
-
 export default class Vehicle extends EventEmitter {
   private vin: string|null;
   private pin: string|null;
   private bluelinky: BlueLinky;
   private currentFeatures: object;
   private gen: number = 2;
+  private regId: string|null = null;
 
   constructor(config: VehicleConfig) {
     super(); 
@@ -53,6 +52,7 @@ export default class Vehicle extends EventEmitter {
     if (vehicleInfo !== null) {
       const info = vehicleInfo.result[0].veh;
       this.gen = info.IsGen2;
+      this.regId = info.RegistrationID;
       logger.debug(`registering a gen ${this.gen} vehicle`);
     }
     // we tell the vehicle it's loaded :D
@@ -78,7 +78,6 @@ export default class Vehicle extends EventEmitter {
     }
 
     const formData = {
-      regId: this.vin,
       service: 'remoteunlock'
     };
 
@@ -98,7 +97,6 @@ export default class Vehicle extends EventEmitter {
     }
 
     const response = await this._request(endpoints.remoteAction, {
-      regId: this.vin,
       service: 'remotelock'
     });
 
@@ -112,7 +110,6 @@ export default class Vehicle extends EventEmitter {
   async start(config: StartConfig): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      regId: this.vin,
       service: 'ignitionstart',
       ...config
     });
@@ -127,7 +124,6 @@ export default class Vehicle extends EventEmitter {
   async stop(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      regId: this.vin,
       service: 'ignitionstop'
     });
 
@@ -142,7 +138,6 @@ export default class Vehicle extends EventEmitter {
   async flashLights(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      regId: this.vin,
       service: 'light'
     });
 
@@ -156,7 +151,6 @@ export default class Vehicle extends EventEmitter {
   async panic(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      regId: this.vin,
       service: 'horn'
     });
 
@@ -277,7 +271,7 @@ export default class Vehicle extends EventEmitter {
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
 
-    if (this.gen === GEN_TWO) {
+    if (this.gen === GEN_ONE) {
       throw new Error('Status feature is not supported on gen 1 vehicles :(');
     }
 
@@ -286,7 +280,6 @@ export default class Vehicle extends EventEmitter {
     const response = await this._request(endpoints.status,  {
       // what is the key called for you here? services or service?
       services: service, // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
-      regId: this.vin,
       refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });
 
@@ -307,6 +300,7 @@ export default class Vehicle extends EventEmitter {
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
       token: this.bluelinky.getAccessToken(),
       gen: this.gen,
+      regId: this.regId,
       ...data
     });
 

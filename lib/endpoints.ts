@@ -14,9 +14,10 @@ export const endpoints = {
 
 export const GEN_TWO = 2;
 export const GEN_ONE = 1;
+
 // lets focus on status ok
 export const SERVICE = {
-  locak: {
+  lock: {
     [GEN_ONE]: 'remotelock',
     [GEN_TWO]: 'unlockForGen2'
   },
