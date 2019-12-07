@@ -78,7 +78,7 @@ class BlueLinky {
       this.vehicles.push(vehicle);
 
       return new Promise((resolve, reject) => {
-        vehicle.getEventEmitter().on('ready', () => resolve(vehicle));
+        vehicle.on('ready', () => resolve(vehicle));
       });
     }
 
