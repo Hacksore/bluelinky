@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import { endpoints } from './endpoints';
+import { endpoints, GEN1, GEN2} from './constants';
 import got from 'got';
 import { buildFormData } from './util';
 
@@ -13,17 +13,18 @@ import {
 
 import logger from './logger';
 
-export default class Vehicle {
+export default class Vehicle extends EventEmitter {
   private vin: string|null;
   private pin: string|null;
-  private eventEmitter: EventEmitter;
   private bluelinky: BlueLinky;
   private currentFeatures: object;
+  private gen: number = 2;
+  private regId: string|null = null;
 
   constructor(config: VehicleConfig) {
+    super();
     this.vin = config.vin;
     this.pin = config.pin;
-    this.eventEmitter = new EventEmitter();
     this.bluelinky = config.bluelinky;
     this.currentFeatures = {};
 
@@ -44,16 +45,21 @@ export default class Vehicle {
       });
 
     }
+
+    const ownerInfo = await this.ownerInfo();
+    if (ownerInfo !== null) {
+      const vehicle = ownerInfo.result.OwnersVehiclesInfo.find(item => this.vin === item.VinNumber);
+      this.gen = vehicle.IsGen2;
+      this.regId = vehicle.RegistrationID;
+      logger.debug(`registering a gen ${this.gen} vehicle (${this.regId})`);
+    }
+
     // we tell the vehicle it's loaded :D
-    this.eventEmitter.emit('ready');
+    this.emit('ready');
   }
 
   getVinNumber(): string|null {
     return this.vin;
-  }
-
-  getEventEmitter(): EventEmitter {
-    return this.eventEmitter;
   }
 
   hasFeature(featureName: string): boolean {
@@ -71,8 +77,6 @@ export default class Vehicle {
     }
 
     const formData = {
-      gen: 2,
-      regId: this.vin,
       service: 'remoteunlock'
     };
 
@@ -92,8 +96,6 @@ export default class Vehicle {
     }
 
     const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'remotelock'
     });
 
@@ -107,8 +109,6 @@ export default class Vehicle {
   async start(config: StartConfig): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'ignitionstart',
       ...config
     });
@@ -123,8 +123,6 @@ export default class Vehicle {
   async stop(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'ignitionstop'
     });
 
@@ -139,8 +137,6 @@ export default class Vehicle {
   async flashLights(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'light'
     });
 
@@ -154,8 +150,6 @@ export default class Vehicle {
   async panic(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'horn'
     });
 
@@ -221,6 +215,19 @@ export default class Vehicle {
     };
   }
 
+  async ownerInfo(): Promise<HyundaiResponse|null> {
+
+    const response = await this._request(endpoints.myAccount,  {
+      service: 'getOwnerInfoService'
+    });
+
+    return {
+      result: response.RESPONSE_STRING,
+      status: response.E_IFRESULT,
+      errorMessage: response.E_IFFAILMSG
+    };
+  }
+
   async features(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(endpoints.enrollmentStatus,  {
@@ -276,10 +283,12 @@ export default class Vehicle {
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
 
+    if (this.gen === GEN1) {
+      throw new Error('Status feature is not supported on gen 1 vehicles :(');
+    }
+
     const response = await this._request(endpoints.status,  {
       services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
-      gen: 2,
-      regId: this.vin,
       refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });
 
@@ -293,15 +302,16 @@ export default class Vehicle {
     // handle token refresh if we need to
     await this.bluelinky.handleTokenRefresh();
 
-    const merged = Object.assign({
+    const formData = buildFormData({
       vin: this.vin,
       username: this.bluelinky.username,
       pin: this.pin,
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-      token: this.bluelinky.getAccessToken()
-    }, data);
-
-    const formData = buildFormData(merged);
+      token: this.bluelinky.getAccessToken(),
+      gen: this.gen,
+      regId: this.regId,
+      ...data
+    });
 
     const response = await got(endpoint, {
       method: 'POST',

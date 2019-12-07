@@ -11,3 +11,6 @@ export const endpoints = {
   enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
   subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
+
+export const GEN2 = 2;
+export const GEN1 = 1;

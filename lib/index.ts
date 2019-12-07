@@ -1,5 +1,5 @@
 import got from 'got';
-import { endpoints } from './endpoints';
+import { endpoints } from './constants';
 import Vehicle from './vehicle';
 import { buildFormData } from './util';
 
@@ -78,7 +78,7 @@ class BlueLinky {
       this.vehicles.push(vehicle);
 
       return new Promise((resolve, reject) => {
-        vehicle.getEventEmitter().on('ready', () => resolve(vehicle));
+        vehicle.on('ready', () => resolve(vehicle));
       });
     }
 
