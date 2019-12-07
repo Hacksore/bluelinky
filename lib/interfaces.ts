@@ -33,13 +33,6 @@ export interface VehicleConfig {
   bluelinky: BlueLinky;
 }
 
-export interface CanadaVehicleConfig {
-  vin: string|null;
-  pin: string|null;
-  token: string|null;
-  bluelinky: BlueLinky;
-}
-
 export interface RegisterVehicleConfig {
   vin: string;
   pin: string;
@@ -81,4 +74,24 @@ export interface VehicleStatus {
     tirePressureWarningLampRearRight: number
   };
   trunkOpenStatus: string;
+}
+
+export interface CanadianEndpoints { 
+  login: string,
+  logout: string,
+  status: string,
+}
+
+export interface AmericanEndpoints { 
+  getToken: string,
+  validateToken: string,
+  auth: string,
+  remoteAction: string,
+  usageStats: string,
+  health: string,
+  messageCenter: string,
+  myAccount: string,
+  status: string,
+  enrollmentStatus: string,
+  subscriptions: string
 }

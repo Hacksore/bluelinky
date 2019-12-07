@@ -2,54 +2,48 @@ import BlueLinky from './index';
 import EventEmitter from 'events';
 import allEndpoints from './endpoints';
 import got from 'got';
-import { buildFormData } from './util';
+
+import BaseVehicle from './baseVehicle';
 
 import {
-  HyundaiResponse,
-  CanadaVehicleConfig,
-  VehicleStatus
+  VehicleConfig,
+  VehicleStatus,
+  CanadianEndpoints
 } from './interfaces';
 
 import logger from './logger';
+ 
+export default class CanadianVehicle extends BaseVehicle {
+  private endpoints: CanadianEndpoints = allEndpoints['CA'];
 
-const endpoints = allEndpoints['CA'];
-
-export default class AmericanVehicle extends EventEmitter{
-  private vin: string|null;
-  private pin: string|null;
-  private eventEmitter: EventEmitter;
-  private bluelinky: BlueLinky;
-  private currentFeatures: object;
-
-  constructor(config: CanadaVehicleConfig) {
-    super();
+  constructor(config: VehicleConfig) {
+    super(config);
     this.vin = config.vin;
     this.pin = config.pin;
-    this.eventEmitter = new EventEmitter();
     this.bluelinky = config.bluelinky;
+    this.auth.accessToken = config.token;
 
     this.onInit();
   }
 
-  addFeature(featureName, state) {
-    this.currentFeatures[featureName] = (state === 'ON' ? true : false);
-  }
-
   async onInit() {
+    logger.info('onInit from CA')
    
-    this.emit('ready');
+    setTimeout(() => this.emit('ready'), 0);
   }
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
+    logger.info('in status method');
+    const response = await this._request(this.endpoints.status, {});
 
-    const response = await this._request(endpoints.status, {});
+    console.log(response.body)
 
-    return response.RESPONSE_STRING.vehicleStatus;
+    return null
 
   }
 
   private async _request(endpoint, data): Promise<any|null> {
-    logger.debug(`[${endpoint}] ${JSON.stringify(data)}`);
+    logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
 
     const response = await got(endpoint, {
       method: 'POST',
