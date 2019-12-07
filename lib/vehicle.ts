@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import { endpoints, SERVICE, GEN_ONE, GEN_TWO} from './endpoints';
+import { endpoints, GEN1, GEN2} from './constants';
 import got from 'got';
 import { buildFormData } from './util';
 
@@ -22,7 +22,7 @@ export default class Vehicle extends EventEmitter {
   private regId: string|null = null;
 
   constructor(config: VehicleConfig) {
-    super(); 
+    super();
     this.vin = config.vin;
     this.pin = config.pin;
     this.bluelinky = config.bluelinky;
@@ -45,7 +45,7 @@ export default class Vehicle extends EventEmitter {
       });
 
     }
-    
+
     const ownerInfo = await this.ownerInfo();
     if (ownerInfo !== null) {
       const vehicle = ownerInfo.result.OwnersVehiclesInfo.find(item => this.vin === item.VinNumber);
@@ -283,15 +283,12 @@ export default class Vehicle extends EventEmitter {
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
 
-    if (this.gen === GEN_ONE) {
+    if (this.gen === GEN1) {
       throw new Error('Status feature is not supported on gen 1 vehicles :(');
     }
 
-    // kind of think this is not necassary anymore?
-    const service = SERVICE.status[this.gen];
     const response = await this._request(endpoints.status,  {
-      // what is the key called for you here? services or service?
-      services: service, // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
+      services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
       refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });
 

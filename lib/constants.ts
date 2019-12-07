@@ -12,21 +12,5 @@ export const endpoints = {
   subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
 
-export const GEN_TWO = 2;
-export const GEN_ONE = 1;
-
-// lets focus on status ok
-export const SERVICE = {
-  lock: {
-    [GEN_ONE]: 'remotelock',
-    [GEN_TWO]: 'unlockForGen2'
-  },
-  unlock: {
-    [GEN_ONE]: 'unlockForGen1',
-    [GEN_TWO]: 'unlockForGen2'
-  },
-  status: {
-    1: '',
-    2: 'getVehicleStatus'
-  }
-}
+export const GEN2 = 2;
+export const GEN1 = 1;

@@ -1,5 +1,5 @@
 import got from 'got';
-import { endpoints } from './endpoints';
+import { endpoints } from './constants';
 import Vehicle from './vehicle';
 import { buildFormData } from './util';
 
