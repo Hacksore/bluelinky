@@ -46,15 +46,14 @@ export default class Vehicle extends EventEmitter {
 
     }
     
-    // get back the info that has gen
-    const vehicleInfo = await this.accountInfo();
-
-    if (vehicleInfo !== null) {
-      const info = vehicleInfo.result[0].veh;
-      this.gen = info.IsGen2;
-      this.regId = info.RegistrationID;
-      logger.debug(`registering a gen ${this.gen} vehicle`);
+    const ownerInfo = await this.ownerInfo();
+    if (ownerInfo !== null) {
+      const vehicle = ownerInfo.result.OwnersVehiclesInfo.find(item => this.vin === item.VinNumber);
+      this.gen = vehicle.IsGen2;
+      this.regId = vehicle.RegistrationID;
+      logger.debug(`registering a gen ${this.gen} vehicle (${this.regId})`);
     }
+
     // we tell the vehicle it's loaded :D
     this.emit('ready');
   }
@@ -207,6 +206,19 @@ export default class Vehicle extends EventEmitter {
 
     const response = await this._request(endpoints.myAccount,  {
       service: 'getOwnerInfoDashboard'
+    });
+
+    return {
+      result: response.RESPONSE_STRING,
+      status: response.E_IFRESULT,
+      errorMessage: response.E_IFFAILMSG
+    };
+  }
+
+  async ownerInfo(): Promise<HyundaiResponse|null> {
+
+    const response = await this._request(endpoints.myAccount,  {
+      service: 'getOwnerInfoService'
     });
 
     return {
