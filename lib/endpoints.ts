@@ -11,3 +11,21 @@ export const endpoints = {
   enrollmentStatus: 'https://owners.hyundaiusa.com/bin/common/enrollmentStatus',
   subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
+
+export const GEN_TWO = 2;
+export const GEN_ONE = 1;
+// lets focus on status ok
+export const SERVICE = {
+  locak: {
+    [GEN_ONE]: 'remotelock',
+    [GEN_TWO]: 'unlockForGen2'
+  },
+  unlock: {
+    [GEN_ONE]: 'unlockForGen1',
+    [GEN_TWO]: 'unlockForGen2'
+  },
+  status: {
+    1: '',
+    2: 'getVehicleStatus'
+  }
+}

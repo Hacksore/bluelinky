@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import { endpoints } from './endpoints';
+import { endpoints, SERVICE, GEN_ONE, GEN_TWO} from './endpoints';
 import got from 'got';
 import { buildFormData } from './util';
 
@@ -12,6 +12,8 @@ import {
 } from './interfaces';
 
 import logger from './logger';
+
+
 
 export default class Vehicle extends EventEmitter {
   private vin: string|null;
@@ -275,8 +277,15 @@ export default class Vehicle extends EventEmitter {
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
 
+    if (this.gen === GEN_TWO) {
+      throw new Error('Status feature is not supported on gen 1 vehicles :(');
+    }
+
+    // kind of think this is not necassary anymore?
+    const service = SERVICE.status[this.gen];
     const response = await this._request(endpoints.status,  {
-      services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
+      // what is the key called for you here? services or service?
+      services: service, // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
       regId: this.vin,
       refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });

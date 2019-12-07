@@ -19,7 +19,7 @@ const test = async () => {
 
 	// call the status method
 	const status = await vehicle.status();
-	// console.log(status);
+	console.log(status);
 }
 
 test();
