@@ -78,6 +78,10 @@ export interface VehicleStatus {
 
 export interface CanadianEndpoints {
   login: string;
+  list: string;
+  lock: string;
+  verifyPin: string;
+  verifyToken: string;
   logout: string;
   status: string;
 }

@@ -1,6 +1,4 @@
-import BlueLinky from './index';
-import EventEmitter from 'events';
-import { ALL_ENDPOINTS } from './constants';
+import { CA_ENDPOINTS } from './constants';
 import got from 'got';
 
 import BaseVehicle from './baseVehicle';
@@ -14,7 +12,9 @@ import {
 import logger from './logger';
 
 export default class CanadianVehicle extends BaseVehicle {
-  private endpoints: CanadianEndpoints = ALL_ENDPOINTS.CA;
+  private endpoints: CanadianEndpoints = CA_ENDPOINTS;
+
+  private vehicleId: number = 0;
 
   constructor(config: VehicleConfig) {
     super(config);
@@ -29,30 +29,101 @@ export default class CanadianVehicle extends BaseVehicle {
   async onInit() {
     logger.info('onInit from CA');
 
-    // TODO: async stuff
+    // get list of vehicles and find the vehicle id
+    const resposnse = await this.getVehicleList();
+    const vehicles = resposnse.body.result.vehicles;
+    const foundVehicle = vehicles.find(car => car.vin === this.vin);
+
+    this.vehicleId = foundVehicle.vehicleId;
 
     this.emit('ready');
   }
 
-  async status(refresh: boolean = false): Promise<VehicleStatus|null> {
-    logger.info('in status method');
-    const response = await this._request(this.endpoints.status, {});
+  async getVehicleList(): Promise<any> { // TODO: type this
+    console.log('getVehicleList');
+
+    const token = this.bluelinky.getAccessToken() || '';
+    const response = await got(this.endpoints.list, {
+      method: 'POST',
+      headers: {
+        from: 'CWP',
+        language: '1',
+        Host: 'mybluelink.ca',
+        Origin: 'https://mybluelink.ca',
+        offset: '-5',
+        accessToken: token
+      },
+      json: true
+    });
+
+    return Promise.resolve(response.body.result.vehicles);
+  }
+
+  async status(): Promise<VehicleStatus|null> {
+    logger.info('Begin status request');
+    const response = await this._request(this.endpoints.status, {    
+    });
 
     console.log(response.body);
-
     return null;
+  }
 
+  async lock(): Promise<any> {
+    logger.info('Begin lock request');
+
+    // get pAuth header
+    const preAuth = await this.getPreAuth();
+
+    // do lock request
+    const response = await this._request(this.endpoints.lock, {
+      pAuth: preAuth
+    });
+
+    console.log(response.body);
+    return null;
+  }
+
+  private async getPreAuth() {
+    const token = this.bluelinky.getAccessToken() || '';
+    const response = await got(this.endpoints.verifyPin, {
+      method: 'POST',
+      headers: {
+        from: 'CWP',
+        language: '1',
+        Host: 'mybluelink.ca',
+        Origin: 'https://mybluelink.ca',
+        offset: '-5',
+        accessToken: token
+      },
+      json: true,
+      body: { pin: this.pin }
+    });
+
+    const pAuth = response.body.result.pAuth;
+    logger.info('pAuth ' + pAuth);
+    return pAuth;
   }
 
   private async _request(endpoint, data): Promise<any|null> {
     logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
 
-    const response = await got(endpoint, {
+    const response = await got(this.endpoints.login, {
       method: 'POST',
       json: true,
-      body: {
-        pin: this.pin
+      headers: {
+        pin: this.pin,
+        from: 'CWP',
+        language: '1',
+        Host: 'mybluelink.ca',
+        Origin: 'https://mybluelink.ca',
+        offset: '-5',
+        accessToken: this.bluelinky.getAccessToken(),
+        vehicleId: this.vehicleId,
+        ...data
       },
+      body: {
+        pin: this.pin 
+      }
     });
 
     return response;

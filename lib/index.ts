@@ -106,7 +106,6 @@ class BlueLinky {
     logger.info(`starting login method [${region}]`);
     // if region is US do this
     if (region === 'US') {
-      logger.info(`starting login specifc for US`);
       const response = await this.getToken();
       const currentTime = Math.floor(+new Date()/1000);
       const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
@@ -120,24 +119,29 @@ class BlueLinky {
 
     // if region is CA do this
     if (region === 'CA') {
-      logger.info(`starting login specifc for CA`);
+      
+      try {
+        const resposne = await got('https://mybluelink.ca/tods/api/lgn', {
+          method: 'POST',
+          headers: {
+            from: 'CWP',
+            language: '1',
+            Host: 'mybluelink.ca',
+            Origin: 'https://mybluelink.ca',
+            offset: '-5',
+          },
+          json: true,
+          body: {
+            loginId: this.authConfig.username,
+            password: this.authConfig.password
+          }          
+        });
+        console.log(resposne.body);
+      } catch (err) {
+        console.log(err.message);
+        return Promise.reject(err.message);
+      }
 
-      const resposne = await got('https://mybluelink.ca/tods/api/lgn', {
-        method: 'POST',
-        headers: {
-          from: 'CWP',
-          language: '1',
-          Host: 'mybluelink.ca',
-          Origin: 'https://mybluelink.ca',
-          offset: '-5',
-        },
-        json: true,
-        body: {
-          loginId: this.authConfig.username,
-          password: this.authConfig.password
-        }
-      });
-      console.log(resposne.body);
     }
 
     return Promise.resolve({});
@@ -153,6 +157,10 @@ class BlueLinky {
 
   registerVehicle(config: RegisterVehicleConfig): Promise<CanadianVehicle|AmericanVehicle|null> {
     const { vin, pin } = config;
+
+    if (this.accessToken === null) {
+      return Promise.reject('access token not fetched, try again');
+    }
 
     logger.info(`reg veh: ${vin}, ${pin}`);
     if(!this.getVehicle(vin)) {
