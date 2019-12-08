@@ -23,7 +23,7 @@ export default {
 		builtins(),
 		resolve({ preferBuiltins: true }),
 		typescript(),
-		minify(),
+		//minify(),
 		commonjs(),
 		license({
 			banner: `

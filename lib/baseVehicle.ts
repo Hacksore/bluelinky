@@ -1,7 +1,7 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
 import { VehicleConfig } from './interfaces';
- 
+
 export default class BaseVehicle extends EventEmitter {
 
   public vin: string|null;
@@ -9,6 +9,8 @@ export default class BaseVehicle extends EventEmitter {
   public bluelinky: BlueLinky;
   public currentFeatures: object;
   public auth: any;
+  public gen: number = 2;
+  public regId: string|null = null;
 
   constructor(config: VehicleConfig) {
     super();

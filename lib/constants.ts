@@ -18,9 +18,10 @@ export const CA_ENDPOINTS = {
   status: 'https://mybluelink.ca/tods/api/lstvhclsts'
 };
 
-const endpoints = {
-  'US': US_ENDPOINTS,
-  'CA': CA_ENDPOINTS,
-}
+export const ALL_ENDPOINTS =  {
+  US: US_ENDPOINTS,
+  CA: CA_ENDPOINTS,
+};
 
-export default endpoints;
+export const GEN2 = 2;
+export const GEN1 = 1;

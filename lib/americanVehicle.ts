@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import allEndpoints from './endpoints';
+import { ALL_ENDPOINTS, GEN1, GEN2} from './constants';
 import got from 'got';
 import { buildFormData } from './util';
 
@@ -16,7 +16,7 @@ import logger from './logger';
 import BaseVehicle from './baseVehicle';
 
 export default class AmericanVehicle extends BaseVehicle {
-  private endpoints: AmericanEndpoints = allEndpoints['US'];
+  private endpoints: AmericanEndpoints = ALL_ENDPOINTS.US;
 
   constructor(config: VehicleConfig) {
     super(config);
@@ -28,24 +28,40 @@ export default class AmericanVehicle extends BaseVehicle {
     this.onInit();
   }
 
-  handleTokenRefresh() {
-
-  }
-
   async onInit() {
     logger.info('calling onInit()')
     const response = await this.features();
     logger.info(`Getting features ${response}`);
 
     if(response!.result === 'E:Failure' ||  response!.result !== undefined) {
-
       response!.result.forEach(item => {
         this.addFeature(item.featureName, item.featureStatus);
       });
-
     }
+
+    const ownerInfo = await this.ownerInfo();
+    if (ownerInfo !== null) {
+      console.log(this.vin, ownerInfo.result.OwnersVehiclesInfo);
+      const vehicle = ownerInfo.result.OwnersVehiclesInfo.find(item => this.vin === item.VinNumber);
+      this.gen = vehicle.IsGen2;
+      this.regId = vehicle.RegistrationID;
+      logger.debug(`registering a gen ${this.gen} vehicle (${this.regId})`);
+    }
+
     // we tell the vehicle it's loaded :D
     this.emit('ready');
+  }
+
+  getVinNumber(): string|null {
+    return this.vin;
+  }
+
+  hasFeature(featureName: string): boolean {
+    return this.currentFeatures[featureName];
+  }
+
+  getFeatures(): object {
+    return this.currentFeatures;
   }
 
   async unlock(): Promise<HyundaiResponse|null> {
@@ -55,8 +71,6 @@ export default class AmericanVehicle extends BaseVehicle {
     }
 
     const formData = {
-      gen: 2,
-      regId: this.vin,
       service: 'remoteunlock'
     };
 
@@ -76,8 +90,6 @@ export default class AmericanVehicle extends BaseVehicle {
     }
 
     const response = await this._request(this.endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'remotelock'
     });
 
@@ -91,8 +103,6 @@ export default class AmericanVehicle extends BaseVehicle {
   async start(config: StartConfig): Promise<HyundaiResponse|null> {
 
     const response = await this._request(this.endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'ignitionstart',
       ...config
     });
@@ -107,8 +117,6 @@ export default class AmericanVehicle extends BaseVehicle {
   async stop(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(this.endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'ignitionstop'
     });
 
@@ -123,8 +131,6 @@ export default class AmericanVehicle extends BaseVehicle {
   async flashLights(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(this.endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'light'
     });
 
@@ -138,8 +144,6 @@ export default class AmericanVehicle extends BaseVehicle {
   async panic(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(this.endpoints.remoteAction, {
-      gen: 2,
-      regId: this.vin,
       service: 'horn'
     });
 
@@ -205,6 +209,19 @@ export default class AmericanVehicle extends BaseVehicle {
     };
   }
 
+  async ownerInfo(): Promise<HyundaiResponse|null> {
+
+    const response = await this._request(this.endpoints.myAccount,  {
+      service: 'getOwnerInfoService'
+    });
+
+    return {
+      result: response.RESPONSE_STRING,
+      status: response.E_IFRESULT,
+      errorMessage: response.E_IFFAILMSG
+    };
+  }
+
   async features(): Promise<HyundaiResponse|null> {
 
     const response = await this._request(this.endpoints.enrollmentStatus,  {
@@ -260,10 +277,12 @@ export default class AmericanVehicle extends BaseVehicle {
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
 
+    if (this.gen === GEN1) {
+      throw new Error('Status feature is not supported on gen 1 vehicles :(');
+    }
+
     const response = await this._request(this.endpoints.status,  {
       services: 'getVehicleStatus', // THIS IS WHAT HAPPENS WHEN YOU MAKE A PRO TYPO.... services (plural)
-      gen: 2,
-      regId: this.vin,
       refresh: refresh // I think this forces the their API to connect to the vehicle and pull the status
     });
 
@@ -272,22 +291,22 @@ export default class AmericanVehicle extends BaseVehicle {
   }
 
   private async _request(endpoint, data): Promise<any|null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
-    logger.info(`[AUTH] ${this.auth.accessToken}`);
+    // logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
+    // logger.info(`[AUTH] ${this.auth.accessToken}`);
 
     // handle token refresh if we need to
-    await this.handleTokenRefresh();
+    await this.bluelinky.handleTokenRefresh();
 
-    const merged = {
+    const formData = buildFormData({
       vin: this.vin,
       username: this.auth.username,
       pin: this.pin,
       url: 'https://owners.hyundaiusa.com/us/en/page/dashboard.html',
-      token: this.auth.accessToken,
+      token: this.bluelinky.getAccessToken(),
+      gen: this.gen,
+      regId: this.regId,
       ...data
-    };
-
-    const formData = buildFormData(merged);
+    });
 
     const response = await got(endpoint, {
       method: 'POST',

@@ -1,6 +1,6 @@
 import BlueLinky from './index';
 import EventEmitter from 'events';
-import allEndpoints from './endpoints';
+import { ALL_ENDPOINTS } from './constants';
 import got from 'got';
 
 import BaseVehicle from './baseVehicle';
@@ -12,9 +12,9 @@ import {
 } from './interfaces';
 
 import logger from './logger';
- 
+
 export default class CanadianVehicle extends BaseVehicle {
-  private endpoints: CanadianEndpoints = allEndpoints['CA'];
+  private endpoints: CanadianEndpoints = ALL_ENDPOINTS.CA;
 
   constructor(config: VehicleConfig) {
     super(config);
@@ -27,18 +27,20 @@ export default class CanadianVehicle extends BaseVehicle {
   }
 
   async onInit() {
-    logger.info('onInit from CA')
-   
-    setTimeout(() => this.emit('ready'), 0);
+    logger.info('onInit from CA');
+
+    // TODO: async stuff
+
+    this.emit('ready');
   }
 
   async status(refresh: boolean = false): Promise<VehicleStatus|null> {
     logger.info('in status method');
     const response = await this._request(this.endpoints.status, {});
 
-    console.log(response.body)
+    console.log(response.body);
 
-    return null
+    return null;
 
   }
 
