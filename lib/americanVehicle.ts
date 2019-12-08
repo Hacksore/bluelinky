@@ -29,7 +29,7 @@ export default class AmericanVehicle extends BaseVehicle {
   }
 
   async onInit() {
-    logger.info('calling onInit()')
+    logger.info('calling onInit()');
     const response = await this.features();
     logger.info(`Getting features ${response}`);
 
@@ -170,7 +170,7 @@ export default class AmericanVehicle extends BaseVehicle {
 
   async apiUsageStatus(): Promise<HyundaiResponse|null> {
 
-    const response = await this._request(this.endpoints.usageStats,  {
+    const response = await this._request(this.endpoints.usageStats, {
       startdate: 20140401, // TODO: make these paramters
       enddate: 20190611, // TODO: make these paramters
       service: 'getUsageStats'

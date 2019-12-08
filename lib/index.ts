@@ -182,10 +182,8 @@ class BlueLinky {
       this.vehicles.push(vehicle);
 
       return new Promise((resolve, reject) => {
-        logger.info('start promise');
         vehicle.on('ready', () => {
-          logger.info('fin promise');
-          resolve(vehicle)
+          resolve(vehicle);
         });
       });
     }

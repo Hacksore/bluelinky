@@ -76,22 +76,22 @@ export interface VehicleStatus {
   trunkOpenStatus: string;
 }
 
-export interface CanadianEndpoints { 
-  login: string,
-  logout: string,
-  status: string,
+export interface CanadianEndpoints {
+  login: string;
+  logout: string;
+  status: string;
 }
 
-export interface AmericanEndpoints { 
-  getToken: string,
-  validateToken: string,
-  auth: string,
-  remoteAction: string,
-  usageStats: string,
-  health: string,
-  messageCenter: string,
-  myAccount: string,
-  status: string,
-  enrollmentStatus: string,
-  subscriptions: string
+export interface AmericanEndpoints {
+  getToken: string;
+  validateToken: string;
+  auth: string;
+  remoteAction: string;
+  usageStats: string;
+  health: string;
+  messageCenter: string;
+  myAccount: string;
+  status: string;
+  enrollmentStatus: string;
+  subscriptions: string;
 }
