@@ -30,10 +30,8 @@ export default class CanadianVehicle extends BaseVehicle {
     logger.info('onInit from CA');
 
     // get list of vehicles and find the vehicle id
-    const resposnse = await this.getVehicleList();
-    const vehicles = resposnse.body.result.vehicles;
+    const vehicles = await this.getVehicleList();
     const foundVehicle = vehicles.find(car => car.vin === this.vin);
-
     this.vehicleId = foundVehicle.vehicleId;
 
     this.emit('ready');
@@ -56,9 +54,9 @@ export default class CanadianVehicle extends BaseVehicle {
       json: true
     });
     
-    console.log(response.body);
+    console.log(response.body, null, 2);
 
-    return Promise.resolve(response.body.result.vehicles);
+    return response.body.result.vehicles;
   }
 
   async status(): Promise<VehicleStatus|null> {
