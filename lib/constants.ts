@@ -17,7 +17,7 @@ export const CA_ENDPOINTS = {
   logout: 'https://mybluelink.ca/tods/api/lgout',
   lock: 'https://mybluelink.ca/tods/api/drlck',
   list: 'https://mybluelink.ca/tods/api/vhcllst',
-  status: 'https://mybluelink.ca/tods/api/lstvhclsts',
+  status: 'https://mybluelink.ca/tods/api/rltmvhclsts',
   verifyToken: 'https://mybluelink.ca/tods/api/vrfytnc',
   verifyPin: 'https://mybluelink.ca/tods/api/vrfypin',
 };

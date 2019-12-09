@@ -32,6 +32,8 @@ export default class CanadianVehicle extends BaseVehicle {
     // get list of vehicles and find the vehicle id
     const vehicles = await this.getVehicleList();
     const foundVehicle = vehicles.find(car => car.vin === this.vin);
+
+    console.log('Found vehicle:', foundVehicle.vehicleId);
     this.vehicleId = foundVehicle.vehicleId;
 
     this.emit('ready');
