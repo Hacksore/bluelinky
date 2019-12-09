@@ -55,6 +55,8 @@ export default class CanadianVehicle extends BaseVehicle {
       },
       json: true
     });
+    
+    console.log(response.body);
 
     return Promise.resolve(response.body.result.vehicles);
   }
