@@ -121,7 +121,7 @@ class BlueLinky {
     if (region === 'CA') {
       
       try {
-        const resposne = await got('https://mybluelink.ca/tods/api/lgn', {
+        const response = await got('https://mybluelink.ca/tods/api/lgn', {
           method: 'POST',
           headers: {
             from: 'CWP',
@@ -136,7 +136,9 @@ class BlueLinky {
             password: this.authConfig.password
           }          
         });
-        console.log(resposne.body);
+
+        this.accessToken = response.body.result.accessToken;
+        console.log(response.body);
       } catch (err) {
         console.log(err.message);
         return Promise.reject(err.message);
