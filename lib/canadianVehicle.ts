@@ -43,32 +43,21 @@ export default class CanadianVehicle extends BaseVehicle {
     console.log('getVehicleList');
 
     const token = this.bluelinky.getAccessToken() || '';
-    const response = await got(this.endpoints.list, {
-      method: 'POST',
-      headers: {
-        from: 'CWP',
-        language: '1',
-        Host: 'mybluelink.ca',
-        Origin: 'https://mybluelink.ca',
-        offset: '-5',
-        accessToken: token
-      },
-      json: true
-    });
+    const response = await this._request(this.endpoints.list, {});
     
     console.log(JSON.stringify(response.body, null, 2));
 
     return response.body.result.vehicles;
   }
 
-  async status(): Promise<VehicleStatus|null> {
+  async status(refresh = false): Promise<VehicleStatus|null> {
     logger.info('Begin status request');
-    const response = await this._request(this.endpoints.status, {});
-
+    const endpoint = refresh ? this.endpoints.remoteStatus : this.endpoints.status;
+    const response = await this._request(endpoint, {});
     console.log(response.body);
     return null;
   }
-
+​
   async lock(): Promise<any> {
     logger.info('Begin lock request');
 
@@ -85,20 +74,7 @@ export default class CanadianVehicle extends BaseVehicle {
   }
 
   private async getPreAuth() {
-    const token = this.bluelinky.getAccessToken() || '';
-    const response = await got(this.endpoints.verifyPin, {
-      method: 'POST',
-      headers: {
-        from: 'CWP',
-        language: '1',
-        Host: 'mybluelink.ca',
-        Origin: 'https://mybluelink.ca',
-        offset: '-5',
-        accessToken: token
-      },
-      json: true,
-      body: { pin: this.pin }
-    });
+    const response = await this._request(this.endpoints.verifyPin, {});
 
     const pAuth = response.body.result.pAuth;
     logger.info('pAuth ' + pAuth);

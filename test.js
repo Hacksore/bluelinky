@@ -21,8 +21,12 @@ const test = async () => {
 	});
 
 	// call the status method
-	const status = await vehicle.status();
-	console.log(status);
+	try {
+		const status = await vehicle.status(false);
+		console.log(status);
+	} catch (err) {
+		console.log(err);
+	}
 }
 
 test();
