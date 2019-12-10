@@ -51,14 +51,6 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body.result.vehicles;
   }
 
-  async status(refresh = false): Promise<VehicleStatus|null> {
-    logger.info('Begin status request');
-    const endpoint = refresh ? this.endpoints.remoteStatus : this.endpoints.status;
-    const response = await this._request(endpoint, {});
-    console.log(response.body);
-    return null;
-  }
-​
   async lock(): Promise<any> {
     logger.info('Begin lock request');
 
@@ -120,16 +112,42 @@ export default class CanadianVehicle extends BaseVehicle {
     return null;
   }
 
-  async accountInfo(): Promise<any> {
-    logger.info('Begin accountInfo request');
-​
-    // do accountInfo request
-    const response = await this._request(this.endpoints.myAccount, {});
-​
-    console.log(response.body);
+  async myAccount(): Promise<any> {
+    logger.info('Begin myAccount request');
+​   const response = await this._request(this.endpoints.myAccount, {});
+​   console.log(response.body);
     return null;
   }
 
+  async vehiculeInfo(): Promise<any> {
+    logger.info('Begin vehiculeInfo request');
+​   const response = await this._request(this.endpoints.vehiculeInfo, {});
+​   console.log(response.body);
+    return null;
+  }
+
+  async nextService(): Promise<any> {
+    logger.info('Begin nextService request');
+​   const response = await this._request(this.endpoints.nextService, {});
+​   console.log(response.body);
+    return null;
+  }
+
+  async preferedDealer(): Promise<any> {
+    logger.info('Begin preferedDealer request');
+​   const response = await this._request(this.endpoints.preferedDealer, {});
+​   console.log(response.body);
+    return null;
+  }
+
+  async status(refresh = false): Promise<VehicleStatus|null> {
+    logger.info('Begin status request');
+    const endpoint = refresh ? this.endpoints.remoteStatus : this.endpoints.status;
+    const response = await this._request(endpoint, {});
+    console.log(response.body);
+    return null;
+  }
+​
   private async getPreAuth() {
     const response = await this._request(this.endpoints.verifyPin, {});
 
