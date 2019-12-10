@@ -24,6 +24,8 @@ const test = async () => {
 	try {
 		const status = await vehicle.status(false);
 		console.log(status);
+
+		
 	} catch (err) {
 		console.log(err);
 	}

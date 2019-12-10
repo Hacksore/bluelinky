@@ -4,6 +4,7 @@ import got from 'got';
 import BaseVehicle from './baseVehicle';
 
 import {
+  StartConfig,
   VehicleConfig,
   VehicleStatus,
   CanadianEndpoints
@@ -44,7 +45,7 @@ export default class CanadianVehicle extends BaseVehicle {
 
     const token = this.bluelinky.getAccessToken() || '';
     const response = await this._request(this.endpoints.list, {});
-    
+
     console.log(JSON.stringify(response.body, null, 2));
 
     return response.body.result.vehicles;
@@ -87,7 +88,38 @@ export default class CanadianVehicle extends BaseVehicle {
     console.log(response.body);
     return null;
   }
-  
+
+  async start(config: StartConfig): Promise<any> {
+    logger.info('Begin start request');
+
+    // get pAuth header
+    const preAuth = await this.getPreAuth();
+
+    // do lock request
+    const response = await this._request(this.endpoints.start, {
+      pAuth: preAuth,
+      ...config
+    });
+
+    console.log(response.body);
+    return null;
+  }
+
+  async stop(): Promise<any> {
+    logger.info('Begin stop request');
+
+    // get pAuth header
+    const preAuth = await this.getPreAuth();
+
+    // do lock request
+    const response = await this._request(this.endpoints.stop, {
+      pAuth: preAuth
+    });
+
+    console.log(response.body);
+    return null;
+  }
+
   async accountInfo(): Promise<any> {
     logger.info('Begin accountInfo request');
 ​
