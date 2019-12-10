@@ -14,7 +14,7 @@ import logger from './logger';
 export default class CanadianVehicle extends BaseVehicle {
   private endpoints: CanadianEndpoints = CA_ENDPOINTS;
 
-  private vehicleId: number = 0;
+  private vehicleId: string = '';
 
   constructor(config: VehicleConfig) {
     super(config);
@@ -56,15 +56,14 @@ export default class CanadianVehicle extends BaseVehicle {
       json: true
     });
     
-    console.log(response.body, null, 2);
+    console.log(JSON.stringify(response.body, null, 2));
 
     return response.body.result.vehicles;
   }
 
   async status(): Promise<VehicleStatus|null> {
     logger.info('Begin status request');
-    const response = await this._request(this.endpoints.status, {    
-    });
+    const response = await this._request(this.endpoints.status, {});
 
     console.log(response.body);
     return null;
@@ -109,7 +108,7 @@ export default class CanadianVehicle extends BaseVehicle {
   private async _request(endpoint, data): Promise<any|null> {
     logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
 
-    const response = await got(this.endpoints.login, {
+    const response = await got(endpoint, {
       method: 'POST',
       json: true,
       headers: {
@@ -124,7 +123,7 @@ export default class CanadianVehicle extends BaseVehicle {
         ...data
       },
       body: {
-        pin: this.pin 
+        pin: this.pin,
       }
     });
 
