@@ -73,6 +73,31 @@ export default class CanadianVehicle extends BaseVehicle {
     return null;
   }
 
+  async unlock(): Promise<any> {
+    logger.info('Begin lock request');
+
+    // get pAuth header
+    const preAuth = await this.getPreAuth();
+
+    // do lock request
+    const response = await this._request(this.endpoints.unlock, {
+      pAuth: preAuth
+    });
+
+    console.log(response.body);
+    return null;
+  }
+  
+  async accountInfo(): Promise<any> {
+    logger.info('Begin accountInfo request');
+​
+    // do accountInfo request
+    const response = await this._request(this.endpoints.myAccount, {});
+​
+    console.log(response.body);
+    return null;
+  }
+
   private async getPreAuth() {
     const response = await this._request(this.endpoints.verifyPin, {});
 

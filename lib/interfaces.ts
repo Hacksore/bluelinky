@@ -80,6 +80,8 @@ export interface CanadianEndpoints {
   login: string;
   list: string;
   lock: string;
+  unlock: string;
+  myAccount: string;
   verifyPin: string;
   remoteStatus: string;
   verifyToken: string;
