@@ -12,10 +12,11 @@ export const US_ENDPOINTS = {
   subscriptions: 'https://owners.hyundaiusa.com/bin/common/managesubscription'
 };
 
-
 export const CA_ENDPOINTS = {
   login: 'https://mybluelink.ca/tods/api/lgn',
   logout: 'https://mybluelink.ca/tods/api/lgout',
+  climate_on: 'https://mybluelink.ca/tods/api/evc/rfon',
+  climate_off: 'https://mybluelink.ca/tods/api/evc/rfoff',
   lock: 'https://mybluelink.ca/tods/api/drlck',
   unlock: 'https://mybluelink.ca/tods/api/drulck',
   list: 'https://mybluelink.ca/tods/api/vhcllst',

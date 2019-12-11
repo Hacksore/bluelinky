@@ -23,7 +23,10 @@ const test = async () => {
 	// call the status method
 	try {
 		const status = await vehicle.status(false);
-		console.log(status);
+		console.log(JSON.stringify(status));
+
+		const result = await vehicle.lock();
+		console.log(result)
 	} catch (err) {
 		console.log(err);
 	}
