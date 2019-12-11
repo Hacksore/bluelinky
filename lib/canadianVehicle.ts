@@ -90,13 +90,13 @@ export default class CanadianVehicle extends BaseVehicle {
   async myAccount(): Promise<any> {
     logger.info('Begin myAccount request');
     const response = await this._request(this.endpoints.myAccount, {});
-    return response.body;
+    return response.body.result;
   }
 
   async vehiculeInfo(): Promise<any> {
     logger.info('Begin vehiculeInfo request');
     const response = await this._request(this.endpoints.vehiculeInfo, {});
-    return response.body;
+    return response.body.result;
   }
 
   async nextService(): Promise<any> {
