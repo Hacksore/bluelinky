@@ -275,9 +275,9 @@ myAccount : {
     }
   }
 }
-[2019-12-11 10:35:32] [32minfo[39m: Begin vehiculeInfo request
+[2019-12-11 10:35:32] [32minfo[39m: Begin vehicleInfo request
 [2019-12-11 10:35:32] [32minfo[39m: [https://mybluelink.ca/tods/api/sltvhcl] {}
-vehiculeInfo : {
+vehicleInfo : {
   "responseHeader": {
     "responseCode": 0,
     "responseDesc": "Success"

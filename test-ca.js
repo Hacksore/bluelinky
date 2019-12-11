@@ -31,8 +31,8 @@ const test = async () => {
 		const myAccount = await vehicle.myAccount();
 		console.log('myAccount : ' + JSON.stringify(myAccount, null, 2));
 
-		const vehiculeInfo = await vehicle.vehiculeInfo();
-		console.log('vehiculeInfo : ' + JSON.stringify(vehiculeInfo, null, 2));
+		const vehicleInfo = await vehicle.vehicleInfo();
+		console.log('vehicleInfo : ' + JSON.stringify(vehicleInfo, null, 2));
 
 		const nextService = await vehicle.status();
 		console.log('nextService : ' + JSON.stringify(nextService, null, 2));

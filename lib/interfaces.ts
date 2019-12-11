@@ -89,7 +89,7 @@ export interface CanadianEndpoints {
   remoteStatus: string;
   verifyPin: string;
   verifyToken: string;
-  vehiculeInfo: string;
+  vehicleInfo: string;
   nextService: string;
   preferedDealer: string;
 }

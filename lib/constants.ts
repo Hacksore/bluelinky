@@ -25,7 +25,7 @@ export const CA_ENDPOINTS = {
   remoteStatus: 'https://mybluelink.ca/tods/api/rltmvhclsts',
   verifyPin: 'https://mybluelink.ca/tods/api/vrfypin',
   verifyToken: 'https://mybluelink.ca/tods/api/vrfytnc',
-  vehiculeInfo: 'https://mybluelink.ca/tods/api/sltvhcl',
+  vehicleInfo: 'https://mybluelink.ca/tods/api/sltvhcl',
   nextService: 'https://mybluelink.ca/tods/api/nxtsvc',
   preferedDealer : 'https://mybluelink.ca/tods/api/gtprfrdlr'
 };
