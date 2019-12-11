@@ -10,6 +10,7 @@
     "lint": "tslint --formatters-dir ./node_modules/tslint-formatter-beauty -t beauty -p .",
     "prepublishOnly": "npm run build",
     "test": "npm run build && node test.js",
+    "test-ca": "npm run build && node test-ca.js",
     "watch": "tsc -w"
   },
   "author": "Hacksore",

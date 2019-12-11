@@ -1,114 +1,81 @@
-const config = require('./config.json');
-// const BlueLinky = require('bluelinky');
+const express = require("express");
 const BlueLinky = require('./dist/index');
+const bodyParser = require("body-parser");
 
-const authCreds = {
-	username: config.username,
-	password: config.password
-}
+const config = require('./config.json');
 
-const test = async () => {
-	console.log(BlueLinky)
-	const client = new BlueLinky(authCreds);
+const app = express();
+app.use(bodyParser.json());
 
-	// do login
-	const auth = await client.login({ region: 'CA' });
-	
-	// we register and wait for a vehicle to get its features
-	const vehicle = await client.registerVehicle({
-		vin: config.vin, 
-		pin: config.pin
-	});
+let client;
+let vehicle;
 
-	// call the status method
-	try {
-		const status = await vehicle.status(false);
-		console.log(status);
-	} catch (err) {
-		console.log(err);
-	}
-}
+const middleWare = async (req, res, next) => {
+  const ip = req.connection.remoteAddress;
+  console.log(req.path, ip);
 
-test();
+  if (req.body.VALIDATION_KEY !== config.validation_key) {
+    console.log("Bad key used by: " + ip);
+    return res.send({ error: "bad key" });
+  }
 
-// const express = require("express");
-// const BlueLinky = require('./dist/index');
-// const bodyParser = require("body-parser");
+  if (client === undefined) {
+    client = new BlueLinky({
+      username: config.username,
+      password: config.password
+    });
 
-// const config = require('./config.json');
+    //login
+    await client.login();
 
-// const app = express();
-// app.use(bodyParser.json());
+    vehicle = await client.registerVehicle(config.vin, config.pin);
+  }
 
-// let client;
-// let vehicle;
+  return next();
+};
 
-// const middleWare = async (req, res, next) => {
-//   const ip = req.connection.remoteAddress;
-//   console.log(req.path, ip);
+app.use(middleWare);
 
-//   if (req.body.VALIDATION_KEY !== config.validation_key) {
-//     console.log("Bad key used by: " + ip);
-//     return res.send({ error: "bad key" });
-//   }
+app.post("/start", async (req, res) => {
+  let response;
+  try {
+    response = await vehicle.start({
+      airCtrl: true,
+      igniOnDuration: 10,
+      airTempvalue: 60
+    });
+  } catch (e) {
+    response = {
+      error: e.message
+    };
+  }
+  res.send(response);
+});
 
-//   if (client === undefined) {
-//     client = new BlueLinky({
-//       username: config.username,
-//       password: config.password
-//     });
+app.post("/lock", async (req, res) => {
+  let response;
+  try {
+    response = await vehicle.lock();
+  } catch (e) {
+    console.log(e);
+    response = {
+      error: e.message
+    };
+  }
+  res.send(response);
+});
 
-//     //login
-//     await client.login();
+app.post("/status", async (req, res) => {
+  let response;
+  try {
+    response = await vehicle.status();
+  } catch (e) {
+    console.log(e);
+    response = {
+      error: e.message
+    };
+  }
+  res.send(response);
+});
 
-//     vehicle = await client.registerVehicle(config.vin, config.pin);
-//   }
-
-//   return next();
-// };
-
-// app.use(middleWare);
-
-// app.post("/start", async (req, res) => {
-//   let response;
-//   try {
-//     response = await vehicle.start({
-//       airCtrl: true,
-//       igniOnDuration: 10,
-//       airTempvalue: 60
-//     });
-//   } catch (e) {
-//     response = {
-//       error: e.message
-//     };
-//   }
-//   res.send(response);
-// });
-
-// app.post("/lock", async (req, res) => {
-//   let response;
-//   try {
-//     response = await vehicle.lock();
-//   } catch (e) {
-//     console.log(e);
-//     response = {
-//       error: e.message
-//     };
-//   }
-//   res.send(response);
-// });
-
-// app.post("/status", async (req, res) => {
-//   let response;
-//   try {
-//     response = await vehicle.status();
-//   } catch (e) {
-//     console.log(e);
-//     response = {
-//       error: e.message
-//     };
-//   }
-//   res.send(response);
-// });
-
-// app.listen(8080, "0.0.0.0");
+app.listen(8080, "0.0.0.0");

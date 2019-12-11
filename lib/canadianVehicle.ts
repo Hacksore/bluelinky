@@ -4,6 +4,7 @@ import got from 'got';
 import BaseVehicle from './baseVehicle';
 
 import {
+  StartConfig,
   VehicleConfig,
   VehicleStatus,
   CanadianEndpoints
@@ -41,66 +42,84 @@ export default class CanadianVehicle extends BaseVehicle {
 
   async getVehicleList(): Promise<any> { // TODO: type this
     console.log('getVehicleList');
-
     const token = this.bluelinky.getAccessToken() || '';
     const response = await this._request(this.endpoints.list, {});
-    
     console.log(JSON.stringify(response.body, null, 2));
-
     return response.body.result.vehicles;
+  }
+
+  async lock(): Promise<any> {
+    logger.info('Begin lock request');
+    // get pAuth header
+    const preAuth = await this.getPreAuth();
+    // do lock request
+    const response = await this._request(this.endpoints.lock, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
+  async unlock(): Promise<any> {
+    logger.info('Begin lock request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.unlock, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
+  async start(config: StartConfig): Promise<any> {
+    logger.info('Begin start request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.start, {
+      pAuth: preAuth,
+      ...config
+    });
+    return response.body;
+  }
+
+  async stop(): Promise<any> {
+    logger.info('Begin stop request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.stop, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
+  async myAccount(): Promise<any> {
+    logger.info('Begin myAccount request');
+    const response = await this._request(this.endpoints.myAccount, {});
+    return response.body.result;
+  }
+
+  async vehicleInfo(): Promise<any> {
+    logger.info('Begin vehicleInfo request');
+    const response = await this._request(this.endpoints.vehicleInfo, {});
+    return response.body.result;
+  }
+
+  async nextService(): Promise<any> {
+    logger.info('Begin nextService request');
+    const response = await this._request(this.endpoints.nextService, {});
+    return response.body;
+  }
+
+  async preferedDealer(): Promise<any> {
+    logger.info('Begin preferedDealer request');
+    const response = await this._request(this.endpoints.preferedDealer, {});
+    return response.body;
   }
 
   async status(refresh = false): Promise<VehicleStatus|null> {
     logger.info('Begin status request');
     const endpoint = refresh ? this.endpoints.remoteStatus : this.endpoints.status;
     const response = await this._request(endpoint, {});
-    console.log(response.body);
-    return null;
+    return response.body;
   }
 ​
-  async lock(): Promise<any> {
-    logger.info('Begin lock request');
-
-    // get pAuth header
-    const preAuth = await this.getPreAuth();
-
-    // do lock request
-    const response = await this._request(this.endpoints.lock, {
-      pAuth: preAuth
-    });
-
-    console.log(response.body);
-    return null;
-  }
-
-  async unlock(): Promise<any> {
-    logger.info('Begin lock request');
-
-    // get pAuth header
-    const preAuth = await this.getPreAuth();
-
-    // do lock request
-    const response = await this._request(this.endpoints.unlock, {
-      pAuth: preAuth
-    });
-
-    console.log(response.body);
-    return null;
-  }
-  
-  async accountInfo(): Promise<any> {
-    logger.info('Begin accountInfo request');
-​
-    // do accountInfo request
-    const response = await this._request(this.endpoints.myAccount, {});
-​
-    console.log(response.body);
-    return null;
-  }
-
   private async getPreAuth() {
     const response = await this._request(this.endpoints.verifyPin, {});
-
     const pAuth = response.body.result.pAuth;
     logger.info('pAuth ' + pAuth);
     return pAuth;
@@ -129,6 +148,5 @@ export default class CanadianVehicle extends BaseVehicle {
     });
 
     return response;
-
   }
 }
