@@ -124,7 +124,7 @@ class BlueLinky {
         const response = await got('https://mybluelink.ca/tods/api/lgn', {
           method: 'POST',
           headers: {
-            from: 'CWP',
+            from: 'SPA',
             language: '1',
             Host: 'mybluelink.ca',
             Origin: 'https://mybluelink.ca',

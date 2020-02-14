@@ -84,6 +84,7 @@ export interface CanadianEndpoints {
   unlock: string;
   start: string;
   stop: string;
+  locate: string;
   myAccount: string;
   status: string;
   remoteStatus: string;

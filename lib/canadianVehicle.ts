@@ -87,6 +87,15 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body;
   }
 
+  async locate(): Promise<any> {
+    logger.info('Begin locate request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.locate, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
   async myAccount(): Promise<any> {
     logger.info('Begin myAccount request');
     const response = await this._request(this.endpoints.myAccount, {});
@@ -133,7 +142,7 @@ export default class CanadianVehicle extends BaseVehicle {
       json: true,
       headers: {
         pin: this.pin,
-        from: 'CWP',
+        from: 'SPA',
         language: '1',
         Host: 'mybluelink.ca',
         Origin: 'https://mybluelink.ca',

@@ -20,6 +20,7 @@ export const CA_ENDPOINTS = {
   unlock: 'https://mybluelink.ca/tods/api/drulck',
   start: 'https://mybluelink.ca/tods/api/rfon',
   stop: 'https://mybluelink.ca/tods/api/rfoff',
+  locate: 'https://mybluelink.ca/tods/api/fndmcr',
   myAccount: 'https://mybluelink.ca/tods/api/acctinfo',
   status: 'https://mybluelink.ca/tods/api/lstvhclsts',
   remoteStatus: 'https://mybluelink.ca/tods/api/rltmvhclsts',

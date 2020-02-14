@@ -241,6 +241,34 @@ status remote : {
     }
   }
 }
+[2020-02-14 13:08:27] info: Begin locate request
+[2020-02-14 13:08:27] info: [https://mybluelink.ca/tods/api/vrfypin] {}
+[2020-02-14 13:08:29] info: pAuth RtnchvyYDigwszafItNTrmfVfwWbXVYh
+[2020-02-14 13:08:29] info: [https://mybluelink.ca/tods/api/fndmcr] {"pAuth":"RtnchvyYDigwszafItNTrmfVfwWbXVYh"}
+locate : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "coord": {
+      "lat": 77.777777,
+      "lon": -77.777777,
+      "alt": 373.78,
+      "type": 0
+    },
+    "time": "20200214180813",
+    "speed": {
+      "value": 0,
+      "unit": 0
+    },
+    "head": 229,
+    "accuracy": {
+      "hdop": 0,
+      "pdop": 1
+    }
+  }
+}
 [2019-12-11 10:35:29] [32minfo[39m: Begin myAccount request
 [2019-12-11 10:35:29] [32minfo[39m: [https://mybluelink.ca/tods/api/acctinfo] {}
 myAccount : {
