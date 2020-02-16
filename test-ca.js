@@ -9,10 +9,16 @@ const authCreds = {
 
 const test = async() => {
     console.log(BlueLinky)
+
+    // let airTemp = 27
+    // var airTempValue = (6 + (airTemp - 17) * 2).toString(16)
+    // console.log('Begin start request ' + airTempValue);
+
     const client = new BlueLinky(authCreds);
 
     // do login
     const auth = await client.login({ region: 'CA' });
+    console.log('login : ' + JSON.stringify(auth, null, 2));
 
     // we register and wait for a vehicle to get its features
     const vehicle = await client.registerVehicle({
@@ -43,18 +49,17 @@ const test = async() => {
         const preferedDealer = await vehicle.status();
         console.log('preferedDealer : ' + JSON.stringify(preferedDealer, null, 2));
 
-        // const lockRes = await vehicle.lock();
-        // console.log('lock : ' + JSON.stringify(lockRes, null, 2));
+        const unlockRes = await vehicle.unlock();
+        console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
 
-        // const unlockRes = await vehicle.unlock();
-        // console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
+        const lockRes = await vehicle.lock();
+        console.log('lock : ' + JSON.stringify(lockRes, null, 2));
 
+        const startRes = await vehicle.start(false, true, false, 17);
+        console.log('start : ' + JSON.stringify(startRes, null, 2));
 
-        // const startRes = await vehicle.start({});
-        // console.log('start : ' + JSON.stringify(startRes, null, 2));
-
-        // const stopRes = await vehicle.stop();
-        // console.log('stop : ' + JSON.stringify(stopRes, null, 2));
+        const stopRes = await vehicle.stop();
+        console.log('stop : ' + JSON.stringify(stopRes, null, 2));
 
     } catch (err) {
         console.log(err);

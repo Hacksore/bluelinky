@@ -269,6 +269,34 @@ locate : {
     }
   }
 }
+[2020-02-16 16:37:37] [32minfo[39m: Begin locate request
+[2020-02-16 16:37:37] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
+[2020-02-16 16:37:38] [32minfo[39m: pAuth dSnWaKGbkkDLdaKamXsQMfbbKQwBlacp
+[2020-02-16 16:37:38] [32minfo[39m: [https://mybluelink.ca/tods/api/fndmcr] {"pAuth":"dSnWaKGbkkDLdaKamXsQMfbbKQwBlacp"} null
+locate : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "coord": {
+      "lat": 44.444444,
+      "lon": -44.444444,
+      "alt": 378.41,
+      "type": 0
+    },
+    "time": "20200216163145",
+    "speed": {
+      "value": 0,
+      "unit": 0
+    },
+    "head": 227,
+    "accuracy": {
+      "hdop": 0,
+      "pdop": 1
+    }
+  }
+}
 [2019-12-11 10:35:29] [32minfo[39m: Begin myAccount request
 [2019-12-11 10:35:29] [32minfo[39m: [https://mybluelink.ca/tods/api/acctinfo] {}
 myAccount : {
@@ -813,5 +841,45 @@ preferedDealer : {
       "windowOpen": {},
       "engineRuntime": {}
     }
+  }
+}
+[2020-02-16 16:38:02] [32minfo[39m: Begin lock request
+[2020-02-16 16:38:02] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
+[2020-02-16 16:38:06] [32minfo[39m: pAuth YaDilFFQSscZeijHTWxHqZToBKWrxcOp
+[2020-02-16 16:38:06] [32minfo[39m: [https://mybluelink.ca/tods/api/drulck] {"pAuth":"YaDilFFQSscZeijHTWxHqZToBKWrxcOp"} null
+unlock : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  }
+}
+[2020-02-16 16:38:10] [32minfo[39m: Begin lock request
+[2020-02-16 16:38:10] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
+[2020-02-16 16:38:12] [32minfo[39m: pAuth hWXfpIbggPLzPSwfUlJXedqqGxFgWoJi
+[2020-02-16 16:38:12] [32minfo[39m: [https://mybluelink.ca/tods/api/drlck] {"pAuth":"hWXfpIbggPLzPSwfUlJXedqqGxFgWoJi"} null
+lock : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  }
+}
+[2020-02-16 16:38:14] [32minfo[39m: Begin start request {"hvacInfo":{"17":{"value":"6H","unit":0,"hvacTempType":1},"airCtrl":0,"defrost":false,"heating1":1}}
+[2020-02-16 16:38:14] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
+[2020-02-16 16:38:15] [32minfo[39m: pAuth ehggZWYHCkVvLoukFwktnHGmpJWnhiaF
+[2020-02-16 16:38:15] [32minfo[39m: [https://mybluelink.ca/tods/api/evc/rfon] {"pAuth":"ehggZWYHCkVvLoukFwktnHGmpJWnhiaF"} {"hvacInfo":{"17":{"value":"6H","unit":0,"hvacTempType":1},"airCtrl":0,"defrost":false,"heating1":1}}
+start : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  }
+}
+[2020-02-16 16:38:18] [32minfo[39m: Begin stop request
+[2020-02-16 16:38:18] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
+[2020-02-16 16:38:21] [32minfo[39m: pAuth SvAdKJrdIoQzEICfeHKmxnaDBTnZxYkN
+[2020-02-16 16:38:21] [32minfo[39m: [https://mybluelink.ca/tods/api/evc/rfoff] {"pAuth":"SvAdKJrdIoQzEICfeHKmxnaDBTnZxYkN"} null
+stop : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
   }
 }

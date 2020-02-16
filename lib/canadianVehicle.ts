@@ -60,7 +60,7 @@ export default class CanadianVehicle extends BaseVehicle {
   }
 
   async unlock(): Promise<any> {
-    logger.info('Begin lock request');
+    logger.info('Begin unlock request');
     const preAuth = await this.getPreAuth();
     const response = await this._request(this.endpoints.unlock, {
       pAuth: preAuth
@@ -68,13 +68,36 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body;
   }
 
-  async start(config: StartConfig): Promise<any> {
-    logger.info('Begin start request');
+  async start(
+    airCtrl: Boolean,  // climatisation
+    heating: Boolean,  // front defrost, airCtrl will be on
+    defrost: Boolean,  // side mirrors & rear defrost
+    airTemp: number | null  // temp for clim and heating
+    ): Promise<any> {
+
+    var body =  
+    { hvacInfo: {
+      airCtrl: (airCtrl || defrost) ? 1 : 0,
+      defrost: defrost,
+      heating1: heating ? 1 : 0
+    }}
+
+    if (airTemp != null) {
+      if (airTemp > 27 || airTemp < 17) {
+        return "air temperature should be between 17 and 27 degrees";
+      }
+      var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
+      body.hvacInfo[airTemp] = {value: airTempValue,unit:0,hvacTempType:1}
+    } else if (airCtrl || heating) {
+      return "air temperature should be specified"
+    }
+
+    logger.info('Begin start request ' + JSON.stringify(body));
     const preAuth = await this.getPreAuth();
     const response = await this._request(this.endpoints.start, {
-      pAuth: preAuth,
-      ...config
-    });
+      pAuth: preAuth
+    }, body);
+
     return response.body;
   }
 
@@ -134,27 +157,29 @@ export default class CanadianVehicle extends BaseVehicle {
     return pAuth;
   }
 
-  private async _request(endpoint, data): Promise<any|null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
+  private async _request(endpoint, headers, body: object | null = null): Promise<any|null> {
+    logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
     const response = await got(endpoint, {
       method: 'POST',
       json: true,
       headers: {
-        pin: this.pin,
         from: 'SPA',
         language: '1',
         Host: 'mybluelink.ca',
         Origin: 'https://mybluelink.ca',
         offset: '-5',
+        pin: this.pin,
         accessToken: this.bluelinky.getAccessToken(),
         vehicleId: this.vehicleId,
-        ...data
+        ...headers
       },
       body: {
         pin: this.pin,
+        ...body
+        }
       }
-    });
+    );
 
     return response;
   }
