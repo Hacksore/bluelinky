@@ -8,12 +8,8 @@ const authCreds = {
 }
 
 const test = async() => {
+
     console.log(BlueLinky)
-
-    // let airTemp = 27
-    // var airTempValue = (6 + (airTemp - 17) * 2).toString(16)
-    // console.log('Begin start request ' + airTempValue);
-
     const client = new BlueLinky(authCreds);
 
     // do login
