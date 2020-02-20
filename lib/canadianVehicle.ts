@@ -75,7 +75,7 @@ export default class CanadianVehicle extends BaseVehicle {
     airTemp: number | null  // temp for clim and heating
     ): Promise<any> {
 
-    var body =  
+    const body =  
     { hvacInfo: {
       airCtrl: (airCtrl || defrost) ? 1 : 0,
       defrost: defrost,
