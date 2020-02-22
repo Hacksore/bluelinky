@@ -22,7 +22,10 @@ export default {
 	plugins: [
 		// builtins(),
 		resolve({ preferBuiltins: true }),
-		typescript(),
+		typescript({
+			skipLibCheck: true,
+			abortOnError: false
+		}),
 		minify(),
 		commonjs(),
 		license({
