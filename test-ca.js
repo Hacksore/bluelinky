@@ -52,9 +52,9 @@ const test = async() => {
         console.log('lock : ' + JSON.stringify(lockRes, null, 2));
 
         const startRes = await vehicle.start({
-            airCtrl: false,
-            airTempvalue: 17,
-            defrost: false,
+            airCtrl: true,
+            airTempvalue: 22,
+            defrost: true,
             heating1: true
         });
         console.log('start : ' + JSON.stringify(startRes, null, 2));

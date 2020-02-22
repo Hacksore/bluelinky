@@ -81,7 +81,7 @@ export default class CanadianVehicle extends BaseVehicle {
 
     const body =  
     { hvacInfo: {
-      airCtrl: (config.airCtrl || config.defrost) ? 1 : 0,
+      airCtrl: ((config.airCtrl ?? false) || (config.defrost ?? false)) ? 1 : 0,
       defrost: config.defrost ?? false,
       heating1: config.heating1 ? 1 : 0
     }}
@@ -92,8 +92,8 @@ export default class CanadianVehicle extends BaseVehicle {
         return "air temperature should be between 17 and 27 degrees";
       }
       var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
-      body.hvacInfo[airTemp] = {value: airTempValue,unit:0,hvacTempType:1}
-    } else if (config.airCtrl || config.defrost) {
+      body.hvacInfo['airTemp'] = {value: airTempValue,unit:0,hvacTempType:1}
+    } else if ((config.airCtrl ?? false) || (config.defrost ?? false)) {
       return "air temperature should be specified"
     }
 
