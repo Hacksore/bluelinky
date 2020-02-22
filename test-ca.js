@@ -53,7 +53,7 @@ const test = async() => {
 
         const startRes = await vehicle.start({
             airCtrl: true,
-            airTempvalue: 22,
+            airTempvalue: 17,
             defrost: true,
             heating1: true
         });
