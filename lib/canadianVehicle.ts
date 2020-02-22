@@ -68,27 +68,32 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body;
   }
 
-  async start(
+
+    /*
     airCtrl: Boolean,  // climatisation
-    heating: Boolean,  // front defrost, airCtrl will be on
+    heating1: Boolean,  // front defrost, airCtrl will be on
     defrost: Boolean,  // side mirrors & rear defrost
-    airTemp: number | null  // temp for clim and heating
+    airTempvalue: number | null  // temp in degrees for clim and heating 17-27
+    */
+    async start(
+    config: StartConfig
     ): Promise<any> {
 
     const body =  
     { hvacInfo: {
-      airCtrl: (airCtrl || defrost) ? 1 : 0,
-      defrost: defrost,
-      heating1: heating ? 1 : 0
+      airCtrl: (config.airCtrl || config.defrost) ? 1 : 0,
+      defrost: config.defrost ?? false,
+      heating1: config.heating1 ? 1 : 0
     }}
 
+    let airTemp = config.airTempvalue
     if (airTemp != null) {
       if (airTemp > 27 || airTemp < 17) {
         return "air temperature should be between 17 and 27 degrees";
       }
       var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
       body.hvacInfo[airTemp] = {value: airTempValue,unit:0,hvacTempType:1}
-    } else if (airCtrl || heating) {
+    } else if (config.airCtrl || config.defrost) {
       return "air temperature should be specified"
     }
 
