@@ -1,7 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import resolve from 'rollup-plugin-node-resolve';
 import license from 'rollup-plugin-license';
-// import builtins from 'rollup-plugin-node-builtins';
+import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
 import minify from 'rollup-plugin-babel-minify';
 import pkg from './package.json';
@@ -20,7 +20,7 @@ export default {
 		'events'
   ],
 	plugins: [
-		// builtins(),
+		builtins(),
 		resolve({ preferBuiltins: true }),
 		typescript({
 			skipLibCheck: true,
