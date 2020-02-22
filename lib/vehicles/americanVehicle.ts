@@ -1,8 +1,8 @@
-import BlueLinky from './index';
+import BlueLinky from '../index';
 import EventEmitter from 'events';
-import { ALL_ENDPOINTS, GEN1, GEN2} from './constants';
+import { ALL_ENDPOINTS, GEN1, GEN2} from '../constants';
 import got from 'got';
-import { buildFormData } from './util';
+import { buildFormData } from '../util';
 
 import {
   StartConfig,
@@ -10,10 +10,10 @@ import {
   VehicleConfig,
   VehicleStatus,
   AmericanEndpoints
-} from './interfaces';
+} from '../interfaces';
 
-import logger from './logger';
-import BaseVehicle from './baseVehicle';
+import logger from '../logger';
+import BaseVehicle from '../baseVehicle';
 
 export default class AmericanVehicle extends BaseVehicle {
   private endpoints: AmericanEndpoints = ALL_ENDPOINTS.US;
@@ -31,7 +31,7 @@ export default class AmericanVehicle extends BaseVehicle {
   async onInit() {
     logger.info('calling onInit()');
     const response = await this.features();
-    logger.info(`Getting features ${response}`);
+    logger.info(`Getting features ${JSON.stringify(response)}`);
 
     if(response!.result === 'E:Failure' ||  response!.result !== undefined) {
       response!.result.forEach(item => {
@@ -41,7 +41,6 @@ export default class AmericanVehicle extends BaseVehicle {
 
     const ownerInfo = await this.ownerInfo();
     if (ownerInfo !== null) {
-      console.log(this.vin, ownerInfo.result.OwnersVehiclesInfo);
       const vehicle = ownerInfo.result.OwnersVehiclesInfo.find(item => this.vin === item.VinNumber);
       this.gen = vehicle.IsGen2;
       this.regId = vehicle.RegistrationID;

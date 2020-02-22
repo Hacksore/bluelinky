@@ -21,7 +21,7 @@ export default class BaseVehicle extends EventEmitter {
     this.bluelinky = bluelinky;
     this.currentFeatures = [];
     this.auth = {
-      username: bluelinky.authConfig.username,
+      username: bluelinky.config.username,
       accessToken: token
     };
   }

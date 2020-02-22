@@ -1,8 +1,9 @@
 import BlueLinky from './index';
 
-export interface AuthConfig {
+export interface BlueLinkyConfig {
   username: string|null;
   password: string|null;
+  region: string|null;
 }
 
 export interface StartConfig {
@@ -106,4 +107,9 @@ export interface AmericanEndpoints {
   status: string;
   enrollmentStatus: string;
   subscriptions: string;
+}
+
+// TODO:
+export interface EuropianEndpoints {
+  start: string;
 }

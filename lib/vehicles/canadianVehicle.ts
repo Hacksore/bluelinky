@@ -1,16 +1,16 @@
-import { CA_ENDPOINTS } from './constants';
+import { CA_ENDPOINTS } from '../constants';
 import got from 'got';
 
-import BaseVehicle from './baseVehicle';
+import BaseVehicle from '../baseVehicle';
 
 import {
   StartConfig,
   VehicleConfig,
   VehicleStatus,
   CanadianEndpoints
-} from './interfaces';
+} from '../interfaces';
 
-import logger from './logger';
+import logger from '../logger';
 
 export default class CanadianVehicle extends BaseVehicle {
   private endpoints: CanadianEndpoints = CA_ENDPOINTS;
@@ -34,17 +34,17 @@ export default class CanadianVehicle extends BaseVehicle {
     const vehicles = await this.getVehicleList();
     const foundVehicle = vehicles.find(car => car.vin === this.vin);
 
-    console.log('Found vehicle:', foundVehicle.vehicleId);
+    logger.info('Found vehicle:', foundVehicle.vehicleId);
     this.vehicleId = foundVehicle.vehicleId;
 
     this.emit('ready');
   }
 
   async getVehicleList(): Promise<any> { // TODO: type this
-    console.log('getVehicleList');
+    logger.info('getVehicleList');
     const token = this.bluelinky.getAccessToken() || '';
     const response = await this._request(this.endpoints.list, {});
-    console.log(JSON.stringify(response.body, null, 2));
+    logger.info(JSON.stringify(response.body, null, 2));
     return response.body.result.vehicles;
   }
 

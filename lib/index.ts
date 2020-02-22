@@ -1,32 +1,40 @@
 import got from 'got';
-import AmericanVehicle from './americanVehicle';
-import CanadianVehicle from './canadianVehicle';
-import { ALL_ENDPOINTS } from './constants';
+import AmericanVehicle from './vehicles/americanVehicle';
+import CanadianVehicle from './vehicles/canadianVehicle';
+import EuropianVehicle from './vehicles/europianVehicle';
+import { ALL_ENDPOINTS, REGIONS } from './constants';
 import { buildFormData } from './util';
+import EventEmitter from 'events';
 
 import {
-  AuthConfig,
+  BlueLinkyConfig,
   TokenResponse,
   RegisterVehicleConfig,
 } from './interfaces';
 
 import logger from './logger';
+import BaseVehicle from './baseVehicle';
 
-class BlueLinky {
+class BlueLinky extends EventEmitter {
 
-  public authConfig: AuthConfig = {
+  public config: BlueLinkyConfig = {
     username: null,
-    password: null
+    password: null,
+    region: null
   };
-  public region: string|null = null;
 
+  public region: string|null = null;
   private accessToken: string|null = null;
   private tokenExpires: number = 0;
-
   private vehicles: Array<CanadianVehicle|AmericanVehicle> = [];
 
-  constructor(authConfig: AuthConfig) {
-    this.authConfig = authConfig;
+  constructor(config: BlueLinkyConfig) {
+    super();
+    this.config = config;
+
+    // do login for token here
+    this.login();
+
   }
 
   setAccessToken(token: string|null) {
@@ -80,8 +88,8 @@ class BlueLinky {
 
     const formData = buildFormData({
       ':cq_csrf_token': csrfToken,
-      'username': this.authConfig.username,
-      'password': this.authConfig.password,
+      'username': this.config.username,
+      'password': this.config.password,
       'url': 'https://owners.hyundaiusa.com/us/en/index.html'
     });
 
@@ -100,12 +108,11 @@ class BlueLinky {
     }
   }
 
-  async login(config: any): Promise<object> {
-    const { region } = config;
-    this.region = region;
+  async login(): Promise<object> {
+    const { region } = this.config;
     logger.info(`starting login method [${region}]`);
     // if region is US do this
-    if (region === 'US') {
+    if (region === REGIONS.US) {
       const response = await this.getToken();
       const currentTime = Math.floor(+new Date()/1000);
       const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
@@ -114,11 +121,11 @@ class BlueLinky {
       logger.info(`Current time: ${currentTime}`);
       this.accessToken = response.access_token;
       this.tokenExpires = expires;
-      return response;
+      // return response;
     }
 
     // if region is CA do this
-    if (region === 'CA') {
+    if (region === REGIONS.CA) {
 
       try {
         const response = await got('https://mybluelink.ca/tods/api/lgn', {
@@ -132,20 +139,21 @@ class BlueLinky {
           },
           json: true,
           body: {
-            loginId: this.authConfig.username,
-            password: this.authConfig.password
+            loginId: this.config.username,
+            password: this.config.password
           }
         });
 
         this.accessToken = response.body.result.accessToken;
-        console.log(response.body);
+        logger.debug(JSON.stringify(response.body));
       } catch (err) {
-        console.log(err.message);
-        return Promise.reject(err.message);
+        logger.debug(JSON.stringify(err.message));
+        Promise.reject(err.message);
       }
 
     }
 
+    this.emit('ready');
     return Promise.resolve({});
   }
 
@@ -153,7 +161,7 @@ class BlueLinky {
     return this.vehicles;
   }
 
-  getVehicle(vin: string): CanadianVehicle|AmericanVehicle|undefined {
+  getVehicle(vin: string): BaseVehicle|undefined {
     return this.vehicles.find(item => vin === item.getVinNumber());
   }
 
@@ -164,30 +172,34 @@ class BlueLinky {
       return Promise.reject('access token not fetched, try again');
     }
 
-    logger.info(`reg veh: ${vin}, ${pin}`);
+    logger.debug(`registering vehicle: ${vin}, ${pin}`);
+
     if(!this.getVehicle(vin)) {
       let vehicle;
 
-      if (this.region === 'US') {
-        vehicle = new AmericanVehicle({
-          vin: vin,
-          pin: pin,
-          token: this.accessToken,
-          bluelinky: this
-        });
-      } else if (this.region === 'CA') {
-        vehicle = new CanadianVehicle({
-          vin: vin,
-          pin: pin,
-          token: this.accessToken,
-          bluelinky: this
-        });
+      const vehicleConfig = {
+        vin: vin,
+        pin: pin,
+        token: this.accessToken,
+        bluelinky: this
+      };
+
+      switch(this.config.region) {
+        case REGIONS.US:
+          vehicle = new AmericanVehicle(vehicleConfig);
+          break;
+        case REGIONS.CA:
+          vehicle = new CanadianVehicle(vehicleConfig);
+          break;
+        case REGIONS.EU:
+          vehicle = new EuropianVehicle(vehicleConfig);
+          break;
       }
 
       if (!vehicle) {
         return Promise.reject(null);
       }
-      logger.info('created new vehicle');
+      logger.debug('created new vehicle');
 
       this.vehicles.push(vehicle);
 
