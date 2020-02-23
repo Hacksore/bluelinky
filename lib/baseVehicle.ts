@@ -1,5 +1,5 @@
 import BlueLinky from './index';
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import { VehicleConfig } from './interfaces';
 
 export default class BaseVehicle extends EventEmitter {

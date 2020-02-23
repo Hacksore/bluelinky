@@ -23,8 +23,6 @@ export default {
 		builtins(),
 		resolve({ preferBuiltins: true }),
 		typescript({
-			// skipLibCheck: true,
-			// abortOnError: false
 		}),
 		minify(),
 		commonjs(),

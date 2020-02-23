@@ -4,7 +4,7 @@ import CanadianVehicle from './vehicles/canadianVehicle';
 import EuropianVehicle from './vehicles/europianVehicle';
 import { ALL_ENDPOINTS, REGIONS } from './constants';
 import { buildFormData } from './util';
-import EventEmitter from 'events';
+import { EventEmitter } from 'events';
 
 import {
   BlueLinkyConfig,
