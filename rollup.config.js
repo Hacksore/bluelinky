@@ -3,7 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import license from 'rollup-plugin-license';
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
-import uglify from 'rollup-plugin-babel-minify';
+import { uglify } from 'rollup-plugin-uglify';
 import pkg from './package.json';
 import fs from 'fs';
 const licenseText = fs.readFileSync(__dirname + '/LICENSE');
