@@ -60,7 +60,7 @@ export default class CanadianVehicle extends BaseVehicle {
   }
 
   async unlock(): Promise<any> {
-    logger.info('Begin lock request');
+    logger.info('Begin unlock request');
     const preAuth = await this.getPreAuth();
     const response = await this._request(this.endpoints.unlock, {
       pAuth: preAuth
@@ -68,13 +68,42 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body;
   }
 
+
+  /*
+  airCtrl: Boolean,  // climatisation
+  heating1: Boolean,  // front defrost, airCtrl will be on
+  defrost: Boolean,  // side mirrors & rear defrost
+  airTempvalue: number | null  // temp in degrees for clim and heating 17-27
+  */
   async start(config: StartConfig): Promise<any> {
-    logger.info('Begin start request');
+
+    const body =  
+    { hvacInfo: {
+      airCtrl: ((config.airCtrl ?? false) || (config.defrost ?? false)) ? 1 : 0,
+      defrost: config.defrost ?? false,
+      heating1: config.heating1 ? 1 : 0
+    }}
+
+    let airTemp = config.airTempvalue
+    if (airTemp != null) {
+      if (airTemp > 27 || airTemp < 17) {
+        return "air temperature should be between 17 and 27 degrees";
+      }
+      var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
+      if (airTempValue.length == 2) {
+        airTempValue = '0' + airTempValue
+      }
+      body.hvacInfo['airTemp'] = {value: airTempValue,unit:0,hvacTempType:1}
+    } else if ((config.airCtrl ?? false) || (config.defrost ?? false)) {
+      return "air temperature should be specified"
+    }
+
+    logger.info('Begin start request ' + JSON.stringify(body));
     const preAuth = await this.getPreAuth();
     const response = await this._request(this.endpoints.start, {
-      pAuth: preAuth,
-      ...config
-    });
+      pAuth: preAuth
+    }, body);
+
     return response.body;
   }
 
@@ -82,6 +111,15 @@ export default class CanadianVehicle extends BaseVehicle {
     logger.info('Begin stop request');
     const preAuth = await this.getPreAuth();
     const response = await this._request(this.endpoints.stop, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
+  async locate(): Promise<any> {
+    logger.info('Begin locate request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.locate, {
       pAuth: preAuth
     });
     return response.body;
@@ -125,27 +163,29 @@ export default class CanadianVehicle extends BaseVehicle {
     return pAuth;
   }
 
-  private async _request(endpoint, data): Promise<any|null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
+  private async _request(endpoint, headers, body: object | null = null): Promise<any|null> {
+    logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
     const response = await got(endpoint, {
       method: 'POST',
       json: true,
       headers: {
-        pin: this.pin,
-        from: 'CWP',
+        from: 'SPA',
         language: '1',
         Host: 'mybluelink.ca',
         Origin: 'https://mybluelink.ca',
         offset: '-5',
+        pin: this.pin,
         accessToken: this.bluelinky.getAccessToken(),
         vehicleId: this.vehicleId,
-        ...data
+        ...headers
       },
       body: {
         pin: this.pin,
+        ...body
+        }
       }
-    });
+    );
 
     return response;
   }
