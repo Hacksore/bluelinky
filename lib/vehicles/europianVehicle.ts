@@ -14,7 +14,6 @@ import logger from '../logger';
 
 export default class EuropianVehicle extends BaseVehicle {
   private endpoints: EuropianEndpoints = EU_ENDPOINTS;
-
   private vehicleId: string = '';
 
   constructor(config: VehicleConfig) {

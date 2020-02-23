@@ -3,7 +3,6 @@ import { EventEmitter } from 'events';
 import { VehicleConfig } from './interfaces';
 
 export default class BaseVehicle extends EventEmitter {
-
   public vin: string|null;
   public pin: string|null;
   public bluelinky: BlueLinky;
