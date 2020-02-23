@@ -13,7 +13,7 @@ export default {
 	output:	{
 		format: 'cjs',
 		name: 'index',
-		file: 'dist/index.js'		
+		file: 'dist/index.js'
 	},
   external: [
 		...Object.keys(pkg.dependencies || {}),
@@ -23,8 +23,8 @@ export default {
 		builtins(),
 		resolve({ preferBuiltins: true }),
 		typescript({
-			skipLibCheck: true,
-			abortOnError: false
+			// skipLibCheck: true,
+			// abortOnError: false
 		}),
 		minify(),
 		commonjs(),

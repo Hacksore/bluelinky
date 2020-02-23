@@ -16,6 +16,7 @@
   "author": "Hacksore",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^13.7.4",
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "winston": "^3.2.1"
