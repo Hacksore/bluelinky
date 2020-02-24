@@ -35,6 +35,8 @@ class BlueLinky extends EventEmitter {
     // do login for token here
     this.login();
 
+    logger.info({ objects: 1 });
+
   }
 
   setAccessToken(token: string|null) {
@@ -57,7 +59,7 @@ class BlueLinky extends EventEmitter {
 
     // Refresh 60 seconds before timeout just for good measure
     if (tokenDelta <= 60) {
-      logger.info('Token is about to expire, refreshing access token 60 seconds early');
+      logger.debug('Token is about to expire, refreshing access token 60 seconds early');
       const result = await this.getToken();
       this.setAccessToken(result.access_token);
       logger.debug(`Token is refreshed ${JSON.stringify(result)}`);
@@ -110,15 +112,14 @@ class BlueLinky extends EventEmitter {
 
   async login(): Promise<object> {
     const { region } = this.config;
-    logger.info(`starting login method [${region}]`);
+    logger.debug(`starting login method [${region}]`);
     // if region is US do this
     if (region === REGIONS.US) {
       const response = await this.getToken();
       const currentTime = Math.floor(+new Date()/1000);
       const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
 
-      logger.info(`Logged in to bluelink, token expires at ${expires}`);
-      logger.info(`Current time: ${currentTime}`);
+      logger.debug(`Logged in to bluelink, token expires at ${expires}`);
       this.accessToken = response.access_token;
       this.tokenExpires = expires;
       // return response;
@@ -145,12 +146,22 @@ class BlueLinky extends EventEmitter {
         });
 
         this.accessToken = response.body.result.accessToken;
-        logger.debug(JSON.stringify(response.body));
+        logger.debug('body: %o', response.body);
       } catch (err) {
-        logger.debug(JSON.stringify(err.message));
+        logger.debug('error: %o', JSON.stringify(err.message));
         Promise.reject(err.message);
       }
 
+    }
+
+    // if region is CA do this
+    if (region === REGIONS.CA) {
+
+      try {
+        console.log(1);
+      } catch (err) {
+        logger.error('Error: %0', err);
+      }
     }
 
     this.emit('ready');

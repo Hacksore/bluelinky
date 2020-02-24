@@ -1,10 +1,20 @@
 import * as winston from 'winston';
+import util from 'util';
 
 const defaultLevel = process.env.LOG_LEVEL || 'info';
-const { colorize, combine, timestamp, printf } = winston.format;
+const { colorize, json, combine, timestamp, printf } = winston.format;
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-  return `[${timestamp}] ${level}: ${message}`;
+// TODO: get json working for printing
+const myFormat = printf(({ info, level, message, timestamp, ...leftOver }) => {
+  const prefix = `[${timestamp}] ${level}:`;
+  let retVal;
+  if(message) {
+    retVal += prefix + message;
+  } else{
+    retVal += prefix + util.inspect(JSON.parse(message));
+  }
+
+  return retVal;
 });
 
 const combinedFormats = combine(
@@ -12,6 +22,7 @@ const combinedFormats = combine(
     format: 'YYYY-MM-DD HH:mm:ss'
   }),
   colorize(),
+  json(),
   myFormat,
 );
 

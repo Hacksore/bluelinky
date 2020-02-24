@@ -29,9 +29,9 @@ export default class AmericanVehicle extends BaseVehicle {
   }
 
   async onInit() {
-    logger.info('calling onInit()');
+    logger.debug('calling onInit()');
     const response = await this.features();
-    logger.info(`Getting features ${JSON.stringify(response)}`);
+    logger.debug(`Getting features ${JSON.stringify(response)}`);
 
     if(response!.result === 'E:Failure' ||  response!.result !== undefined) {
       response!.result.forEach(item => {
@@ -290,9 +290,6 @@ export default class AmericanVehicle extends BaseVehicle {
   }
 
   private async _request(endpoint, data): Promise<any|null> {
-    // logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
-    // logger.info(`[AUTH] ${this.auth.accessToken}`);
-
     // handle token refresh if we need to
     await this.bluelinky.handleTokenRefresh();
 
