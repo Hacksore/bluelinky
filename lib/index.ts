@@ -43,9 +43,9 @@ class BlueLinky extends EventEmitter {
       return [];
   }
 
-  login() {
+  async login() {
     if(this.controller)
-      this.controller.login();
+      return this.controller.login();
     else
       logger.warn('Controller not ready!');
   }

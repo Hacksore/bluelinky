@@ -1,7 +1,7 @@
 import { BlueLinkyConfig } from './../interfaces/common.interfaces';
 // import fetch from 'node-fetch';
 import got from 'got';
-import * as https from "https";
+import * as https from 'https';
 import { ALL_ENDPOINTS } from '../constants';
 import { Logger } from 'winston';
 import { Vehicle } from '../vehicles/vehicle';
@@ -89,24 +89,22 @@ export class EuropeanController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    return new Promise((resolve, reject) => {
-        if(this.accessToken !== undefined){
-            fetch('https://prd.eu-ccapi.hyundai.com:8080/api/v1/spa/vehicles', {
-            method: 'get',
+    return new Promise(async (resolve, reject) => {
+        if(this.accessToken !== undefined) {
+          const response = await got('https://prd.eu-ccapi.hyundai.com:8080/api/v1/spa/vehicles', {
+            method: 'GET',
             headers: {
-                'Authorization': this.accessToken,
-                'ccsp-device-id': this.deviceId
+              'Authorization': this.accessToken,
+              'ccsp-device-id': this.deviceId
             },
-        }).then((result: Response) => {
-            result.json().then(vehicles => {
-                const euv: Array<EuropeanVehicle> = vehicles.resMsg.vehicles;
-                const result: Array<Vehicle> = [];
-                euv.forEach((_euv: EuropeanVehicle) => {
-                  result.push(new Vehicle(_euv));
-                });
-                resolve(result);
-            });
-        });
+            json: true
+          });
+
+          const result: Array<Vehicle> = [];
+          response.body.resMsg.vehicles.forEach((_euv: any) => {
+            result.push(new Vehicle(new EuropeanVehicle(_euv.master, _euv.nickname, _euv.regDate, _euv.type,_euv.vehicleId, _euv.vehicleName)));
+          });
+          resolve(result);
         } else {
             reject('Token not set');
         }

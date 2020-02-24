@@ -6,17 +6,21 @@ import {
 } from '../interfaces/european.interfaces';
 
 import logger from '../logger';
+import BaseVehicle from '../baseVehicle';
 
-export default class EuropeanVehicle {
+export default class EuropeanVehicle extends BaseVehicle {
   private endpoints: EuropeanEndpoints = EU_ENDPOINTS;
+  public region = 'EU';
+
 
   constructor(
-    private master: boolean,
-    private nickname: string,
-    private regDate: string,
-    private type: string,
-    private vehicleId: string,
-    private vehicleName: string) {
+    public master: boolean,
+    public nickname: string,
+    public regDate: string,
+    public type: string,
+    public vehicleId: string,
+    public vehicleName: string) {
+    super();
     this.onInit();
   }
 

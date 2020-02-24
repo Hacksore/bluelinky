@@ -1,4 +1,4 @@
-import { BlueLinkyConfig } from "../interfaces/common.interfaces";
+import { BlueLinkyConfig } from '../interfaces/common.interfaces';
 
 export class AmericanController {
   public config: BlueLinkyConfig = {

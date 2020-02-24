@@ -4,13 +4,26 @@ import EuropeanVehicle from './europianVehicle';
 
 export class Vehicle {
 
-  constructor(private vehicle: EuropeanVehicle){}
+  public get name() {
+    return this.vehicle.name;
+  }
 
-  unlock() {
+  public get vin() {
+    return this.vehicle.vin;
+  }
+
+  public get type() {
+    return this.vehicle.type;
+  }
+
+  constructor(private vehicle: EuropeanVehicle){
+  }
+
+  public unlock() {
     this.vehicle.unlock();
   }
 
-  lock() {
+  public lock() {
     this.vehicle.lock();
   }
 

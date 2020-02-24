@@ -8,10 +8,13 @@ const client = new BlueLinky({
 	region: 'EU'
 });
 
-client.login();
+client.login().then( async () => {
+	const vehicles = await client.getVehicles();
+	console.log(vehicles);
+});
 
 client.on('ready', async () => {
-	const vehicle = await client.registerVehicle({ vin, pin });
-  const status = await vehicle.status();  
-  console.log(status);
+	// const vehicle = await client.registerVehicle({ vin, pin });
+  // const status = await vehicle.status();  
+  // console.log(status);
 });
