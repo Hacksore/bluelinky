@@ -1,5 +1,6 @@
 const US_BASE_URL = 'https://owners.hyundaiusa.com';
 const CA_BASE_URL = 'https://mybluelink.ca';
+const EU_BASE_URL = 'https://prd.eu-ccapi.hyundai.com:8080/api/v1';
 
 export const US_ENDPOINTS = {
   getToken: `${US_BASE_URL}/etc/designs/ownercommon/us/token.json?reg=`,
@@ -33,9 +34,11 @@ export const CA_ENDPOINTS = {
   preferedDealer : `${CA_BASE_URL}/tods/api/gtprfrdlr`
 };
 
-// TODO:
 export const EU_ENDPOINTS = {
-  start: 'TBD'
+  session: `${EU_BASE_URL}/user/oauth2/authorize?response_type=code&state=test&client_id=6d477c38-3ca4-4cf3-9557-2a1929a94654&redirect_uri=https://prd.eu-ccapi.hyundai.com:8080/api/v1/user/oauth2/redirect`,
+  login: `${EU_BASE_URL}/user/signin`,
+  redirect_uri: `${EU_BASE_URL}/user/oauth2/redirect`,
+  token: `${EU_BASE_URL}/user/oauth2/token`
 };
 
 export const ALL_ENDPOINTS =  {
@@ -50,5 +53,5 @@ export const GEN1 = 1;
 export enum REGIONS {
   US = 'US',
   CA = 'CA',
-  EU = 'US'
+  EU = 'EU'
 }

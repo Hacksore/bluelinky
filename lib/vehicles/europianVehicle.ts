@@ -1,51 +1,55 @@
 import { EU_ENDPOINTS } from '../constants';
 import got from 'got';
 
-import BaseVehicle from '../baseVehicle';
-
 import {
-  StartConfig,
-  VehicleConfig,
-  VehicleStatus,
-  EuropianEndpoints
-} from '../interfaces';
+  EuropeanEndpoints
+} from '../interfaces/european.interfaces';
 
 import logger from '../logger';
 
-export default class EuropianVehicle extends BaseVehicle {
-  private endpoints: EuropianEndpoints = EU_ENDPOINTS;
-  private vehicleId: string = '';
+export default class EuropeanVehicle {
+  private endpoints: EuropeanEndpoints = EU_ENDPOINTS;
 
-  constructor(config: VehicleConfig) {
-    super(config);
-    this.vin = config.vin;
-    this.pin = config.pin;
-    this.bluelinky = config.bluelinky;
-    this.auth.accessToken = config.token;
-
+  constructor(
+    private master: boolean,
+    private nickname: string,
+    private regDate: string,
+    private type: string,
+    private vehicleId: string,
+    private vehicleName: string) {
     this.onInit();
   }
 
   async onInit() {
-    logger.info('onInit from EU');
-
-    this.emit('ready');
+    logger.info(`EU Vehicle ${this.vehicleId} created`);
   }
 
-  private async _request(endpoint, data): Promise<any|null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
+  public async getStatus(){
 
-    const response = await got(endpoint, {
-      method: 'POST',
-      json: true,
-      headers: {
-        ...data
-      },
-      body: {
-        pin: this.pin,
-      }
-    });
-
-    return response;
   }
+
+  public async unlock(){
+
+  }
+
+  public async lock(){
+    
+  }
+
+  // private async _request(endpoint, data): Promise<any|null> {
+  //   logger.info(`[${endpoint}] ${JSON.stringify(data)}`);
+
+  //   const response = await got(endpoint, {
+  //     method: 'POST',
+  //     json: true,
+  //     headers: {
+  //       ...data
+  //     },
+  //     body: {
+  //       pin: this.pin,
+  //     }
+  //   });
+
+  //   return response;
+  // }
 }

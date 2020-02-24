@@ -1,10 +1,4 @@
-import BlueLinky from './index';
-
-export interface BlueLinkyConfig {
-  username: string|null;
-  password: string|null;
-  region: string|null;
-}
+import BlueLinky from '../index';
 
 export interface StartConfig {
   airCtrl?: boolean|string;
@@ -107,9 +101,4 @@ export interface AmericanEndpoints {
   status: string;
   enrollmentStatus: string;
   subscriptions: string;
-}
-
-// TODO:
-export interface EuropianEndpoints {
-  start: string;
 }
