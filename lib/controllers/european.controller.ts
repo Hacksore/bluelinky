@@ -1,4 +1,4 @@
-import { BlueLinkyConfig, BluelinkVehicle } from './../interfaces/common.interfaces';
+import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 // import fetch from 'node-fetch';
 import got from 'got';
 import * as https from 'https';
@@ -6,7 +6,6 @@ import { ALL_ENDPOINTS } from '../constants';
 import { Logger } from 'winston';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/europianVehicle';
-import logger from '../logger';
 import SessionController from './controller';
 
 export class EuropeanController extends SessionController {
@@ -17,16 +16,49 @@ export class EuropeanController extends SessionController {
     logger.info(`${this.config.region} Controller created`);
   }
 
-  public accessToken: string = '';
-  public deviceId: string = 'c0e238b4-c0de-488c-9eee-caa6c74035a1';
+  session: Session = {
+    accessToken: '',
+    controlToken: '',
+    deviceId: 'c0e238b4-c0de-488c-9eee-caa6c74035a1',
+  };
+
   private vehicles: Array<EuropeanVehicle> = [];
 
   public config: BlueLinkyConfig = {
     username: null,
     password: null,
     region: 'EU',
-    autoLogin: true
+    autoLogin: true,
+    pin: null
   };
+
+  async enterPin(): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      if(this.session.accessToken !== '') {
+          const response = await got('https://prd.eu-ccapi.hyundai.com:8080/api/v1/user/pin', {
+            method: 'PUT',
+            headers: {
+              'Authorization': this.session.accessToken,
+              'Content-Type': 'application/json'
+            },
+            body: {
+              deviceId: this.session.deviceId,
+              pin: this.config.pin
+            },
+            json: true
+          });
+
+          this.session.controlToken = 'Bearer ' + response.body.controlToken;
+          setTimeout(() => {
+              this.session.controlToken = '';
+              console.log('Control token timed out!');
+          }, response.body.expiresTime * 1000);
+          resolve('PIN Entered OK');
+      } else {
+          reject('Token not set');
+      }
+    });
+  }
 
   async login() {
     return new Promise<string>(async (resolve, reject) => {
@@ -78,7 +110,7 @@ export class EuropeanController extends SessionController {
           body: formData.toString(),
         });
 
-        this.accessToken = JSON.parse(response.body).access_token;
+        this.session.accessToken = 'Bearer ' + JSON.parse(response.body).access_token;
         resolve('Login success');
         // logger.debug(JSON.stringify(response.body));
       } catch (err) {
@@ -94,18 +126,18 @@ export class EuropeanController extends SessionController {
 
   async getVehicles(): Promise<Array<Vehicle>> {
     return new Promise(async (resolve, reject) => {
-        if(this.accessToken !== undefined) {
+        if(this.session.accessToken !== undefined) {
           const response = await got('https://prd.eu-ccapi.hyundai.com:8080/api/v1/spa/vehicles', {
             method: 'GET',
             headers: {
-              'Authorization': this.accessToken,
-              'ccsp-device-id': this.deviceId
+              'Authorization': this.session.accessToken,
+              'ccsp-device-id': this.session.deviceId
             },
             json: true
           });
 
           response.body.resMsg.vehicles.forEach(v => {
-            this.vehicles.push(new EuropeanVehicle(v.master, v.nickname, v.regDate, v.type, v.vehicleId, v.vehicleName));
+            this.vehicles.push(new EuropeanVehicle(v.master, v.nickname, v.regDate, v.type, v.vehicleId, v.vehicleName, this.session));
           });
           resolve(this.vehicles);
         } else {

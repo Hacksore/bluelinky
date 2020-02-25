@@ -12,10 +12,17 @@ export interface BlueLinkyConfig {
   password: string|null;
   region: string|null;
   autoLogin: boolean|null;
+  pin: string|null;
 }
 
 export interface BluelinkVehicle {
   name: string;
   vin: string;
   type: string;
+}
+
+export interface Session {
+  accessToken?: string;
+  controlToken?: string;
+  deviceId?: string;
 }

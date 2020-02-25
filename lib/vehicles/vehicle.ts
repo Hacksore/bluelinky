@@ -4,4 +4,6 @@ export abstract class Vehicle {
   abstract get Type(): string;
   abstract async Unlock(): Promise<string>;
   abstract async Lock(): Promise<string>;
+
+  constructor(public session: any){}
 }

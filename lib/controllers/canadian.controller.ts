@@ -5,7 +5,8 @@ export class CanadianController {
     username: null,
     password: null,
     region: 'CA',
-    autoLogin: true
+    autoLogin: true,
+    pin: null
   };
 
   login() {

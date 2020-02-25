@@ -5,16 +5,12 @@ const { username, password, vin, pin } = config;
 const client = new BlueLinky({
 	username,
   password,
-	region: 'EU'
+	region: 'EU',
+	pin
 });
 
 client.login().then( async () => {
 	const vehicles = await client.getVehicles();
-	console.log(vehicles[0].Name);
-});
-
-client.on('ready', async () => {
-	// const vehicle = await client.registerVehicle({ vin, pin });
-  // const status = await vehicle.status();  
-  // console.log(status);
+	await client.enterPin();
+	await vehicles[0].Lock();
 });

@@ -47,6 +47,10 @@ class BlueLinky extends EventEmitter {
   logout() {
     this.controller?.logout();
   }
+
+  async enterPin() {
+    return this.controller?.enterPin();
+  }
 }
 
 export default BlueLinky;

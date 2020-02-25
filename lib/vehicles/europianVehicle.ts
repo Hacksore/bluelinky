@@ -32,8 +32,9 @@ export default class EuropeanVehicle extends Vehicle {
     public regDate: string,
     public type: string,
     public vehicleId: string,
-    public vehicleName: string) {
-    super();
+    public vehicleName: string,
+    public session) {
+    super(session);
     this.onInit();
   }
 
@@ -46,11 +47,47 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async Unlock(): Promise<string> {
-    return Promise.resolve('OK');
+    return new Promise(async (resolve, reject) => {
+      if(this.session.controlToken !== ''){
+          const response = await got(`https://prd.eu-ccapi.hyundai.com:8080/api/v2/spa/vehicles/${this.vehicleId}/control/door`, {
+            method: 'POST',
+            headers: {
+              'Authorization': this.session.controlToken,
+              'ccsp-device-id': this.session.deviceId
+            },
+            body: {
+              action: 'open',
+              deviceId: this.session.deviceId
+            },
+            json: true
+          });
+          resolve('Unlock OK');
+      } else {
+          reject('Token not set');
+      }
+    })
   }
 
   public async Lock(): Promise<string> {
-    return Promise.resolve('OK');
+    return new Promise(async (resolve, reject) => {
+      if(this.session.controlToken !== ''){
+          const response = await got(`https://prd.eu-ccapi.hyundai.com:8080/api/v2/spa/vehicles/${this.vehicleId}/control/door`, {
+            method: 'POST',
+            headers: {
+              'Authorization': this.session.controlToken,
+              'ccsp-device-id': this.session.deviceId
+            },
+            body: {
+              action: 'close',
+              deviceId: this.session.deviceId
+            },
+            json: true
+          });
+          resolve('Lock OK');
+      } else {
+          reject('Token not set');
+      }
+    })
   }
 
   // private async _request(endpoint, data): Promise<any|null> {
