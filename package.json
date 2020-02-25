@@ -20,6 +20,7 @@
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "https": "^1.0.0",
+    "push-receiver": "^2.1.0",
     "tough-cookie": "^3.0.1",
     "winston": "^3.2.1"
   },

@@ -1,4 +1,5 @@
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
+import * as pr from 'push-receiver';
 // import fetch from 'node-fetch';
 import got from 'got';
 import * as https from 'https';
@@ -19,7 +20,7 @@ export class EuropeanController extends SessionController {
   session: Session = {
     accessToken: '',
     controlToken: '',
-    deviceId: 'c0e238b4-c0de-488c-9eee-caa6c74035a1',
+    deviceId: '',
   };
 
   private vehicles: Array<EuropeanVehicle> = [];
@@ -29,7 +30,8 @@ export class EuropeanController extends SessionController {
     password: null,
     region: 'EU',
     autoLogin: true,
-    pin: null
+    pin: null,
+    deviceUuid: null
   };
 
   async enterPin(): Promise<string> {
@@ -90,6 +92,29 @@ export class EuropeanController extends SessionController {
         const authCode = authCodeResponse.body.redirectUrl.split('?')[1].split('&')[0].split('=')[1];
         // logger.debug('Got auth code: ' + authCode);
 
+        const credentials = await pr.register('199360397125');
+
+        const notificationReponse = await got('https://prd.eu-ccapi.hyundai.com:8080/api/v1/spa/notifications/register', {
+          method: 'POST',
+          headers: {
+            'ccsp-service-id': '6d477c38-3ca4-4cf3-9557-2a1929a94654',
+            'Content-Type':	'application/json;charset=UTF-8',
+            'Content-Length':	'231',
+            'Host':	'prd.eu-ccapi.hyundai.com:8080',
+            'Connection':	'Keep-Alive',
+            'Accept-Encoding':	'gzip',
+            'User-Agent':	'okhttp/3.10.0'
+          },
+          body: {
+            pushRegId: credentials.gcm.token,
+            pushType: 'GCM',
+            uuid: this.config.deviceUuid
+          },
+          json: true
+        });
+
+        this.session.deviceId = notificationReponse.body.resMsg.deviceId;
+
         const formData = new URLSearchParams();
         formData.append('grant_type', 'authorization_code');
         formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirect_uri);
@@ -111,6 +136,9 @@ export class EuropeanController extends SessionController {
         });
 
         this.session.accessToken = 'Bearer ' + JSON.parse(response.body).access_token;
+
+        console.log(this.session);
+
         resolve('Login success');
         // logger.debug(JSON.stringify(response.body));
       } catch (err) {
