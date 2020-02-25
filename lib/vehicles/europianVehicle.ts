@@ -6,9 +6,22 @@ import {
 } from '../interfaces/european.interfaces';
 
 import logger from '../logger';
-import BaseVehicle from '../baseVehicle';
+import { Vehicle } from './vehicle';
 
-export default class EuropeanVehicle extends BaseVehicle {
+export default class EuropeanVehicle extends Vehicle {
+
+  get Name(): string {
+    return this.nickname;
+  }
+
+  get VIN(): string {
+    return '';
+  }
+
+  get Type(): string {
+    return this.type;
+  }
+
   private endpoints: EuropeanEndpoints = EU_ENDPOINTS;
   public region = 'EU';
 
@@ -32,12 +45,12 @@ export default class EuropeanVehicle extends BaseVehicle {
 
   }
 
-  public async unlock(){
-
+  public async Unlock(): Promise<string> {
+    return Promise.resolve('OK');
   }
 
-  public async lock(){
-    
+  public async Lock(): Promise<string> {
+    return Promise.resolve('OK');
   }
 
   // private async _request(endpoint, data): Promise<any|null> {

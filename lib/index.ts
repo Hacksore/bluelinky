@@ -1,6 +1,6 @@
 import { Vehicle } from './vehicles/vehicle';
 import { EuropeanController } from './controllers/european.controller';
-import { SessionController } from './controllers/controller';
+import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
 
 
@@ -16,14 +16,8 @@ class BlueLinky extends EventEmitter {
 
     switch(config.region){
       case "EU":
-        this.controller = new SessionController(new EuropeanController(logger), config);
+        this.controller = new EuropeanController(logger, config);
         break;
-      // case "US":
-      //   this.controller = new SessionController(new AmericanController(logger), config);
-      //   break;
-      // case "CA":
-      //   this.controller = new SessionController(new CanadianController(logger), config);
-      //   break;
     }
 
     if(this.controller === null){

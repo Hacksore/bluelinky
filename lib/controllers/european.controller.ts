@@ -1,4 +1,4 @@
-import { BlueLinkyConfig } from './../interfaces/common.interfaces';
+import { BlueLinkyConfig, BluelinkVehicle } from './../interfaces/common.interfaces';
 // import fetch from 'node-fetch';
 import got from 'got';
 import * as https from 'https';
@@ -7,15 +7,19 @@ import { Logger } from 'winston';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/europianVehicle';
 import logger from '../logger';
+import SessionController from './controller';
 
-export class EuropeanController {
+export class EuropeanController extends SessionController {
 
-  constructor(private logger: Logger){
+  constructor(private logger: Logger, config: BlueLinkyConfig) {
+    super();
+    this.config = config;
     logger.info(`${this.config.region} Controller created`);
   }
 
   public accessToken: string = '';
   public deviceId: string = 'c0e238b4-c0de-488c-9eee-caa6c74035a1';
+  private vehicles: Array<EuropeanVehicle> = [];
 
   public config: BlueLinkyConfig = {
     username: null,
@@ -84,8 +88,8 @@ export class EuropeanController {
     });
   }
 
-  logout() {
-    return 'OK';
+  logout(): Promise<string> {
+    return Promise.resolve('OK');
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
@@ -100,11 +104,10 @@ export class EuropeanController {
             json: true
           });
 
-          const result: Array<Vehicle> = [];
-          response.body.resMsg.vehicles.forEach((_euv: any) => {
-            result.push(new Vehicle(new EuropeanVehicle(_euv.master, _euv.nickname, _euv.regDate, _euv.type,_euv.vehicleId, _euv.vehicleName)));
+          response.body.resMsg.vehicles.forEach(v => {
+            this.vehicles.push(new EuropeanVehicle(v.master, v.nickname, v.regDate, v.type, v.vehicleId, v.vehicleName));
           });
-          resolve(result);
+          resolve(this.vehicles);
         } else {
             reject('Token not set');
         }

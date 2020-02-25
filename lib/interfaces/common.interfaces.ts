@@ -13,3 +13,9 @@ export interface BlueLinkyConfig {
   region: string|null;
   autoLogin: boolean|null;
 }
+
+export interface BluelinkVehicle {
+  name: string;
+  vin: string;
+  type: string;
+}

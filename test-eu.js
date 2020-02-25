@@ -10,7 +10,7 @@ const client = new BlueLinky({
 
 client.login().then( async () => {
 	const vehicles = await client.getVehicles();
-	console.log(vehicles);
+	console.log(vehicles[0].Name);
 });
 
 client.on('ready', async () => {
