@@ -6,6 +6,8 @@ import { EventEmitter } from 'events';
 
 import logger from './logger';
 import { BlueLinkyConfig } from './interfaces/common.interfaces';
+import { REGIONS } from './constants';
+import { AmericanController } from './controllers/american.controller';
 
 class BlueLinky extends EventEmitter {
 
@@ -15,13 +17,15 @@ class BlueLinky extends EventEmitter {
     super();
 
     switch(config.region){
-      case "EU":
-        this.controller = new EuropeanController(logger, config);
+      case REGIONS.EU:
+        this.controller = new EuropeanController(config);
+      case REGIONS.US:
+        this.controller = new AmericanController(config);
         break;
     }
 
     if(this.controller === null){
-      throw('Your region is not supported yet.');
+      throw new Error('Your region is not supported yet.');
     }
 
     // do login for token here
