@@ -82,6 +82,11 @@ export class AmericanController implements SessionController {
     });
 
     const data = JSON.parse(response.body);
+
+    if (data.enrolledVehicleDetails === undefined) {
+      this.vehicles = [];
+      return Promise.reject('No vehicles found for account!');
+    }
    
     data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
