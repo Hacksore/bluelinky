@@ -1,4 +1,5 @@
 import { REGIONS, EU_ENDPOINTS, EU_BASE_URL } from '../constants';
+import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
 import got from 'got';
 
 import { EuropeanEndpoints } from '../interfaces/european.interfaces';
@@ -7,6 +8,27 @@ import logger from '../logger';
 import { Vehicle } from './vehicle';
 
 export default class EuropeanVehicle extends Vehicle {
+
+  get location(): VehicleLocation | null {
+    throw new Error('Method not implemented.');
+  }
+  get odometer(): Odometer | null {
+    throw new Error('Method not implemented.');
+  }
+
+  get status(): VehicleStatus {
+    throw new Error('Method not implemented.');
+  }
+
+  startClimate(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  stopClimate(): Promise<string> {
+    throw new Error('Method not implemented.');
+  }
+  updateStatus(): Promise<VehicleStatus> {
+    throw new Error('Method not implemented.');
+  }
   get name(): string {
     return this.nickname;
   }

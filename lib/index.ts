@@ -19,6 +19,7 @@ class BlueLinky extends EventEmitter {
     switch(config.region){
       case REGIONS.EU:
         this.controller = new EuropeanController(config);
+        break;
       case REGIONS.US:
         this.controller = new AmericanController(config);
         break;
@@ -44,6 +45,13 @@ class BlueLinky extends EventEmitter {
   async login() {
     if(this.controller)
       return this.controller.login();
+    else
+      logger.warn('Controller not ready!');
+  }
+
+  async refreshAccessToken() {
+    if(this.controller)
+      return this.controller.refreshAccessToken();
     else
       logger.warn('Controller not ready!');
   }

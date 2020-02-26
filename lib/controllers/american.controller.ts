@@ -26,6 +26,7 @@ export class AmericanController extends SessionController {
 
   session: Session = {
     accessToken: '',
+    refreshToken: '',
     controlToken: '',
     deviceId: '',
   };
@@ -39,6 +40,10 @@ export class AmericanController extends SessionController {
 
   logout(): Promise<string> {
     return Promise.resolve('OK');
+  }
+
+  async refreshAccessToken(): Promise<string> {
+    return Promise.resolve('');
   }
 
   getVehicles(): Promise<Array<Vehicle>> {

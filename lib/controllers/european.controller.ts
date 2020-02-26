@@ -8,7 +8,7 @@ import EuropeanVehicle from '../vehicles/europianVehicle';
 import SessionController from './controller';
 
 import logger from '../logger';
-import url from 'url';
+import { URLSearchParams } from 'url';
 
 export class EuropeanController extends SessionController {
 
@@ -20,6 +20,7 @@ export class EuropeanController extends SessionController {
 
   session: Session = {
     accessToken: '',
+    refreshToken: '',
     controlToken: '',
     deviceId: '',
   };
@@ -34,6 +35,10 @@ export class EuropeanController extends SessionController {
     pin: null,
     deviceUuid: null
   };
+
+  async refreshAccessToken(): Promise<string> {
+    return this.login();
+  }
 
   async enterPin(): Promise<string> {
     return new Promise(async (resolve, reject) => {
@@ -54,9 +59,10 @@ export class EuropeanController extends SessionController {
           this.session.controlToken = 'Bearer ' + response.body.controlToken;
           setTimeout(() => {
               this.session.controlToken = '';
-              console.log('Control token timed out!');
+              logger.info('Control token timed out!');
           }, response.body.expiresTime * 1000);
-          resolve('PIN Entered OK');
+          logger.info('PIN entered OK, The pin is valid for 10 minutes')
+          resolve('PIN entered OK, The pin is valid for 10 minutes');
       } else {
           reject('Token not set');
       }
@@ -91,7 +97,7 @@ export class EuropeanController extends SessionController {
         });
 
         const authCode = authCodeResponse.body.redirectUrl.split('?')[1].split('&')[0].split('=')[1];
-        // logger.debug('Got auth code: ' + authCode);
+        this.session.refreshToken = authCode;
 
         const credentials = await pr.register('199360397125');
 
@@ -116,8 +122,7 @@ export class EuropeanController extends SessionController {
 
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
 
-        // FIXME: named export was not working for this, hacky workaround
-        const formData = new url.URLSearchParams();
+        const formData = new URLSearchParams();
         formData.append('grant_type', 'authorization_code');
         formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirect_uri);
         formData.append('code', authCode);
@@ -137,12 +142,17 @@ export class EuropeanController extends SessionController {
           body: formData.toString(),
         });
 
-        this.session.accessToken = 'Bearer ' + JSON.parse(response.body).access_token;
+        const responseBody = JSON.parse(response.body);
+        this.session.accessToken = 'Bearer ' + responseBody.access_token;
 
-        console.log(this.session);
+        logger.info(`Login successful for user ${this.config.username}`);
+
+        setInterval(() => {
+          logger.info(`Access token expiered, getting a new one for ${this.config.username}`);
+          this.refreshAccessToken();
+        }, responseBody.expires_in * 1000);
 
         resolve('Login success');
-        // logger.debug(JSON.stringify(response.body));
       } catch (err) {
         logger.debug(JSON.stringify(err.message));
         reject(err.message);
@@ -166,6 +176,8 @@ export class EuropeanController extends SessionController {
             json: true
           });
 
+          this.vehicles = [];
+
           response.body.resMsg.vehicles.forEach(v => {
             const config = {
               master: v.master,
@@ -177,6 +189,8 @@ export class EuropeanController extends SessionController {
             }
             this.vehicles.push(new EuropeanVehicle(config, this.session));
           });
+
+          logger.info(`Success! Got ${this.vehicles.length} vehicles`)
           resolve(this.vehicles);
         } else {
             reject('Token not set');

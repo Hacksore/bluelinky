@@ -11,7 +11,5 @@ const client = new BlueLinky({
 });
 
 client.login().then( async () => {
-	const vehicles = await client.getVehicles();
-	await client.enterPin();
-	await vehicles[0].Lock();
+	await client.refreshAccessToken();
 });
