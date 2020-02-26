@@ -15,7 +15,11 @@ export default class EuropeanVehicle extends Vehicle {
     return this.config.nickname;
   }
 
-  get vinNumber(): string {
+  get vin(): string {
+    return 'NOT YET IMPLEMENTED';
+  }
+
+  get gen(): string {
     return 'NOT YET IMPLEMENTED';
   }
 

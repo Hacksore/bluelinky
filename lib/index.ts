@@ -65,7 +65,8 @@ class BlueLinky extends EventEmitter {
   }
 
   async enterPin(): Promise<string|undefined> {
-    return this.controller?.enterPin();
+    // return this.controller?.enterPin();
+    return undefined
   }
 }
 

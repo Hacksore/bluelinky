@@ -4,6 +4,7 @@ export interface BlueLinkyConfig {
   region: string|null;
   autoLogin: boolean|null;
   pin: string|null;
+  vin: string|null;
   deviceUuid: string|null;
 }
 

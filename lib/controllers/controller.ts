@@ -1,11 +1,12 @@
 import { Vehicle } from '../vehicles/vehicle';
-import { Session } from '../interfaces/common.interfaces';
+import { Session, VehicleStatus } from '../interfaces/common.interfaces';
 
-export default abstract class SessionController {
-  abstract async login(): Promise<string>;
-  abstract async logout(): Promise<string>;
-  abstract async getVehicles(): Promise<Array<Vehicle>>;
-  abstract async enterPin(): Promise<string>;
-  abstract async refreshAccessToken(): Promise<string>;
-  abstract session: Session;
+// changed this to interface so we can have option things?
+export default interface SessionController {
+  login(): Promise<string>;
+  logout(): Promise<string>;
+  getVehicles(): Promise<Array<Vehicle>>;
+  enterPin?(): Promise<string>;  
+  refreshAccessToken(): Promise<string>;
+  session: Session;
 }

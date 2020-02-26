@@ -11,10 +11,9 @@ import logger from '../logger';
 import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
-export class EuropeanController extends SessionController {
+export class EuropeanController implements SessionController {
 
   constructor(config: BlueLinkyConfig) {
-    super();
     this.config = config;
     logger.info(`${this.config.region} Controller created`);
   }
@@ -34,6 +33,7 @@ export class EuropeanController extends SessionController {
     region: 'EU',
     autoLogin: true,
     pin: null,
+    vin: null,
     deviceUuid: null
   };
 
@@ -97,7 +97,8 @@ export class EuropeanController extends SessionController {
       // when I am testing it works without issues, feel free to put back
   
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
-      console.log('cred', this.config)
+      console.log('cred', this.config);
+      
       const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
         method: 'POST',
         headers: {
@@ -121,7 +122,7 @@ export class EuropeanController extends SessionController {
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
-      formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirect_uri);
+      formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
       formData.append('code', authCode);
 
       const response = await got(ALL_ENDPOINTS.EU.token, {

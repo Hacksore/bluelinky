@@ -3,9 +3,14 @@ import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.i
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
+import got from 'got';
+export default class AmericanVehicle extends Vehicle {
+  private _status: VehicleStatus | null = null;
 
-export default class EuropeanVehicle extends Vehicle {
-
+  get status(): VehicleStatus | null {
+    return this._status;
+  }
+  
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
   }
@@ -13,7 +18,11 @@ export default class EuropeanVehicle extends Vehicle {
     throw new Error('Method not implemented.');
   }
 
-  get status(): VehicleStatus {
+  get gen(): string {
+    throw new Error('Method not implemented.');
+  }
+
+  get vin(): string {
     throw new Error('Method not implemented.');
   }
 
@@ -27,7 +36,7 @@ export default class EuropeanVehicle extends Vehicle {
     throw new Error('Method not implemented.');
   }
   get name(): string {
-    return this.nickname;
+    return this.config.nickname;
   }
 
   get vinNumber(): string {
@@ -38,26 +47,39 @@ export default class EuropeanVehicle extends Vehicle {
     return this.type;
   }
 
-  public region = REGIONS.EU;
+  public region = REGIONS.US;
 
-  constructor(
-    public master: boolean,
-    public nickname: string,
-    public regDate: string,
-    public vehicleId: string,
-    public vehicleName: string,
-    public session
-  ) {
+  constructor(public config, public session) {
     super(session);
     this.onInit();
   }
 
   onInit(): void {
-    logger.info(`US Vehicle ${this.vehicleId} created`);
+    console.log(this.config);
+    logger.info(`US Vehicle ${this.config.regId} created`);
   }
 
-  public getStatus(): void {
-    // TODO:
+  // TODO: make static things constants
+  public async getStatus(): Promise<VehicleStatus> {
+    const response = await got('https://api.telematics.hyundaiusa.com/ac/v2/rcs/rvs/vehicleStatus', {
+      method: 'GET',
+      headers: {
+        'access_token': this.session.accessToken,
+        'Client_Id': '815c046afaa4471aa578827ad546cc76',
+        'Host': 'api.telematics.hyundaiusa.com',
+        'User-Agent': 'okhttp/3.12.0',
+        'registrationId': this.config.regId,
+        'VIN': this.config.vin,
+        'Language': '0',
+        'To': 'ISS',
+        'From': 'SPA',
+        'refresh': 'false',
+        'brandIndecator': this.config.brandIndecator,
+        'Offset': '-5'
+      }
+    });
+    const data = JSON.parse(response.body);
+    return Promise.resolve(data as VehicleStatus);
   }
 
   public async unlock(): Promise<string> {
