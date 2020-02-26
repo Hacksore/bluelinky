@@ -1,8 +1,5 @@
-import { REGIONS, EU_ENDPOINTS, EU_BASE_URL } from '../constants';
+import { REGIONS } from '../constants';
 import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
-import got from 'got';
-
-import { EuropeanEndpoints } from '../interfaces/european.interfaces';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
@@ -41,7 +38,6 @@ export default class EuropeanVehicle extends Vehicle {
     return this.type;
   }
 
-  private endpoints: EuropeanEndpoints = EU_ENDPOINTS;
   public region = REGIONS.EU;
 
   constructor(
@@ -56,11 +52,11 @@ export default class EuropeanVehicle extends Vehicle {
     this.onInit();
   }
 
-  async onInit() {
+  onInit(): void {
     logger.info(`US Vehicle ${this.vehicleId} created`);
   }
 
-  public async getStatus() {
+  public getStatus(): void {
     // TODO:
   }
 

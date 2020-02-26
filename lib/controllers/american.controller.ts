@@ -1,14 +1,11 @@
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
-import got from 'got';
-import { ALL_ENDPOINTS, REGIONS } from '../constants';
+import { REGIONS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import SessionController from './controller';
 
 import logger from '../logger';
-// import { URLSearchParams } from 'url';
 
 export class AmericanController extends SessionController {
-  private vehicles: Array<Vehicle> = [];
   public config: BlueLinkyConfig = {
     username: null,
     password: null,

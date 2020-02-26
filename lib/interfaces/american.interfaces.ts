@@ -10,6 +10,8 @@ export interface StartConfig {
 
 export interface HyundaiResponse {
   status: string;
+  // I think this is dynamic so hard to type it?
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   result: any;
   errorMessage: string;
 }

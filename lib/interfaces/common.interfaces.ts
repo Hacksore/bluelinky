@@ -1,4 +1,3 @@
-import BlueLinky from '..';
 export interface BlueLinkyConfig {
   username: string|null;
   password: string|null;
@@ -29,31 +28,31 @@ export interface VehicleStatus {
   defrostStatus: string;
   transCond: boolean;
   doorLockStatus: string;
-  doorOpen: { frontRight: number, frontLeft: number, backLeft: number, backRight: number };
+  doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
   airCtrlOn: boolean;
-  airTemp: { unit: number, hvacTempType: number, value: string };
+  airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
     batSignalReferenceValue: {};
     batSoc: number;
     batState: number;
-    sjbDeliveryMode: number
+    sjbDeliveryMode: number;
   };
   ign3: boolean;
   ignitionStatus: string;
   lowFuelLight: boolean;
   sideBackWindowHeat: number;
-  dte: { unit: number, value: number };
+  dte: { unit: number; value: number };
   engine: boolean;
   defrost: boolean;
   hoodOpen: boolean;
   airConditionStatus: string;
   steerWheelHeat: number;
   tirePressureLamp: {
-    tirePressureWarningLampRearLeft: number,
-    tirePressureWarningLampFrontLeft: number,
-    tirePressureWarningLampFrontRight: number,
-    tirePressureWarningLampAll: number,
-    tirePressureWarningLampRearRight: number
+    tirePressureWarningLampRearLeft: number;
+    tirePressureWarningLampFrontLeft: number;
+    tirePressureWarningLampFrontRight: number;
+    tirePressureWarningLampAll: number;
+    tirePressureWarningLampRearRight: number;
   };
   trunkOpenStatus: string;
 }
@@ -62,18 +61,18 @@ export interface VehicleLocation {
   accuracy: {
     hdop: number;
     pdop: number;
-  },
+  };
   coord: {
       alt: number;
       lat: number;
       lon: number;
       type: number;
-  },
+  };
   head: number;
   speed: {
       unit: number;
       value: number;
-  },
+  };
   time: string;
 }
 

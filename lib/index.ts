@@ -35,32 +35,36 @@ class BlueLinky extends EventEmitter {
     }
   }
 
-  async getVehicles(): Promise<Vehicle[]> {
+  async getVehicles(): Promise<Array<Vehicle>> {
     if(this.controller)
       return this.controller.getVehicles();
     else
       return [];
   }
 
-  async login() {
-    if(this.controller)
+  async login(): Promise<string> {
+    if (this.controller) {
       return this.controller.login();
-    else
-      logger.warn('Controller not ready!');
+    }
+    
+    logger.warn('Controller not ready!');
+    return '';
   }
 
-  async refreshAccessToken() {
-    if(this.controller)
+  async refreshAccessToken(): Promise<string> {
+    if (this.controller) {
       return this.controller.refreshAccessToken();
-    else
-      logger.warn('Controller not ready!');
+    }
+    // this does not seem right
+    logger.warn('Controller not ready!');
+    return '';
   }
 
-  logout() {
+  logout(): void {
     this.controller?.logout();
   }
 
-  async enterPin() {
+  async enterPin(): Promise<string|undefined> {
     return this.controller?.enterPin();
   }
 }

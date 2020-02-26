@@ -1,4 +1,5 @@
 import { VehicleStatus, VehicleLocation, Odometer, ClimateConfig } from '../interfaces/common.interfaces';
+import { Session } from '../interfaces/common.interfaces';
 
 export abstract class Vehicle {
   abstract get name(): string;
@@ -13,5 +14,5 @@ export abstract class Vehicle {
   abstract async stopClimate(): Promise<string>;
   abstract async updateStatus(): Promise<VehicleStatus>;
 
-  constructor(public session: any) {}
+  constructor(public session: Session) {}
 }

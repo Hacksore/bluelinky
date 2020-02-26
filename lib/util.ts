@@ -1,6 +1,6 @@
 import FormData from 'form-data';
 
-export function buildFormData(config) {
+export function buildFormData(config): FormData {
   const form = new FormData();
   for (const key in config) {
     const value = config[key];

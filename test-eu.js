@@ -1,3 +1,4 @@
+/* eslint-disable */
 const config = require('./config.json');
 const BlueLinky = require('./dist/index');
 
@@ -10,6 +11,10 @@ const client = new BlueLinky({
 	deviceUuid
 });
 
-client.login().then( async () => {
-	
+client.login().then(res => {
+	console.log('response:', res);
+
+	client.getVehicles()
+		.then(res => console.log(res))
+		.catch(err => console.log(err));
 });
