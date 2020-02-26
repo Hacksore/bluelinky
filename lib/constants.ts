@@ -15,20 +15,26 @@ export const US_ENDPOINTS = {
 export const CA_ENDPOINTS = {
   login: 'https://mybluelink.ca/tods/api/lgn',
   logout: 'https://mybluelink.ca/tods/api/lgout',
-  list: 'https://mybluelink.ca/tods/api/vhcllst',
+  // Account
+  myAccount: 'https://mybluelink.ca/tods/api/acctinfo',
+  nextService: 'https://mybluelink.ca/tods/api/nxtsvc',
+  preferedDealer : 'https://mybluelink.ca/tods/api/gtprfrdlr',
+  // Vehicle
+  vehicleList: 'https://mybluelink.ca/tods/api/vhcllst',
+  vehicleInfo: "https://mybluelink.ca/tods/api/sltvhcl",
+  status: 'https://mybluelink.ca/tods/api/lstvhclsts',
+  remoteStatus: 'https://mybluelink.ca/tods/api/rltmvhclsts',
+  // Car commands with preauth (PIN)
   lock: 'https://mybluelink.ca/tods/api/drlck',
   unlock: 'https://mybluelink.ca/tods/api/drulck',
   start: 'https://mybluelink.ca/tods/api/evc/rfon',
   stop: 'https://mybluelink.ca/tods/api/evc/rfoff',
   locate: 'https://mybluelink.ca/tods/api/fndmcr',
-  myAccount: 'https://mybluelink.ca/tods/api/acctinfo',
-  status: 'https://mybluelink.ca/tods/api/lstvhclsts',
-  remoteStatus: 'https://mybluelink.ca/tods/api/rltmvhclsts',
+  hornlight: "https://mybluelink.ca/tods/api/hornlight",
+  // System
+  verifyAccountToken: "https://mybluelink.ca/tods/api/vrfyacctkn",
   verifyPin: 'https://mybluelink.ca/tods/api/vrfypin',
   verifyToken: 'https://mybluelink.ca/tods/api/vrfytnc',
-  vehicleInfo: 'https://mybluelink.ca/tods/api/sltvhcl',
-  nextService: 'https://mybluelink.ca/tods/api/nxtsvc',
-  preferedDealer : 'https://mybluelink.ca/tods/api/gtprfrdlr'
 };
 
 export const ALL_ENDPOINTS =  {

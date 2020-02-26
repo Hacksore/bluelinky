@@ -138,12 +138,11 @@ class BlueLinky {
         });
 
         this.accessToken = response.body.result.accessToken;
-        console.log(response.body);
+        // console.log(response.body);
       } catch (err) {
         console.log(err.message);
         return Promise.reject(err.message);
       }
-
     }
 
     return Promise.resolve({});
