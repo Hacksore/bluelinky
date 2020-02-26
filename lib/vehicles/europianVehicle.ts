@@ -4,7 +4,6 @@ import got from 'got';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
-import { resolve } from 'dns';
 
 export default class EuropeanVehicle extends Vehicle {
 
@@ -13,7 +12,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   get vinNumber(): string {
-    return '';
+    return 'NOT YET IMPLEMENTED';
   }
 
   get type(): string {
@@ -53,7 +52,7 @@ export default class EuropeanVehicle extends Vehicle {
     return new Promise(async (resolve, reject) => {
       if(this.config.controlToken !== ''){
         const response = got(
-          `https://prd.eu-ccapi.hyundai.com:8080/api/v2/spa/vehicles/${this.config.id}/control/temperature`, {
+          `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`, {
           method: 'POST',
           body: {
             action: "start",
@@ -87,7 +86,7 @@ export default class EuropeanVehicle extends Vehicle {
     return new Promise(async (resolve, reject) => {
       if(this.config.controlToken !== ''){
         const response = got(
-          `https://prd.eu-ccapi.hyundai.com:8080/api/v2/spa/vehicles/${this.config.id}/control/temperature`, {
+          `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`, {
           method: 'POST',
           body: {
             action: "stop",
@@ -130,6 +129,7 @@ export default class EuropeanVehicle extends Vehicle {
           headers: {
             'Authorization': this.session.controlToken,
             'ccsp-device-id': this.session.deviceId,
+            'Content-Type': 'application/json'
           },
           body: {
             action: 'open',
@@ -156,7 +156,8 @@ export default class EuropeanVehicle extends Vehicle {
             method: 'GET',
             headers: {
               'Authorization': this.session.controlToken,
-              'ccsp-device-id': this.session.deviceId
+              'ccsp-device-id': this.session.deviceId,
+              'Content-Type': 'application/json'
             },
             json: true,
           }
@@ -188,6 +189,7 @@ export default class EuropeanVehicle extends Vehicle {
           headers: {
             'Authorization': this.session.controlToken,
             'ccsp-device-id': this.session.deviceId,
+            'Content-Type': 'application/json'
           },
           body: {
             action: 'close',

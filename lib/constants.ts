@@ -41,6 +41,11 @@ export const EU_ENDPOINTS = {
   token: `${EU_BASE_URL}/api/v1/user/oauth2/token`
 };
 
+export const EU_CONSTANTS = {
+  basicToken: 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
+  GCMSenderID: '199360397125'
+}
+
 export const ALL_ENDPOINTS =  {
   US: US_ENDPOINTS,
   CA: CA_ENDPOINTS,

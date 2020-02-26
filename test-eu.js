@@ -11,5 +11,5 @@ const client = new BlueLinky({
 });
 
 client.login().then( async () => {
-	await client.refreshAccessToken();
+	
 });

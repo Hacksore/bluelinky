@@ -1,3 +1,4 @@
+import { EU_CONSTANTS } from './../constants';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
@@ -99,7 +100,7 @@ export class EuropeanController extends SessionController {
         const authCode = authCodeResponse.body.redirectUrl.split('?')[1].split('&')[0].split('=')[1];
         this.session.refreshToken = authCode;
 
-        const credentials = await pr.register('199360397125');
+        const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
 
         const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
           method: 'POST',
@@ -130,7 +131,7 @@ export class EuropeanController extends SessionController {
         const response = await got(ALL_ENDPOINTS.EU.token, {
           method: 'POST',
           headers: {
-            'Authorization': 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
+            'Authorization': EU_CONSTANTS.basicToken,
             'Content-Type': 'application/x-www-form-urlencoded',
             'Content-Length':'154',
             'Host': 'prd.eu-ccapi.hyundai.com:8080',
