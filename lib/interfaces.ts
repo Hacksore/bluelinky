@@ -79,18 +79,20 @@ export interface VehicleStatus {
 export interface CanadianEndpoints {
   login: string;
   logout: string;
-  list: string;
+  vehicleList: string;
+  vehicleInfo: string;
   lock: string;
   unlock: string;
   start: string;
   stop: string;
   locate: string;
-  myAccount: string;
+  hornlight: string,
   status: string;
   remoteStatus: string;
+  verifyAccountToken: string;
   verifyPin: string;
   verifyToken: string;
-  vehicleInfo: string;
+  myAccount: string;
   nextService: string;
   preferedDealer: string;
 }
