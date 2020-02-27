@@ -4,17 +4,9 @@ import util from 'util';
 const defaultLevel = process.env.LOG_LEVEL || 'info';
 const { colorize, json, combine, timestamp, printf } = winston.format;
 
-// TODO: get json working for printing
-const myFormat = printf(({ info, level, message, timestamp, ...leftOver }) => {
-  const prefix = `[${timestamp}] ${level}:`;
-  let retVal;
-  if(message) {
-    retVal += prefix + message;
-  } else{
-    retVal += prefix + util.inspect(JSON.parse(message));
-  }
-
-  return retVal;
+// TODO: get json working without haveing to use splat
+const myFormat = printf(({ level, message, timestamp }) => {
+  return `[${timestamp}] ${level}: ${message}`;
 });
 
 const combinedFormats = combine(

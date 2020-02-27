@@ -1,229 +1,73 @@
-import got from 'got';
-import AmericanVehicle from './vehicles/americanVehicle';
-import CanadianVehicle from './vehicles/canadianVehicle';
-import EuropianVehicle from './vehicles/europianVehicle';
-import { ALL_ENDPOINTS, REGIONS } from './constants';
-import { buildFormData } from './util';
+import { Vehicle } from './vehicles/vehicle';
+import { EuropeanController } from './controllers/european.controller';
+import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
 
-import {
-  BlueLinkyConfig,
-  TokenResponse,
-  RegisterVehicleConfig,
-} from './interfaces';
 
 import logger from './logger';
-import BaseVehicle from './baseVehicle';
+import { BlueLinkyConfig } from './interfaces/common.interfaces';
+import { REGIONS } from './constants';
+import { AmericanController } from './controllers/american.controller';
 
 class BlueLinky extends EventEmitter {
 
-  public config: BlueLinkyConfig = {
-    username: null,
-    password: null,
-    region: null
-  };
-
-  public region: string|null = null;
-  private accessToken: string|null = null;
-  private tokenExpires: number = 0;
-  private vehicles: Array<CanadianVehicle|AmericanVehicle> = [];
+  controller: SessionController | null = null;
 
   constructor(config: BlueLinkyConfig) {
     super();
-    this.config = config;
+
+    switch(config.region){
+      case REGIONS.EU:
+        this.controller = new EuropeanController(config);
+        break;
+      case REGIONS.US:
+        this.controller = new AmericanController(config);
+        break;
+    }
+
+    if(this.controller === null){
+      throw new Error('Your region is not supported yet.');
+    }
 
     // do login for token here
-    this.login();
-
-    logger.info({ objects: 1 });
-
-  }
-
-  setAccessToken(token: string|null) {
-    this.accessToken = token;
-  }
-
-  getAccessToken(): string|null {
-    return this.accessToken;
-  }
-
-  setTokenExpires(unixtime: number) {
-    this.tokenExpires = unixtime;
-  }
-
-  // We should fetch a new token if we have elapsed the max time
-  async handleTokenRefresh() {
-    logger.debug('token time: ' + this.tokenExpires);
-    const currentTime = Math.floor((+new Date()/1000));
-    const tokenDelta = -(currentTime - (this.tokenExpires));
-
-    // Refresh 60 seconds before timeout just for good measure
-    if (tokenDelta <= 60) {
-      logger.debug('Token is about to expire, refreshing access token 60 seconds early');
-      const result = await this.getToken();
-      this.setAccessToken(result.access_token);
-      logger.debug(`Token is refreshed ${JSON.stringify(result)}`);
-    } else {
-      logger.debug(`Token is still valid: ${tokenDelta}`);
+    if(config.autoLogin){
+      this.controller.login();
     }
   }
 
-  async getToken(): Promise<TokenResponse> {
-    let response: got.Response<any|null>;
-    const endpoints = ALL_ENDPOINTS.US;
-
-    const now = Math.floor(+new Date() / 1000);
-    response = await got(endpoints.getToken + now, {
-      method: 'GET',
-      json: true
-    });
-
-    const csrfToken = response.body.token;
-    logger.debug(`Fetching CSRF Token ${csrfToken}`);
-
-    response = await got(endpoints.validateToken, {
-      method: 'GET',
-      headers: {
-        Cookie: `csrf_token=${csrfToken};`
-      }
-    });
-
-    const formData = buildFormData({
-      ':cq_csrf_token': csrfToken,
-      'username': this.config.username,
-      'password': this.config.password,
-      'url': 'https://owners.hyundaiusa.com/us/en/index.html'
-    });
-
-    response = await got(endpoints.auth, {
-      method: 'POST',
-      body: formData
-    });
-
-    try {
-      const json = JSON.parse(response.body);
-      logger.debug(`Fetching JSON Auth Token, RESPONSE: ${JSON.stringify(json)}`);
-
-      return json.Token;
-    } catch {
-      throw new Error(response.body);
-    }
+  async getVehicles(): Promise<Array<Vehicle>> {
+    if(this.controller)
+      return this.controller.getVehicles();
+    else
+      return [];
   }
 
-  async login(): Promise<object> {
-    const { region } = this.config;
-    logger.debug(`starting login method [${region}]`);
-    // if region is US do this
-    if (region === REGIONS.US) {
-      const response = await this.getToken();
-      const currentTime = Math.floor(+new Date()/1000);
-      const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
-
-      logger.debug(`Logged in to bluelink, token expires at ${expires}`);
-      this.accessToken = response.access_token;
-      this.tokenExpires = expires;
-      // return response;
+  async login(): Promise<string> {
+    if (this.controller) {
+      return this.controller.login();
     }
-
-    // if region is CA do this
-    if (region === REGIONS.CA) {
-
-      try {
-        const response = await got('https://mybluelink.ca/tods/api/lgn', {
-          method: 'POST',
-          headers: {
-            from: 'CWP',
-            language: '1',
-            Host: 'mybluelink.ca',
-            Origin: 'https://mybluelink.ca',
-            offset: '-5',
-          },
-          json: true,
-          body: {
-            loginId: this.config.username,
-            password: this.config.password
-          }
-        });
-
-        this.accessToken = response.body.result.accessToken;
-        logger.debug('body: %o', response.body);
-      } catch (err) {
-        logger.debug('error: %o', JSON.stringify(err.message));
-        Promise.reject(err.message);
-      }
-
-    }
-
-    // if region is CA do this
-    if (region === REGIONS.CA) {
-
-      try {
-        console.log(1);
-      } catch (err) {
-        logger.error('Error: %0', err);
-      }
-    }
-
-    this.emit('ready');
-    return Promise.resolve({});
+    
+    logger.warn('Controller not ready!');
+    return '';
   }
 
-  getVehicles() {
-    return this.vehicles;
-  }
-
-  getVehicle(vin: string): BaseVehicle|undefined {
-    return this.vehicles.find(item => vin === item.getVinNumber());
-  }
-
-  registerVehicle(config: RegisterVehicleConfig): Promise<CanadianVehicle|AmericanVehicle|null> {
-    const { vin, pin } = config;
-
-    if (this.accessToken === null) {
-      return Promise.reject('access token not fetched, try again');
+  async refreshAccessToken(): Promise<string> {
+    if (this.controller) {
+      return this.controller.refreshAccessToken();
     }
-
-    logger.debug(`registering vehicle: ${vin}, ${pin}`);
-
-    if(!this.getVehicle(vin)) {
-      let vehicle;
-
-      const vehicleConfig = {
-        vin: vin,
-        pin: pin,
-        token: this.accessToken,
-        bluelinky: this
-      };
-
-      switch(this.config.region) {
-        case REGIONS.US:
-          vehicle = new AmericanVehicle(vehicleConfig);
-          break;
-        case REGIONS.CA:
-          vehicle = new CanadianVehicle(vehicleConfig);
-          break;
-        case REGIONS.EU:
-          vehicle = new EuropianVehicle(vehicleConfig);
-          break;
-      }
-
-      if (!vehicle) {
-        return Promise.reject(null);
-      }
-      logger.debug('created new vehicle');
-
-      this.vehicles.push(vehicle);
-
-      return new Promise((resolve, reject) => {
-        vehicle.on('ready', () => {
-          resolve(vehicle);
-        });
-      });
-    }
-
-    return Promise.resolve(null);
+    // this does not seem right
+    logger.warn('Controller not ready!');
+    return '';
   }
 
+  logout(): void {
+    this.controller?.logout();
+  }
+
+  async enterPin(): Promise<string|undefined> {
+    // return this.controller?.enterPin();
+    return undefined
+  }
 }
 
 export default BlueLinky;

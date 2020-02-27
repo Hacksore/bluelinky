@@ -1,10 +1,4 @@
-import BlueLinky from './index';
-
-export interface BlueLinkyConfig {
-  username: string|null;
-  password: string|null;
-  region: string|null;
-}
+import BlueLinky from '../index';
 
 export interface StartConfig {
   airCtrl?: boolean|string;
@@ -16,6 +10,8 @@ export interface StartConfig {
 
 export interface HyundaiResponse {
   status: string;
+  // I think this is dynamic so hard to type it?
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   result: any;
   errorMessage: string;
 }
@@ -38,43 +34,6 @@ export interface RegisterVehicleConfig {
   vin: string;
   pin: string;
   region: string|null;
-}
-
-export interface VehicleStatus {
-  dateTime: string;
-  acc: boolean;
-  trunkOpen: boolean;
-  doorLock: boolean;
-  defrostStatus: string;
-  transCond: boolean;
-  doorLockStatus: string;
-  doorOpen: { frontRight: number, frontLeft: number, backLeft: number, backRight: number };
-  airCtrlOn: boolean;
-  airTemp: { unit: number, hvacTempType: number, value: string };
-  battery: {
-    batSignalReferenceValue: {};
-    batSoc: number;
-    batState: number;
-    sjbDeliveryMode: number
-  };
-  ign3: boolean;
-  ignitionStatus: string;
-  lowFuelLight: boolean;
-  sideBackWindowHeat: number;
-  dte: { unit: number, value: number };
-  engine: boolean;
-  defrost: boolean;
-  hoodOpen: boolean;
-  airConditionStatus: string;
-  steerWheelHeat: number;
-  tirePressureLamp: {
-    tirePressureWarningLampRearLeft: number,
-    tirePressureWarningLampFrontLeft: number,
-    tirePressureWarningLampFrontRight: number,
-    tirePressureWarningLampAll: number,
-    tirePressureWarningLampRearRight: number
-  };
-  trunkOpenStatus: string;
 }
 
 export interface CanadianEndpoints {
@@ -107,9 +66,4 @@ export interface AmericanEndpoints {
   status: string;
   enrollmentStatus: string;
   subscriptions: string;
-}
-
-// TODO:
-export interface EuropianEndpoints {
-  start: string;
 }

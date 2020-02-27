@@ -1,6 +1,6 @@
 .env
 node_modules/
 .DS_Store
-config.json
 .rpt2_cache
 dist/
+config*.json

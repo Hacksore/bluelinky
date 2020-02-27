@@ -1,3 +1,4 @@
+/* eslint-disable */
 const config = require('./config.json');
 // const BlueLinky = require('bluelinky');
 const BlueLinky = require('./dist/index');
