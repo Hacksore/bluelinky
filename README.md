@@ -1,9 +1,10 @@
 # bluelinky
 
-> An unoffcial API wrapper for Hyundai bluelink
+> An unoffcial API wrapper for Hyundai BlueLink
 
-![CI](https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg)
-![npm](https://img.shields.io/npm/v/bluelinky.svg)
+[![CI](https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg)](https://circleci.com/gh/Hacksore/bluelinky/tree/master)
+[![npm](https://img.shields.io/npm/v/bluelinky.svg)](https://www.npmjs.com/package/bluelinky)
+[![Discord](https://img.shields.io/discord/652755205041029120)](https://discord.gg/HwnG8sY)
 
 ## Install
 
@@ -12,50 +13,39 @@ npm install bluelinky
 ```
 
 
-# Example
+## Example
 ```javascript
 const BlueLinky = require('bluelinky');
 
-(async () => {
+const client = new BlueLinky({
+	username: 'someguy@example.com'
+  password: 'hunter1',
+	region: 'US',
+	pin: '1234'
+});
 
-	const client = new BlueLinky({
-		username: 'someguy@gmail.com',
-		password: 'password'
-	);
-
-	// Perform the login so we can fetch a token
-	await client.login();
-
-	const vehicle = await client.registerVehicle('JH4KA7650MC002609', '1111');
-	const status = await vehicle.status(true);
-
-	console.log(status);
-
-})();
+client.on('ready', async () => {
+  const vehicle = await client.getVehicle('5NMS55555555555555');
+  const response = await vehicle.lock();
+  console.log(response);
+});
 
 ```
 
 ## Supported Features
-- [X] Lock
-- [X] Unlock
-- [X] Start
-- [X] Stop
-- [X] Health
-- [X] Flash Lights
-- [X] Panic
-- [X] API Stats
-- [X] Vehicle Status
-- [X] Account Info
-- [X] Account Messages
-- [X] Enrollment Status
-- [X] Vehicle Service Info
-- [X] Pin Status
+- Lock
+- Unlock
+- Start (with climate control)
+- Stop
 
-## Responses
-You can find JSON response captures in the docs folder for analysing.
+## Supported Regions
 
-## Observations
-Seems the API has daily limits for commands, unsure of the numbers yet.
+| Regions |
+|---------|
+| USA     |
+| Canada  |
+| Europe  |
+
 
 ## Show your support
 

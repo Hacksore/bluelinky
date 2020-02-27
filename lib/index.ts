@@ -11,7 +11,8 @@ import { AmericanController } from './controllers/american.controller';
 
 class BlueLinky extends EventEmitter {
 
-  controller: SessionController | null = null;
+  private controller: SessionController;
+  private autoLogin = true;
 
   constructor(config: BlueLinkyConfig) {
     super();
@@ -23,50 +24,60 @@ class BlueLinky extends EventEmitter {
       case REGIONS.US:
         this.controller = new AmericanController(config);
         break;
+      default:
+        this.controller = new AmericanController(config);
+        break;
     }
 
     if(this.controller === null){
       throw new Error('Your region is not supported yet.');
     }
 
-    // do login for token here
-    if(config.autoLogin){
-      this.controller.login();
+    this.onInit();
+  }
+
+  async onInit(): Promise<string> {
+    console.log('logon', this.autoLogin.toString())
+    if(this.autoLogin){
+      logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
+      await this.controller.login();      
     }
+    this.emit('ready');
+    return Promise.resolve('onInit done');
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    if(this.controller)
-      return this.controller.getVehicles();
-    else
-      return [];
+    return this.controller.getVehicles() || [];   
   }
 
-  async login(): Promise<string> {
-    if (this.controller) {
-      return this.controller.login();
+  async getVehicle(vin: string): Promise<Vehicle|undefined> {
+    const vehicles = await this.controller.getVehicles();
+    try { 
+      return vehicles.find(car => car.vin === vin);
+    } catch (err) {
+      throw new Error('Vehicle not found!');
     }
-    
-    logger.warn('Controller not ready!');
-    return '';
   }
 
-  async refreshAccessToken(): Promise<string> {
-    if (this.controller) {
-      return this.controller.refreshAccessToken();
+  async login(): Promise<string> {    
+    const response = await this.controller.login();
+    logger.info('Sending ready event!');
+    this.emit('ready');
+    return response;
+  }
+
+  public async refreshAccessToken(): Promise<string> {
+    return this.controller.refreshAccessToken();
+  }
+
+  public async logout(): Promise<string> {
+    return this.controller.logout();
+  }
+
+  public async enterPin(): Promise<string|undefined> {
+    if (this.controller.enterPin) {
+      return this.controller.enterPin();
     }
-    // this does not seem right
-    logger.warn('Controller not ready!');
-    return '';
-  }
-
-  logout(): void {
-    this.controller?.logout();
-  }
-
-  async enterPin(): Promise<string|undefined> {
-    // return this.controller?.enterPin();
-    return undefined
   }
 }
 

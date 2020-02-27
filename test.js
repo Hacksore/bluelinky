@@ -8,17 +8,21 @@ const client = new BlueLinky({
   password,
 	region: 'US',
 	pin,
-	deviceUuid
+  deviceUuid,
+  // autoLogin: false // if you wanted to handle login yourself for some reason change this
 });
 
-client.login()
-.then(async (res) => {
-  console.log('response:', res);
-
-	const vehicles = await client.getVehicles();
-  // console.log('veh', vehicles)
-  const vehicle = vehicles[0];
+client.on('ready', async () => {
+  const vehicle = await client.getVehicle(vin);
   const status = await vehicle.getStatus();
   console.log(status);
-
 });
+
+// manually way
+// client.login()
+// .then(async (res) => {
+//   const vehicles = await client.getVehicles();
+//   const vehicle = vehicles[0];
+//   const status = await vehicle.getStatus();
+//   console.log(status);
+// });

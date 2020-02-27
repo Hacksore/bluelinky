@@ -1,20 +1,7 @@
-export const US_BASE_URL = 'https://owners.hyundaiusa.com';
+// moved all the US constants to its own file, we can use this file for shared constants
+
 export const CA_BASE_URL = 'https://mybluelink.ca';
 export const EU_BASE_URL = 'https://prd.eu-ccapi.hyundai.com:8080';
-
-export const US_ENDPOINTS = {
-  getToken: `${US_BASE_URL}/etc/designs/ownercommon/us/token.json?reg=`,
-  validateToken: `${US_BASE_URL}/libs/granite/csrf/token.json`,
-  auth: `${US_BASE_URL}/bin/common/connectCar`,
-  remoteAction: `${US_BASE_URL}/bin/common/remoteAction`,
-  usageStats: `${US_BASE_URL}/bin/common/usagestats`,
-  health: `${US_BASE_URL}/bin/common/VehicleHealthServlet`,
-  messageCenter: `${US_BASE_URL}/bin/common/MessageCenterServlet`,
-  myAccount: `${US_BASE_URL}/bin/common/MyAccountServlet`,
-  status: `${US_BASE_URL}/bin/common/enrollmentFeature`,
-  enrollmentStatus: `${US_BASE_URL}/bin/common/enrollmentStatus`,
-  subscriptions: `${US_BASE_URL}/bin/common/managesubscriptio`
-};
 
 export const CA_ENDPOINTS = {
   login: `${CA_BASE_URL}/tods/api/lgn`,
@@ -47,7 +34,6 @@ export const EU_CONSTANTS = {
 }
 
 export const ALL_ENDPOINTS =  {
-  US: US_ENDPOINTS,
   CA: CA_ENDPOINTS,
   EU: EU_ENDPOINTS,
 };

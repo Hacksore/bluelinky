@@ -1,11 +1,11 @@
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import got from 'got';
-import { US_ENDPOINTS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import AmericanVehicle from '../vehicles/americanVehicle';
 import SessionController from './controller';
 
 import logger from '../logger';
+import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
 
 export class AmericanController implements SessionController {
   constructor(config: BlueLinkyConfig) {
@@ -32,27 +32,29 @@ export class AmericanController implements SessionController {
     deviceUuid: null,
   };
 
-  async refreshAccessToken(): Promise<string> {
+  public async refreshAccessToken(): Promise<string> {
+    // Seems as of now we can just request a whole new access_token
+    // but the proper oauth flow would be to use the refresh_token :)
     return this.login();
   }
 
-  async login(): Promise<string> {
+  public async login(): Promise<string> {
     try {
-      const response = await got('https://api.telematics.hyundaiusa.com/v2/ac/oauth/token', {
+      const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
         method: 'POST',
         body: {
           username: this.config.username,
           password: this.config.password
         },
         headers: {
-          'client_secret': 'GXZveJJAVTehh/OtakM3EQ==',
-          'client_id': '815c046afaa4471aa578827ad546cc76'
+          'client_secret': CLIENT_SECRET,
+          'client_id': CLIENT_ID
         },
         json: true
-      });
-      // console.log(response.body);
+      });  
 
-      this.session.accessToken = response.body.access_token; 
+      this.session.accessToken = response.body.access_token;
+      this.session.refreshToken = response.body.refresh_token;
 
       return Promise.resolve('');
     } catch (err) {
@@ -69,12 +71,12 @@ export class AmericanController implements SessionController {
 
   async getVehicles(): Promise<Array<Vehicle>> {
 
-    const response = await got('https://api.telematics.hyundaiusa.com/ac/v2/enrollment/details/' + this.config.username, {
+    const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.config.username}`, {
       method: 'GET',
       headers: {
         'access_token': this.session.accessToken,
-        'client_id': '815c046afaa4471aa578827ad546cc76',
-        'Host': 'api.telematics.hyundaiusa.com',
+        'client_id': CLIENT_ID,
+        'Host': API_HOST,
         'User-Agent': 'okhttp/3.12.0',
         'payloadGenerated': '20200226171938',
         'includeNonConnectedVehicles': 'Y'
@@ -87,18 +89,18 @@ export class AmericanController implements SessionController {
       this.vehicles = [];
       return Promise.reject('No vehicles found for account!');
     }
-   
+
     data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
+    
       const config = {
-        master: 'wot',
         nickname: vehicleInfo.nickName,
         vin: vehicleInfo.vin,
         regDate: vehicleInfo.enrollmentDate,
-        type: 'wot',
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
-        gen: vehicleInfo.modelYear > 2017 ? 2 : 1,
+        // unsure if this is right but the new endpoint does not seem to have gen        
+        gen: vehicleInfo.modelYear > 2016 ? 2 : 1,
         name: vehicleInfo.nickName
       }
       this.vehicles.push(new AmericanVehicle(config, this.session));

@@ -37,7 +37,7 @@ export class EuropeanController implements SessionController {
     deviceUuid: null
   };
 
-  async refreshAccessToken(): Promise<string> {
+  public async refreshAccessToken(): Promise<string> {
     return this.login();
   }
 
@@ -91,13 +91,8 @@ export class EuropeanController implements SessionController {
       // spooky :), seems like regex might work better here?
       const authCode = authCodeResponse.body.redirectUrl.split('?')[1].split('&')[0].split('=')[1];
       this.session.refreshToken = authCode;
-
-      logger.info(JSON.stringify(authCodeResponse.body));
-      // Not entierly sure we need notifications right now so I've commented so that
-      // when I am testing it works without issues, feel free to put back
-  
+      
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
-      console.log('cred', this.config);
       
       const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
         method: 'POST',
@@ -146,8 +141,17 @@ export class EuropeanController implements SessionController {
 
       logger.info(`Login successful for user ${this.config.username}`, this.session.accessToken);
 
-      // we can't do this type of logic to keep the library running
-      // seems like a bad flow imo
+      // I think we should just tell them the token has expired, and either we refresh it or they do
+      /*
+
+      if (handleTokenRefresh)
+        // They handle it
+        this.emit('tokenExpired');
+      else
+        // check if token is expired and before doing a new request call
+        this.refreshAccessToken();
+      */
+
       // setInterval(() => {
       //   logger.info(`Access token expiered, getting a new one for ${this.config.username}`);
       //   this.refreshAccessToken();
