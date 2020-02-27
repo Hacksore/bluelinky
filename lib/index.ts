@@ -119,7 +119,7 @@ class BlueLinky {
 
     // if region is CA do this
     if (region === 'CA') {
-      
+
       try {
         const response = await got('https://mybluelink.ca/tods/api/lgn', {
           method: 'POST',
@@ -134,7 +134,7 @@ class BlueLinky {
           body: {
             loginId: this.authConfig.username,
             password: this.authConfig.password
-          }          
+          }
         });
 
         this.accessToken = response.body.result.accessToken;

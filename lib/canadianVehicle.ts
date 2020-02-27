@@ -161,6 +161,15 @@ export default class CanadianVehicle extends BaseVehicle {
     return response.body;
   }
 
+  async stop(): Promise<any> {
+    logger.info('Begin stop request');
+    const preAuth = await this.getPreAuth();
+    const response = await this._request(this.endpoints.stop, {
+      pAuth: preAuth
+    });
+    return response.body;
+  }
+
   async locate(): Promise<any> {
     logger.info('Begin locate request');
     const preAuth = await this.getPreAuth();
@@ -212,9 +221,8 @@ export default class CanadianVehicle extends BaseVehicle {
       body: {
         pin: this.pin,
         ...body
-        }
       }
-    );
+    });
 
     return response;
   }
