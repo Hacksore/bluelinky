@@ -13,6 +13,7 @@ class BlueLinky extends EventEmitter {
 
   private controller: SessionController;
   private autoLogin = true;
+  private vehicles: Array<Vehicle> = [];
 
   constructor(config: BlueLinkyConfig) {
     super();
@@ -42,7 +43,15 @@ class BlueLinky extends EventEmitter {
       logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
       await this.controller.login();      
     }
-    this.emit('ready');
+
+    // get all cars from the controller
+    // we can use this for future caching features and making sure features exist
+    this.vehicles = await this.controller.getVehicles();
+    
+    logger.info(`Found ${this.vehicles.length} on the account`);
+
+    // console.log('redy', this.vehicles)
+    this.emit('ready', this.vehicles);
     return Promise.resolve('onInit done');
   }
 
@@ -50,10 +59,9 @@ class BlueLinky extends EventEmitter {
     return this.controller.getVehicles() || [];   
   }
 
-  async getVehicle(vin: string): Promise<Vehicle|undefined> {
-    const vehicles = await this.controller.getVehicles();
+  async getVehicle(vin: string): Promise<Vehicle|undefined> {;
     try { 
-      return vehicles.find(car => car.vin === vin);
+      return this.vehicles.find(car => car.vin === vin);
     } catch (err) {
       throw new Error('Vehicle not found!');
     }

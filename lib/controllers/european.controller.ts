@@ -23,6 +23,7 @@ export class EuropeanController implements SessionController {
     refreshToken: '',
     controlToken: '',
     deviceId: '',
+    tokenExpiresAt: 0,
   };
 
   private vehicles: Array<EuropeanVehicle> = [];
@@ -170,7 +171,7 @@ export class EuropeanController implements SessionController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    logger.info('getVehicles ' + this.session.accessToken)
+
     if(this.session.accessToken === undefined) {
       return Promise.reject('Token not set');
     }

@@ -6,6 +6,7 @@ import SessionController from './controller';
 
 import logger from '../logger';
 import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
+import { REGIONS } from '../constants';
 
 export class AmericanController implements SessionController {
   constructor(config: BlueLinkyConfig) {
@@ -18,6 +19,7 @@ export class AmericanController implements SessionController {
     refreshToken: '',
     controlToken: '',
     deviceId: '',
+    tokenExpiresAt: 0
   };
 
   private vehicles: Array<AmericanVehicle> = [];
@@ -25,7 +27,7 @@ export class AmericanController implements SessionController {
   public config: BlueLinkyConfig = {
     username: null,
     password: null,
-    region: 'US',
+    region: REGIONS.US,
     vin: null,
     autoLogin: true,
     pin: null,
@@ -33,9 +35,30 @@ export class AmericanController implements SessionController {
   };
 
   public async refreshAccessToken(): Promise<string> {
-    // Seems as of now we can just request a whole new access_token
-    // but the proper oauth flow would be to use the refresh_token :)
-    return this.login();
+    const shouldRefreshToken = Math.floor(((+new Date()/1000)) - this.session.tokenExpiresAt) <= 10;
+    console.log(Math.floor(+new Date()/1000) + '-' + this.session.tokenExpiresAt, shouldRefreshToken.toString());
+
+    if (this.session.refreshToken && shouldRefreshToken) {
+      const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
+        method: 'POST',
+        body: {
+          'refresh_token': this.session.refreshToken
+        },
+        headers: {
+          'client_secret': CLIENT_SECRET,
+          'client_id': CLIENT_ID
+        },
+        json: true
+      });  
+
+      this.session.accessToken = response.body.access_token;
+      this.session.refreshToken = response.body.refresh_token;
+      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + response.body.expires_in);
+      // console.log(this.session)
+      return Promise.resolve('Token refreshed');
+    }
+    
+    return Promise.resolve('Token not expired, no need to refresh');
   }
 
   public async login(): Promise<string> {
@@ -55,6 +78,8 @@ export class AmericanController implements SessionController {
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
+      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + response.body.expires_in);
+      // console.log(this.session)
 
       return Promise.resolve('');
     } catch (err) {
@@ -103,7 +128,7 @@ export class AmericanController implements SessionController {
         gen: vehicleInfo.modelYear > 2016 ? 2 : 1,
         name: vehicleInfo.nickName
       }
-      this.vehicles.push(new AmericanVehicle(config, this.session));
+      this.vehicles.push(new AmericanVehicle(config, this));
     });
 
     return Promise.resolve(this.vehicles);

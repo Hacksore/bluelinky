@@ -11,10 +11,6 @@ const client = new BlueLinky({
 	deviceUuid
 });
 
-client.login().then(res => {
-	console.log('response:', res);
-
-	client.getVehicles()
-		.then(res => console.log(res))
-		.catch(err => console.log(err));
+client.on('ready', vehicles => {
+	console.log(vehicles);
 });

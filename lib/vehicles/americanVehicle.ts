@@ -4,19 +4,20 @@ import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.i
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import got from 'got';
-import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
+import { BASE_URL, CLIENT_ID, API_HOST, CLIENT_SECRET } from '../constants/america';
+import { URLSearchParams } from 'url';
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
   public region = REGIONS.US;
 
-  constructor(public config, public session) {
-    super(session);
+  constructor(public config, public controller) {
+    super(controller);
     logger.info(`US Vehicle ${this.config.regId} created`);
   }
 
-  get status(): VehicleStatus | null {
-    return this._status;
-  }
+  // get status(): VehicleStatus | null {
+  //   return this._status;
+  // }
   
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
@@ -33,12 +34,59 @@ export default class AmericanVehicle extends Vehicle {
     return this.config.vin;
   }
 
-  startClimate(): Promise<string> {
-    throw new Error('Method not implemented.');
+  public async startClimate(): Promise<string> {
+    const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/start`, {
+      method: 'POST',
+      headers: {
+        'ACCESS_TOKEN': this.controller.session.accessToken,
+        'CLIENT_ID': CLIENT_ID,
+        'User-Agent': 'okhttp/3.12.0',
+        'VIN': this.config.vin,
+        'LANGUAGE': '0',
+        'TO': 'ISS',
+        'FROM': 'SPA',        
+        'OFFSET': '-5',
+        'blueLinkServicePin': this.controller.config.pin
+      },
+      body: {
+        "Ims": 0,
+        "airCtrl": 1,
+        "airTemp": {
+          "unit": 1,
+          "value": 72
+        },
+        "defrost": false,
+        "heating1": 0,
+        "igniOnDuration": 1,
+        "seatHeaterVentInfo": null,
+        "username": this.controller.config.username,
+        "vin": this.config.vin
+      },
+      json: true
+    });
+
+    // const data = JSON.parse(response.body);
+    return Promise.resolve('all good');
   }
 
-  stopClimate(): Promise<string> {
-    throw new Error('Method not implemented.');
+  public async stopClimate(): Promise<string> {
+    const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/stop`, {
+      method: 'POST',
+      headers: {
+        'ACCESS_TOKEN': this.controller.session.accessToken,
+        'CLIENT_ID': CLIENT_ID,
+        'User-Agent': 'okhttp/3.12.0',
+        'VIN': this.config.vin,
+        'LANGUAGE': '0',
+        'TO': 'ISS',
+        'FROM': 'SPA',        
+        'OFFSET': '-5',
+        'blueLinkServicePin': this.controller.config.pin
+      }
+    });
+
+    // const data = JSON.parse(response.body);
+    return Promise.resolve('all good');
   }
 
   updateStatus(): Promise<VehicleStatus> {
@@ -57,38 +105,115 @@ export default class AmericanVehicle extends Vehicle {
     return this.type;
   }
 
-  public async getStatus(): Promise<VehicleStatus> {
-
-    // TODO: figure out all the things needed here for headers    
+  public async status(): Promise<VehicleStatus> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rvs/vehicleStatus`, {
       method: 'GET',
       headers: {
-        'access_token': this.session.accessToken,
-        'Client_Id': CLIENT_ID,
-        'Host': API_HOST,
+        'ACCESS_TOKEN': this.controller.session.accessToken,
+        'CLIENT_ID': CLIENT_ID,
         'User-Agent': 'okhttp/3.12.0',
-        'registrationId': this.config.regId,
         'VIN': this.config.vin,
-        'Language': '0',
-        'To': 'ISS',
-        'From': 'SPA',
-        'refresh': 'false',
-        'brandIndecator': this.config.brandIndecator,
-        'Offset': '-5'
+        'LANGUAGE': '0',
+        'TO': 'ISS',
+        'FROM': 'SPA',
+        'REFRESH': 'TRUE',
+        'OFFSET': '-5'
       }
     });
 
     const data = JSON.parse(response.body);
-    return Promise.resolve(data as VehicleStatus);
+    return Promise.resolve(data.vehicleStatus as VehicleStatus);
   }
 
   public async unlock(): Promise<string> {
-    console.log('TODO');
-    return Promise.reject();
+    const formData = new URLSearchParams();
+    formData.append('userName', this.controller.config.username);
+    formData.append('vin', this.config.vin);
+
+    const response = await got(`${BASE_URL}/ac/v2/rcs/rdo/on`, {
+      method: 'POST',
+      headers: {
+        'access_token': this.controller.session.accessToken,
+        'Client_Id': CLIENT_ID,
+        'Host': API_HOST,
+        'requestId': '40',
+        'User-Agent': 'okhttp/3.12.0',
+        'registrationId': this.config.regId,
+        'gen': this.config.gen,
+        'blueLinkServicePin': this.controller.config.pin,
+        'username': this.controller.config.username,
+        'VIN': this.config.vin,
+        'APPCLOUD-VIN': this.config.vin,
+        'Language': '0',
+        'To': 'ISS',
+        'encryptFlag': 'false',
+        'From': 'SPA',
+        'brandIndecator': this.config.brandIndecator,
+        'Offset': '-5'
+      },
+      body: formData.toString()
+    });
+
+    if (response.statusCode === 200) {
+      return Promise.resolve('Unlock successful');  
+    }
+
+    return Promise.reject('Something went wrong!');  
   }
 
   public async lock(): Promise<string> {
-    console.log('TODO');
-    return Promise.reject();
+
+    const formData = new URLSearchParams();
+    formData.append('userName', this.controller.config.username);
+    formData.append('vin', this.config.vin);
+
+    const response = await got(`${BASE_URL}/ac/v2/rcs/rdo/off`, {
+      method: 'POST',
+      headers: {
+        'access_token': this.controller.session.accessToken,
+        'Client_Id': CLIENT_ID,
+        'Host': API_HOST,
+        'requestId': '40',
+        'User-Agent': 'okhttp/3.12.0',
+        'registrationId': this.config.regId,
+        'gen': this.config.gen,
+        'blueLinkServicePin': this.controller.config.pin,
+        'username': this.controller.config.username,
+        'VIN': this.config.vin,
+        'APPCLOUD-VIN': this.config.vin,
+        'Language': '0',
+        'To': 'ISS',
+        'encryptFlag': 'false',
+        'From': 'SPA',
+        'brandIndecator': this.config.brandIndecator,
+        'Offset': '-5'
+      },
+      body: formData.toString()
+    });
+
+    if (response.statusCode === 200) {
+      return Promise.resolve('Lock successful');  
+    }
+
+    return Promise.reject('Something went wrong!');  
+  }
+
+  private async getPinToken(): Promise<any> {
+    const response = await got(`${BASE_URL}/v2/ac/oauth/pintoken/refresh`, {
+      method: 'POST',
+      headers: {
+        'access_token': this.controller.session.accessToken,
+        'Client_Id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'Host': API_HOST,
+        'User-Agent': 'okhttp/3.12.0',
+      },
+      body: {
+        refreshToken: this.config.accessToken
+      },
+      json: true
+    });
+
+    return Promise.resolve(response.body);
   }
 }

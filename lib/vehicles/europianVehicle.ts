@@ -26,31 +26,31 @@ export default class EuropeanVehicle extends Vehicle {
   get type(): string {
     return this.type;
   }
-
-  get status(): VehicleStatus | null {
-    return this._status;
-  }
-
+  
   get odometer(): Odometer | null {
     return this._odometer;
   }
-
+  
   get location(): VehicleLocation | null {
     return this._location;
   }
-
+  
   public region = REGIONS.EU;
   private _status: VehicleStatus | null = null;
   private _location: VehicleLocation | null = null;
   private _odometer: Odometer | null = null;
-
+  
   constructor(public config, public session) {
     super(session);
     this.onInit();
   }
-
+  
   private onInit(): void {
     logger.info(`EU Vehicle ${this.config.id} created`);
+  }
+
+  public async status(): Promise<VehicleStatus|null> {
+    return this._status;
   }
 
   public async startClimate(config: ClimateConfig): Promise<string> {

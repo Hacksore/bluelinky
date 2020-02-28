@@ -12,10 +12,13 @@ const client = new BlueLinky({
   // autoLogin: false // if you wanted to handle login yourself for some reason change this
 });
 
-client.on('ready', async () => {
-  const vehicle = await client.getVehicle(vin);
-  const status = await vehicle.getStatus();
-  console.log(status);
+client.on('ready', async (vehicles) => {
+  // const vehicles = await client.getVehicles();
+  // console.log(vehicles[0].status());
+  // const vehicle = vehicles[0];
+
+  const status = await vehicles[0].status();
+  console.log(status)
 });
 
 // manually way

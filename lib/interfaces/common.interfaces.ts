@@ -19,6 +19,7 @@ export interface Session {
   refreshToken?: string;
   controlToken?: string;
   deviceId?: string;
+  tokenExpiresAt: number;
 }
 
 export interface VehicleStatus {

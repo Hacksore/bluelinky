@@ -1,5 +1,5 @@
 import { Vehicle } from '../vehicles/vehicle';
-import { Session, VehicleStatus } from '../interfaces/common.interfaces';
+import { Session } from '../interfaces/common.interfaces';
 
 // changed this to interface so we can have option things?
 export default interface SessionController {
