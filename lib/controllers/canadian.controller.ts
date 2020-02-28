@@ -10,7 +10,7 @@ export class CanadianController {
     deviceUuid: null
   };
 
-  login() {
+  login(): string {
     return 'OK';
   }
 }

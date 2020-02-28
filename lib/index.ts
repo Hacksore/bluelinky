@@ -59,8 +59,8 @@ class BlueLinky extends EventEmitter {
     return this.controller.getVehicles() || [];   
   }
 
-  async getVehicle(vin: string): Promise<Vehicle|undefined> {;
-    try { 
+  async getVehicle(vin: string): Promise<Vehicle|undefined> {
+    try {
       return this.vehicles.find(car => car.vin === vin);
     } catch (err) {
       throw new Error('Vehicle not found!');

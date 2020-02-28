@@ -4,7 +4,7 @@ import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.i
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import got from 'got';
-import { BASE_URL, CLIENT_ID, API_HOST, CLIENT_SECRET } from '../constants/america';
+import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
 import { URLSearchParams } from 'url';
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
@@ -65,6 +65,7 @@ export default class AmericanVehicle extends Vehicle {
       json: true
     });
 
+    logger.debug(JSON.stringify(response));
     // const data = JSON.parse(response.body);
     return Promise.resolve('all good');
   }
@@ -84,7 +85,7 @@ export default class AmericanVehicle extends Vehicle {
         'blueLinkServicePin': this.controller.config.pin
       }
     });
-
+    logger.debug(JSON.stringify(response));
     // const data = JSON.parse(response.body);
     return Promise.resolve('all good');
   }
@@ -198,22 +199,23 @@ export default class AmericanVehicle extends Vehicle {
     return Promise.reject('Something went wrong!');  
   }
 
-  private async getPinToken(): Promise<any> {
-    const response = await got(`${BASE_URL}/v2/ac/oauth/pintoken/refresh`, {
-      method: 'POST',
-      headers: {
-        'access_token': this.controller.session.accessToken,
-        'Client_Id': CLIENT_ID,
-        'client_secret': CLIENT_SECRET,
-        'Host': API_HOST,
-        'User-Agent': 'okhttp/3.12.0',
-      },
-      body: {
-        refreshToken: this.config.accessToken
-      },
-      json: true
-    });
+  // we dont need this yet
+  // private async getPinToken(): Promise<any> {
+  //   const response = await got(`${BASE_URL}/v2/ac/oauth/pintoken/refresh`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'access_token': this.controller.session.accessToken,
+  //       'Client_Id': CLIENT_ID,
+  //       'client_secret': CLIENT_SECRET,
+  //       'Host': API_HOST,
+  //       'User-Agent': 'okhttp/3.12.0',
+  //     },
+  //     body: {
+  //       refreshToken: this.config.accessToken
+  //     },
+  //     json: true
+  //   });
 
-    return Promise.resolve(response.body);
-  }
+  //   return Promise.resolve(response.body);
+  // }
 }

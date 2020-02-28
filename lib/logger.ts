@@ -1,5 +1,4 @@
 import * as winston from 'winston';
-import util from 'util';
 
 const defaultLevel = process.env.LOG_LEVEL || 'info';
 const { colorize, json, combine, timestamp, printf } = winston.format;
