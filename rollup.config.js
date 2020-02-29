@@ -3,6 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import license from 'rollup-plugin-license';
 import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
+import { uglify } from 'rollup-plugin-uglify';
 import pkg from './package.json';
 import fs from 'fs';
 const licenseText = fs.readFileSync(__dirname + '/LICENSE');
@@ -12,7 +13,7 @@ export default {
 	output:	{
 		format: 'cjs',
 		name: 'index',
-		file: 'dist/index.js'		
+		file: 'dist/index.js'
 	},
   external: [
 		...Object.keys(pkg.dependencies || {}),
@@ -21,7 +22,8 @@ export default {
 	plugins: [
 		builtins(),
 		resolve({ preferBuiltins: true }),
-		typescript(),
+		typescript({
+		}),
 		commonjs(),
 		license({
 			banner: `
@@ -29,6 +31,7 @@ export default {
 
 				${licenseText}
 				`
-		})
+		}),
+		uglify()
 	]
 };

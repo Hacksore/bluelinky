@@ -1,0 +1,789 @@
+[Function: BlueLinky]
+[2019-12-11 10:33:57] [32minfo[39m: starting login method [CA]
+{ responseHeader: { responseCode: 0, responseDesc: 'Success' },
+  result:
+   { accessToken:
+      'eyJrZXkiOiJLRTdQSXdGQzhRL2hGekJsQ0JNM21VMjVUQ3dWWHRIWXVRNzdNcng5UzZiTzdCdUlVUmFsQjE1ZGEyVTY3NTdKdzYzaXR5QnNjOXZwaVhUcDdaNVY4Zz09IiwiZW5jIjoiWlpaVHVvNzB0Z0hFbFBJOGY0RXBZOGZBc2pFSytGM1BPZVdxSTVaV0lpN09MdDJXVWRxUEpWYm9GeWJYVTArWVJXUlMvVVh0TC8yRG1ZQ0Z3ZllsVkE1UlJUOXdaeW9uTWNxeU5hejhjSGF6bW9iNlUzM3RCcnBkZWxJbGhPMmJYcjR2aGJDZER6Q1dDelk2bTU3SUhpL0l4U0R3RkV4NldBVnhFRU9iSjR4OEdBR3gvZkhEUnJmYjhCMUxyYXhsajN3Rnk4Und2NndiODkrbFN5bjBtMEwzYXloeFoyRjluY0pHak0yajU1VC9rTTlOZ21wcU1MdG5nTCs5ZWlremVTNk5iK0F5M3ptQVBmYnVYR2REbnErcGJuUlhEcFlDT3Vrd3FxQmVZa2FkZGkyY0dnQzlhNENzRVFsWnVvMmdOVE1lcjhhVldvNG9OQzhFc2dCQldud1lBYkg5OGNOR3Q5dndIVXV0ckdYYVB0dHhwd3lFZDhxdUpIQzU2TGpjcjczckM0dnFuRVlBWVRReFRHd2xGTk9aLzQvN1dIOXY0MkJVNjZST1lYQUxZSUwyR1BVOXpNMFdZT2ZzcGl3R2UxMVFicWl0Q1RjaHozbnJQNllPeGxQbXhKbGRqYWhDeENTNVQwMVNCbnQycVVzQy9KMlo1NmhKR3ZXVi9PNXZoUTNkQy9YTHBLeStvYkRqQ1JJMWNVcWpJaTBLVjJxY3k1ckl4TCtZV2R1aWcyellCRnpsQUluSldPdCtPTmw3SnJNVUpScFdnRGJkR3NtT3R2ZVQ4THFYQXpaL3M2T1BEdm5xc1lYOTBBeEk0K1k5aFpzSlkvZ1AzOXZYMFdHa200WTJvQ1FIQWE5MzZxSGkxeUxTK1c2ME9zNjhNZFF6V2FZays4U3kvbFJoNExGeGZWRzJIS2JVeXdnd0VpQk1lWUhZSmZGOFRCTE8yMG1oZms1Qnd2MGNnWHFVOU5SNDMrNWNEN3ZVTmJnRVN0QUhyVGc3SXF2MjVWVnZwWFdtcndmTDBkVy9zTXdzVjlLbGJuL1JNR21jYlg5bGtMMkxSU3paYWRuNmhKb1lnVnZJYXNETjJiZ2NITFFVbFRNbkkyQyt6SUhXcW1jdElrOFJtSXphUlpjVlFzSTNlNEJRWmgzbXFhYzlISk5KM01MKzlETjhBc2VNWEVxVVVPTHhQZnB1OVR0QVJhSFhIM3BMbUZJMFl2dFdkNTJzdXkxZ1Y4aDhDUWt2Q2RkOEYzMG5OaC8zMGtKYmtwQ09YcjdBYmZTckE2czZUMTJnUFdYUzJzMmVqejBTWjBoYy9QaVJXdmx4M0R5Vm1zTll5MlNtVW5JdzBObWRoQlVneXIxOTN1d1BGZ0dwMWVpS2k5a0J1QVpwNjhaNWFwbXBrTGNnMlArUVh5U0lWNjA9In0=',
+     scope: [ 'profile' ],
+     tokenType: 'bearer',
+     expireIn: 86400,
+     refreshToken:
+      'eyJrZXkiOiJGeGJWdm9uTHRlYjVkRGRWcDRSWXJ1bnU1VTFEd2xSTkhlTW5hMWFHTEtoQ0dSMjVtcUZvVTdkQ0VaNU9Pd1FFaUpJZ1h2RVc2UGd6VExLZ3lCWFZ6QT09IiwiZW5jIjoiMzJDODhCWG5sRk1TbmRyUzhTNmlaK01HaDdQb1MxbDlXM2MvREU0MHMvUWNjN2MyS09vNGRycG1HWnRPK0d6dkdEcDJ2TzBNTXl6SkUzRmQ5WTdRcC9VSWhlemg3elNLRDBxbUhrbWplelFOMDRYNENCY2FLdHFBMVBWS3d0cHkxZ3A2aDZVMnZ5SnBDODM4bUJsK0pNeUY3N1RuSTJDYmZnS050a2E1eGlLMlNMV0hUV1lYS3JNZHlFZUMwSW9jRnlhNUlxQkwzMmxzVEoyeEQrcXl0MjBqSnQ1cXllTTNlcTV0MFE1RUZIUGpFN1dHeVhHRSs4VXpZbGNtK2wrMzd0dWorUTIwaHVPQW1KU091enhqaHBqWDUwQ0JVdWpRckRXQXFISXJ4M3BCZDFBZENaOFJ5TDczYkJHK0Y2RmtibDR0T0JWcVNueTJDS2JMNVVuY3piWkl0WWROWmhjcXN4M0lSNExRaWh6WHFFdUJxNlQwMnZIbEF0VzZMNlladVo0MHhjQmtRTjkzOGhGbnpici8xVkRHYzdTRUdGNEdJZndwTXl5MGRpM3phblYzL2UwU1o4cCtBYm5EUVJzbHEraGxCVS9xMFp5YWsxb1VsRUJtOW9RcXBPSGRPRkt5NkFUMnQrTXFka2Z3dEtSSURXNm1DM3RWWG9RcDdjMVo5Q2hsc3J1cDZyd3ZXajdvbFFJV1N4eXU0R1BYcXQ1NnkvZnJMZ3hCSnR2aUJhejRHQ2MvYUFGV285MlZrNDM4SzZQcktWbVdhRFg5QzNjdEZEUGV1clRNa2IveFVZanVrb1VUWHRTTFR5K1Y5VjQ0bG52d0o0SDBtb3pmdCt0SGFrY0l5MHhEVVE2MkRNSW1qYjlFSFR0UE15U2ZDS2c5QStPVGlvUElRTTN1bFlaZ2NIUGFZMXpoOFU2UlNIaUFvNEErZmlwWGMxOW9VeVVCUnh1VG9oQmNvYzNHcUpGQi9sVGc0ZHIwMlcvQVNxVXoyL29YRFYvU2owd3o4RHloVkpPdy9qNjNRRlZkRUNDN2FIdndLTEJ6VmU1RW9DdGJwb3JyMUN5Z0d0K2k4bUlGaDVCazAwWElldVZ2ZDV6N1BmUFNTNSt1blNGMDdRRU9rKzVidlkvallmVEppUGp6aWF0WldyMnhaRENXcWo1NXJ6MDB1T21CWm1ac3owbHh1YmF2Y1BhR0h4ZVdNY2ROd3M5Ym4xMWNLVWJQaEVRc1dGYUlKOGRyQjZMek1JbDl6R2FsN2xzekx6ZWw5S1l4R0hFNFJtbklmaUI4eEdRN01nSHdXNWdtY3gwVEgrK054YXlZYzQ5S0Erc3E3bHFsMzY4anJQSnhrRHBaaytiaFptZiszeVRmTmRsMWhQeHFDTEV4VTRNZFZUK1czWk5kTmpNZDN2eUFNd0k9In0=',
+     signature: '' } }
+[2019-12-11 10:33:59] [32minfo[39m: reg veh: KM8K23AG1LU059664, 1945
+[2019-12-11 10:33:59] [32minfo[39m: onInit from CA
+getVehicleList
+[2019-12-11 10:33:59] [32minfo[39m: [https://mybluelink.ca/tods/api/vhcllst] {}
+[2019-12-11 10:33:59] [32minfo[39m: created new vehicle
+{
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "vehicles": [
+      {
+        "vehicleId": "BV/xYFm1XeuElBLH5fk6VQ==",
+        "nickName": "Konasse",
+        "modelCode": "KE1SEFEMEP20",
+        "modelName": "KONA EV",
+        "modelYear": "2020",
+        "fuelKindCode": "E",
+        "trim": "",
+        "engine": "",
+        "exteriorColor": "SS7",
+        "dtcCount": 0,
+        "subscriptionStatus": "A",
+        "subscriptionEndDate": "20241114",
+        "mileageForNextService": 10724.8,
+        "daysForNextService": "20200514",
+        "overviewMessage": "",
+        "defaultVehicle": true,
+        "enrollmentStatus": "4",
+        "genType": "G3",
+        "vin": "KM8K23AG1LU059664"
+      }
+    ]
+  }
+}
+Found vehicle: BV/xYFm1XeuElBLH5fk6VQ==
+[2019-12-11 10:34:00] [32minfo[39m: Begin status request
+[2019-12-11 10:34:00] [32minfo[39m: [https://mybluelink.ca/tods/api/lstvhclsts] {}
+status : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "status": {
+      "lastStatusDate": "20191211153025",
+      "airCtrlOn": false,
+      "engine": false,
+      "doorLock": true,
+      "doorOpen": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "trunkOpen": false,
+      "airTempUnit": "C",
+      "airTemp": {
+        "value": "00H",
+        "unit": 0
+      },
+      "defrost": false,
+      "acc": false,
+      "evStatus": {
+        "batteryCharge": false,
+        "batteryStatus": 81,
+        "batteryPlugin": 0,
+        "remainTime2": {
+          "etc1": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc2": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc3": {
+            "value": 0,
+            "unit": 1
+          },
+          "atc": {
+            "value": 0,
+            "unit": 1
+          }
+        },
+        "drvDistance": [
+          {
+            "rangeByFuel": {
+              "gasModeRange": {
+                "value": 0,
+                "unit": 1
+              },
+              "evModeRange": {
+                "value": 280,
+                "unit": 1
+              },
+              "totalAvailableRange": {
+                "value": 280,
+                "unit": 1
+              }
+            },
+            "type": 2
+          }
+        ]
+      },
+      "hoodOpen": false,
+      "transCond": true,
+      "steerWheelHeat": 0,
+      "sideBackWindowHeat": 0,
+      "dte": {
+        "unit": 1
+      },
+      "tirePressureLamp": {
+        "tirePressureLampAll": 0
+      },
+      "battery": {
+        "batSoc": 90,
+        "batState": 0,
+        "batSignalReferenceValue": {}
+      },
+      "remoteIgnition": true,
+      "seatHeaterVentInfo": {},
+      "sleepModeCheck": false,
+      "lampWireStatus": {
+        "headLamp": {},
+        "stopLamp": {},
+        "turnSignalLamp": {}
+      },
+      "windowOpen": {},
+      "engineRuntime": {}
+    }
+  }
+}
+[2019-12-11 10:35:00] [32minfo[39m: Begin status request
+[2019-12-11 10:35:00] [32minfo[39m: [https://mybluelink.ca/tods/api/rltmvhclsts] {}
+status remote : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "status": {
+      "lastStatusDate": "20191211103527",
+      "airCtrlOn": false,
+      "engine": false,
+      "doorLock": true,
+      "doorOpen": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "trunkOpen": false,
+      "airTempUnit": "C",
+      "airTemp": {
+        "value": "00H",
+        "unit": 0
+      },
+      "defrost": false,
+      "acc": false,
+      "evStatus": {
+        "batteryCharge": false,
+        "batteryStatus": 81,
+        "batteryPlugin": 0,
+        "remainTime2": {
+          "etc1": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc2": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc3": {
+            "value": 0,
+            "unit": 1
+          },
+          "atc": {
+            "value": 0,
+            "unit": 1
+          }
+        },
+        "drvDistance": [
+          {
+            "rangeByFuel": {
+              "gasModeRange": {
+                "value": 0,
+                "unit": 1
+              },
+              "evModeRange": {
+                "value": 280,
+                "unit": 1
+              },
+              "totalAvailableRange": {
+                "value": 280,
+                "unit": 1
+              }
+            },
+            "type": 2
+          }
+        ]
+      },
+      "hoodOpen": false,
+      "transCond": true,
+      "steerWheelHeat": 0,
+      "sideBackWindowHeat": 0,
+      "dte": {
+        "unit": 1
+      },
+      "tirePressureLamp": {
+        "tirePressureLampAll": 0
+      },
+      "battery": {
+        "batSoc": 90,
+        "batState": 0,
+        "batSignalReferenceValue": {}
+      },
+      "remoteIgnition": true,
+      "seatHeaterVentInfo": {},
+      "sleepModeCheck": false,
+      "lampWireStatus": {
+        "headLamp": {},
+        "stopLamp": {},
+        "turnSignalLamp": {}
+      },
+      "windowOpen": {},
+      "engineRuntime": {}
+    }
+  }
+}
+[2019-12-11 10:35:29] [32minfo[39m: Begin myAccount request
+[2019-12-11 10:35:29] [32minfo[39m: [https://mybluelink.ca/tods/api/acctinfo] {}
+myAccount : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "firstName": "xxxx",
+    "lastName": "xxxx",
+    "notificationEmail": "xxxx@gmail.com",
+    "phones": {
+      "primary": "514-xxx-xxxx",
+      "secondary": null
+    },
+    "addresses": {
+      "primary": {
+        "street": "xxxxxx",
+        "city": "Val-David",
+        "province": "QC",
+        "postalCode": "xxxxxx"
+      },
+      "secondary": null
+    },
+    "preference": {
+      "odometerUnit": 1,
+      "climateUnit": "C",
+      "languageId": 1,
+      "maintenanceAlert": false,
+      "preferredDealer": null,
+      "promotionMessage": null
+    }
+  }
+}
+[2019-12-11 10:35:32] [32minfo[39m: Begin vehicleInfo request
+[2019-12-11 10:35:32] [32minfo[39m: [https://mybluelink.ca/tods/api/sltvhcl] {}
+vehicleInfo : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "vehicle": {
+      "vehicleId": "BV/xYFm1XeuElBLH5fk6VQ==",
+      "nickName": "Konasse",
+      "modelCode": "KE1SEFEMEP20",
+      "modelName": "KONA EV",
+      "modelYear": "2020",
+      "fuelKindCode": "E",
+      "trim": "",
+      "engine": "",
+      "exteriorColor": "SS7",
+      "dtcCount": 0,
+      "subscriptionStatus": "A",
+      "subscriptionEndDate": "20241114",
+      "overviewMessage": "",
+      "odometer": 1299.2,
+      "odometerUnit": 1,
+      "defaultVehicle": true,
+      "enrollmentStatus": "4",
+      "genType": "G3",
+      "vin": "KM8K23AG1LU059664"
+    },
+    "features": {
+      "seatHeatVent": {
+        "drvSeatHeatOption": 0,
+        "astSeatHeatOption": 0,
+        "rlSeatHeatOption": 0,
+        "rrSeatHeatOption": 0
+      },
+      "hvacTempType": 1,
+      "targetMinSoc": 50
+    },
+    "featuresModel": {
+      "features": [
+        {
+          "category": "Menu",
+          "features": [
+            {
+              "featureName": "Home"
+            },
+            {
+              "featureName": "RemoteServices"
+            },
+            {
+              "featureName": "FindMyCar"
+            },
+            {
+              "featureName": "CallRoadside"
+            },
+            {
+              "featureName": "VehicleHealthStatus"
+            },
+            {
+              "featureName": "DealerLocator"
+            },
+            {
+              "featureName": "NotificationHistory"
+            },
+            {
+              "featureName": "SelectVehicle"
+            },
+            {
+              "featureName": "ChargingStationLocator"
+            }
+          ]
+        },
+        {
+          "category": "Home",
+          "features": [
+            {
+              "featureName": "RemoteServices"
+            },
+            {
+              "featureName": "FindMyCar"
+            },
+            {
+              "featureName": "VehicleHealthStatus"
+            }
+          ]
+        },
+        {
+          "category": "RemoteServices",
+          "features": [
+            {
+              "featureName": "Lock",
+              "features": [
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "Unlock",
+              "features": [
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "HornLights",
+              "features": [
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "FlashLights",
+              "features": [
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "Climate",
+              "features": [
+                {
+                  "subFeatureName": "Defrost",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "SteerwheelHeat",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "SideMirrorHeat",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "RearWinodwHeat",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "EvSocControl",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "Favorite",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "ClimateSetting",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "TemperatureType",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "Schedule",
+              "features": [
+                {
+                  "subFeatureName": "ChargingSchedule2",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "FatcSetting1",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "ShareClimate",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "Offpeak1",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "OffPeakSelectMode",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "Charge",
+              "features": [
+                {
+                  "subFeatureName": "ChargingStatusControl",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "SocStatus",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "PinRequired",
+                  "subFeatureValue": "1"
+                }
+              ]
+            },
+            {
+              "featureName": "TargetStateOfCharge",
+              "features": [
+                {
+                  "subFeatureName": "CurrentSocAc",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "CurrentSocDc",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "DrivingDistance",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "TargetSocAc",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "TargetSocDc",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "TsocLevelStep",
+                  "subFeatureValue": "10"
+                }
+              ]
+            },
+            {
+              "featureName": "VehicleStatus",
+              "features": [
+                {
+                  "subFeatureName": "DoorStatus",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "EngineStatus",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "ClimateStatus",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "RefreshStatus",
+                  "subFeatureValue": "1"
+                },
+                {
+                  "subFeatureName": "EvSocStatus",
+                  "subFeatureValue": "1"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "status": {
+      "lastStatusDate": "20191211103527",
+      "airCtrlOn": false,
+      "engine": false,
+      "doorLock": true,
+      "doorOpen": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "trunkOpen": false,
+      "airTempUnit": "C",
+      "airTemp": {
+        "value": "00H",
+        "unit": 0
+      },
+      "defrost": false,
+      "acc": false,
+      "hoodOpen": false,
+      "transCond": true,
+      "steerWheelHeat": 0,
+      "sideBackWindowHeat": 0,
+      "dte": {
+        "unit": 1
+      },
+      "tirePressureLamp": {
+        "tirePressureLampAll": 0
+      },
+      "battery": {
+        "batSoc": 90,
+        "batState": 0,
+        "batSignalReferenceValue": {}
+      },
+      "remoteIgnition": true,
+      "seatHeaterVentInfo": {},
+      "sleepModeCheck": false,
+      "lampWireStatus": {
+        "headLamp": {},
+        "stopLamp": {},
+        "turnSignalLamp": {}
+      },
+      "windowOpen": {},
+      "engineRuntime": {}
+    }
+  }
+}
+[2019-12-11 10:35:34] [32minfo[39m: Begin status request
+[2019-12-11 10:35:34] [32minfo[39m: [https://mybluelink.ca/tods/api/lstvhclsts] {}
+nextService : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "status": {
+      "lastStatusDate": "20191211153531",
+      "airCtrlOn": false,
+      "engine": false,
+      "doorLock": true,
+      "doorOpen": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "trunkOpen": false,
+      "airTempUnit": "C",
+      "airTemp": {
+        "value": "00H",
+        "unit": 0
+      },
+      "defrost": false,
+      "acc": false,
+      "evStatus": {
+        "batteryCharge": false,
+        "batteryStatus": 81,
+        "batteryPlugin": 0,
+        "remainTime2": {
+          "etc1": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc2": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc3": {
+            "value": 0,
+            "unit": 1
+          },
+          "atc": {
+            "value": 0,
+            "unit": 1
+          }
+        },
+        "drvDistance": [
+          {
+            "rangeByFuel": {
+              "gasModeRange": {
+                "value": 0,
+                "unit": 1
+              },
+              "evModeRange": {
+                "value": 280,
+                "unit": 1
+              },
+              "totalAvailableRange": {
+                "value": 280,
+                "unit": 1
+              }
+            },
+            "type": 2
+          }
+        ]
+      },
+      "hoodOpen": false,
+      "transCond": true,
+      "steerWheelHeat": 0,
+      "sideBackWindowHeat": 0,
+      "dte": {
+        "unit": 1
+      },
+      "tirePressureLamp": {
+        "tirePressureLampAll": 0
+      },
+      "battery": {
+        "batSoc": 90,
+        "batState": 0,
+        "batSignalReferenceValue": {}
+      },
+      "remoteIgnition": true,
+      "seatHeaterVentInfo": {},
+      "sleepModeCheck": false,
+      "lampWireStatus": {
+        "headLamp": {},
+        "stopLamp": {},
+        "turnSignalLamp": {}
+      },
+      "windowOpen": {},
+      "engineRuntime": {}
+    }
+  }
+}
+[2019-12-11 10:36:07] [32minfo[39m: Begin status request
+[2019-12-11 10:36:07] [32minfo[39m: [https://mybluelink.ca/tods/api/lstvhclsts] {}
+preferedDealer : {
+  "responseHeader": {
+    "responseCode": 0,
+    "responseDesc": "Success"
+  },
+  "result": {
+    "status": {
+      "lastStatusDate": "20191211153531",
+      "airCtrlOn": false,
+      "engine": false,
+      "doorLock": true,
+      "doorOpen": {
+        "frontLeft": 0,
+        "frontRight": 0,
+        "backLeft": 0,
+        "backRight": 0
+      },
+      "trunkOpen": false,
+      "airTempUnit": "C",
+      "airTemp": {
+        "value": "00H",
+        "unit": 0
+      },
+      "defrost": false,
+      "acc": false,
+      "evStatus": {
+        "batteryCharge": false,
+        "batteryStatus": 81,
+        "batteryPlugin": 0,
+        "remainTime2": {
+          "etc1": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc2": {
+            "value": 0,
+            "unit": 1
+          },
+          "etc3": {
+            "value": 0,
+            "unit": 1
+          },
+          "atc": {
+            "value": 0,
+            "unit": 1
+          }
+        },
+        "drvDistance": [
+          {
+            "rangeByFuel": {
+              "gasModeRange": {
+                "value": 0,
+                "unit": 1
+              },
+              "evModeRange": {
+                "value": 280,
+                "unit": 1
+              },
+              "totalAvailableRange": {
+                "value": 280,
+                "unit": 1
+              }
+            },
+            "type": 2
+          }
+        ]
+      },
+      "hoodOpen": false,
+      "transCond": true,
+      "steerWheelHeat": 0,
+      "sideBackWindowHeat": 0,
+      "dte": {
+        "unit": 1
+      },
+      "tirePressureLamp": {
+        "tirePressureLampAll": 0
+      },
+      "battery": {
+        "batSoc": 90,
+        "batState": 0,
+        "batSignalReferenceValue": {}
+      },
+      "remoteIgnition": true,
+      "seatHeaterVentInfo": {},
+      "sleepModeCheck": false,
+      "lampWireStatus": {
+        "headLamp": {},
+        "stopLamp": {},
+        "turnSignalLamp": {}
+      },
+      "windowOpen": {},
+      "engineRuntime": {}
+    }
+  }
+}

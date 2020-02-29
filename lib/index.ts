@@ -1,145 +1,103 @@
-import got from 'got';
-import { endpoints } from './constants';
-import Vehicle from './vehicle';
-import { buildFormData } from './util';
-
-import {
-  AuthConfig,
-  TokenResponse,
-} from './interfaces';
-
+import { AmericanController } from './controllers/american.controller';
+import { EuropeanController } from './controllers/european.controller';
+import SessionController from './controllers/controller';
+import { EventEmitter } from 'events';
 import logger from './logger';
-class BlueLinky {
+import { BlueLinkyConfig } from './interfaces/common.interfaces';
+import { REGIONS } from './constants';
+import { Vehicle } from './vehicles/vehicle';
 
-  private authConfig: AuthConfig = {
-    username: null,
-    password: null
-  };
+class BlueLinky extends EventEmitter {
 
-  private accessToken: string|null = null;
-  private tokenExpires: number = 0;
+  private controller: SessionController;
   private vehicles: Array<Vehicle> = [];
 
-  constructor(authConfig: AuthConfig) {
-    this.authConfig = authConfig;
+  private config: BlueLinkyConfig = {
+    username: '',
+    password: '',
+    region: 'US',
+    pin: '1234',
+    autoLogin: true,
+    vin: '',
+    deviceUuid: '',
   }
 
-  async login(): Promise<object> {
-    const response = await this.getToken();
-    const currentTime = Math.floor(+new Date()/1000);
-    const expires = Math.floor(currentTime + parseInt(response.expires_in, 10));
+  constructor(config: BlueLinkyConfig) {
+    super();
 
-    logger.info(`Logged in to bluelink, token expires at ${expires}`);
-    logger.info(`Current time: ${currentTime}`);
-    this.accessToken = response.access_token;
-    this.tokenExpires = expires;
+    switch(config.region){
+      case REGIONS.EU:
+        this.controller = new EuropeanController(config);
+        break;
+      case REGIONS.US:
+        this.controller = new AmericanController(config);
+        break;
+      default:
+        this.controller = new AmericanController(config);
+        break;
+    }
 
+    if(this.controller === null){
+      throw new Error('Your region is not supported yet.');
+    }
+
+    // merge configs
+    this.config = {      
+      ...this.config,
+      ...config,
+    }
+
+    if (config.autoLogin === undefined) {
+      this.config.autoLogin = true;
+    }
+
+    this.onInit();
+  }
+
+  private onInit(): void {
+    console.log('test', this.config.autoLogin.toString())
+    if(this.config.autoLogin){
+      logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
+      this.login();
+    }
+  }
+
+  public async login(): Promise<string> {
+    const response = await this.controller.login();
+
+    // get all cars from the controller
+    this.vehicles = await this.controller.getVehicles();
+    
+    logger.debug(`Found ${this.vehicles.length} on the account`);
+
+    this.emit('ready');
     return response;
   }
 
-  getAccessToken(): string|null {
-    return this.accessToken;
+  async getVehicles(): Promise<Array<Vehicle>> {
+    return this.controller.getVehicles() || [];   
   }
 
-  setAccessToken(token: string|null) {
-    this.accessToken = token;
-  }
-
-  setTokenExpires(unixtime: number) {
-    this.tokenExpires = unixtime;
-  }
-
-  getTokenExpires(): number {
-    return this.tokenExpires || 0;
-  }
-
-  get username(): string|null {
-    return this.authConfig.username;
-  }
-
-  getVehicles() {
-    return this.vehicles;
-  }
-
-  getVehicle(vin: string): Vehicle|undefined {
-    return this.vehicles.find(item => vin === item.getVinNumber());
-  }
-
-  registerVehicle(vin: string, pin: string): Promise<Vehicle|null> {
-
-    if(!this.getVehicle(vin)) {
-      const vehicle = new Vehicle({
-        vin: vin,
-        pin: pin,
-        token: this.accessToken,
-        bluelinky: this
-      });
-
-      this.vehicles.push(vehicle);
-
-      return new Promise((resolve, reject) => {
-        vehicle.on('ready', () => resolve(vehicle));
-      });
-    }
-
-    return Promise.resolve(null);
-  }
-
-  // We should fetch a new token if we have elapsed the max time
-  async handleTokenRefresh() {
-    logger.debug('token time: ' + this.tokenExpires);
-    const currentTime = Math.floor((+new Date()/1000));
-    const tokenDelta = -(currentTime - (this.tokenExpires));
-
-    // Refresh 60 seconds before timeout just for good measure
-    if (tokenDelta <= 60) {
-      logger.info('Token is about to expire, refreshing access token 60 seconds early');
-      const result = await this.getToken();
-      this.setAccessToken(result.access_token);
-      logger.debug(`Token is refreshed ${JSON.stringify(result)}`);
-    } else {
-      logger.debug(`Token is still valid: ${tokenDelta}`);
-    }
-  }
-
-  async getToken(): Promise<TokenResponse> {
-    let response: got.Response<any|null>;
-
-    const now = Math.floor(+new Date() / 1000);
-    response = await got(endpoints.getToken + now, {
-      method: 'GET',
-      json: true
-    });
-
-    const csrfToken = response.body.token;
-    logger.debug(`Fetching CSRF Token ${csrfToken}`);
-
-    response = await got(endpoints.validateToken, {
-      method: 'GET',
-      headers: {
-        Cookie: `csrf_token=${csrfToken};`
-      }
-    });
-
-    const formData = buildFormData({
-      ':cq_csrf_token': csrfToken,
-      'username': this.authConfig.username,
-      'password': this.authConfig.password,
-      'url': 'https://owners.hyundaiusa.com/us/en/index.html'
-    });
-
-    response = await got(endpoints.auth, {
-      method: 'POST',
-      body: formData
-    });
-
+  public getVehicle(vin: string): Vehicle|undefined {
     try {
-      const json = JSON.parse(response.body);
-      logger.debug(`Fetching JSON Auth Token, RESPONSE: ${JSON.stringify(json)}`);
+      return this.vehicles.find(car => car.vin === vin) as Vehicle;
+    } catch (err) {
+      throw new Error('Vehicle not found!');
+    }
+  }
 
-      return json.Token;
-    } catch {
-      throw new Error(response.body);
+  public async refreshAccessToken(): Promise<string> {
+    return this.controller.refreshAccessToken();
+  }
+
+  public async logout(): Promise<string> {
+    return this.controller.logout();
+  }
+
+  // This is EU specific from what I know
+  public async enterPin(): Promise<string|undefined> {
+    if (this.controller.enterPin) {
+      return this.controller.enterPin();
     }
   }
 }
