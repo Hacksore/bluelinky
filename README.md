@@ -7,25 +7,23 @@
 [![Discord](https://img.shields.io/discord/652755205041029120)](https://discord.gg/HwnG8sY)
 
 ## Install
-
 ```sh
 npm install bluelinky
 ```
-
 
 ## Example
 ```javascript
 const BlueLinky = require('bluelinky');
 
 const client = new BlueLinky({
-	username: 'someguy@example.com'
+  username: 'someguy@example.com',
   password: 'hunter1',
-	region: 'US',
-	pin: '1234'
+  region: 'US',
+  pin: '1234'
 });
 
 client.on('ready', async () => {
-  const vehicle = await client.getVehicle('5NMS55555555555555');
+  const vehicle = client.getVehicle('5NMS55555555555555');
   const response = await vehicle.lock();
   console.log(response);
 });
@@ -39,14 +37,20 @@ client.on('ready', async () => {
 - Stop
 
 ## Supported Regions
-
-| Regions |
-|---------|
-| USA     |
-| Canada  |
-| Europe  |
-
+| [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) | Current Status |
+|-----------|--------------|
+| USA       | Working      |
+| Canada    | WIP (soon™)  |
+| Europe    | WIP (soon™)  |
+| Korea     | ▯▯▯▯▯▯  |
+| Australia | sorry m8     |
 
 ## Show your support
 
 Give a ⭐️ if this project helped you!
+
+## contributors
+
+@altagir - Helping make Canada work
+
+@SondreNjaastad - Helping make Europe wrok
