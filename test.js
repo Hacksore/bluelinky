@@ -8,21 +8,22 @@ const client = new BlueLinky({
   password,
 	region: 'US',
 	pin,
-  autoLogin: false // if you wanted to handle login yourself for some reason change this
+  // autoLogin: false
 });
 
-// client.on('ready', async (vehicles) => {
-//   const vehicle = client.getVehicle(vin);
-//   const response = await vehicle.status();
-//   console.log(response);
-// });
 
-// manual way
-client.login()
-.then(async (res) => {
-  console.log(res);
+const onReadyHandler = async () => {
   const vehicle = client.getVehicle(vin);
-  console.log(vehicle);
-  // const response = await vehicle.status();
-  // console.log(response);
-});
+  const response = await vehicle.status();
+  console.log(response);
+}
+client.on('ready', onReadyHandler);
+
+//manual way
+// client.login()
+//   .then(() => {
+//     const vehicle = client.getVehicle(vin);  
+//     return vehicle.status();  
+//   })
+//   .then(status => console.log(status))
+//   .catch(err => console.log(err));

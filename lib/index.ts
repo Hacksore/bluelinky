@@ -1,19 +1,26 @@
-import { Vehicle } from './vehicles/vehicle';
+import { AmericanController } from './controllers/american.controller';
 import { EuropeanController } from './controllers/european.controller';
 import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
-
-
 import logger from './logger';
 import { BlueLinkyConfig } from './interfaces/common.interfaces';
 import { REGIONS } from './constants';
-import { AmericanController } from './controllers/american.controller';
+import { Vehicle } from './vehicles/vehicle';
 
 class BlueLinky extends EventEmitter {
 
   private controller: SessionController;
-  private autoLogin = true;
   private vehicles: Array<Vehicle> = [];
+
+  private config: BlueLinkyConfig = {
+    username: '',
+    password: '',
+    region: 'US',
+    pin: '1234',
+    autoLogin: true,
+    vin: '',
+    deviceUuid: '',
+  }
 
   constructor(config: BlueLinkyConfig) {
     super();
@@ -34,29 +41,37 @@ class BlueLinky extends EventEmitter {
       throw new Error('Your region is not supported yet.');
     }
 
-    console.log(config)
-    this.autoLogin = config.autoLogin || false;
+    // merge configs
+    this.config = {      
+      ...this.config,
+      ...config,
+    }
+
+    if (config.autoLogin === undefined) {
+      this.config.autoLogin = true;
+    }
 
     this.onInit();
   }
 
-  async onInit(): Promise<string> {
-    console.log('logon', this.autoLogin.toString())
-   
-    if(this.autoLogin){
+  private onInit(): void {
+    console.log('test', this.config.autoLogin.toString())
+    if(this.config.autoLogin){
       logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
-      await this.controller.login();      
+      this.login();
     }
+  }
+
+  public async login(): Promise<string> {
+    const response = await this.controller.login();
 
     // get all cars from the controller
-    // we can use this for future caching features and making sure features exist
     this.vehicles = await this.controller.getVehicles();
     
-    logger.info(`Found ${this.vehicles.length} on the account`);
+    logger.debug(`Found ${this.vehicles.length} on the account`);
 
-    // console.log('redy', this.vehicles)
-    this.emit('ready', this.vehicles);
-    return Promise.resolve('onInit done');
+    this.emit('ready');
+    return response;
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
@@ -71,20 +86,6 @@ class BlueLinky extends EventEmitter {
     }
   }
 
-  async login(): Promise<string> {    
-    const response = await this.controller.login();
-
-    // get all cars from the controller
-    // we can use this for future caching features and making sure features exist
-    this.vehicles = await this.controller.getVehicles();
-    
-    logger.info(`Found ${this.vehicles.length} on the account`);
-
-    // console.log('redy', this.vehicles)
-    // this.emit('ready');
-    return response;
-  }
-
   public async refreshAccessToken(): Promise<string> {
     return this.controller.refreshAccessToken();
   }
@@ -93,6 +94,7 @@ class BlueLinky extends EventEmitter {
     return this.controller.logout();
   }
 
+  // This is EU specific from what I know
   public async enterPin(): Promise<string|undefined> {
     if (this.controller.enterPin) {
       return this.controller.enterPin();
