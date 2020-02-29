@@ -34,11 +34,15 @@ class BlueLinky extends EventEmitter {
       throw new Error('Your region is not supported yet.');
     }
 
+    console.log(config)
+    this.autoLogin = config.autoLogin || false;
+
     this.onInit();
   }
 
   async onInit(): Promise<string> {
     console.log('logon', this.autoLogin.toString())
+   
     if(this.autoLogin){
       logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
       await this.controller.login();      
@@ -59,9 +63,9 @@ class BlueLinky extends EventEmitter {
     return this.controller.getVehicles() || [];   
   }
 
-  async getVehicle(vin: string): Promise<Vehicle|undefined> {
+  public getVehicle(vin: string): Vehicle|undefined {
     try {
-      return this.vehicles.find(car => car.vin === vin);
+      return this.vehicles.find(car => car.vin === vin) as Vehicle;
     } catch (err) {
       throw new Error('Vehicle not found!');
     }
@@ -69,8 +73,15 @@ class BlueLinky extends EventEmitter {
 
   async login(): Promise<string> {    
     const response = await this.controller.login();
-    logger.info('Sending ready event!');
-    this.emit('ready');
+
+    // get all cars from the controller
+    // we can use this for future caching features and making sure features exist
+    this.vehicles = await this.controller.getVehicles();
+    
+    logger.info(`Found ${this.vehicles.length} on the account`);
+
+    // console.log('redy', this.vehicles)
+    // this.emit('ready');
     return response;
   }
 

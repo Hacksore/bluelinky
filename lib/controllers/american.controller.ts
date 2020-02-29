@@ -81,13 +81,13 @@ export class AmericanController implements SessionController {
       this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + response.body.expires_in);
       // console.log(this.session)
 
-      return Promise.resolve('');
+      return Promise.resolve('login good');
     } catch (err) {
       console.log(err);
       Promise.reject('error')
     }
 
-    return Promise.reject('idk');
+    return Promise.reject('login bad');
   }
 
   logout(): Promise<string> {

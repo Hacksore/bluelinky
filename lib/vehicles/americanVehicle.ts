@@ -106,18 +106,18 @@ export default class AmericanVehicle extends Vehicle {
     return this.type;
   }
 
-  public async status(): Promise<VehicleStatus> {
+  public async status(refresh = false): Promise<VehicleStatus> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rvs/vehicleStatus`, {
       method: 'GET',
       headers: {
+        'REFRESH': refresh.toString(),
         'ACCESS_TOKEN': this.controller.session.accessToken,
         'CLIENT_ID': CLIENT_ID,
-        'User-Agent': 'okhttp/3.12.0',
         'VIN': this.config.vin,
+        'User-Agent': 'okhttp/3.12.0',
         'LANGUAGE': '0',
         'TO': 'ISS',
         'FROM': 'SPA',
-        'REFRESH': 'TRUE',
         'OFFSET': '-5'
       }
     });
@@ -156,7 +156,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Unlock successful');  
+      return Promise.resolve('Unlock successful');
     }
 
     return Promise.reject('Something went wrong!');  
