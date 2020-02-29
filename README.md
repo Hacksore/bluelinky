@@ -49,8 +49,10 @@ client.on('ready', async () => {
 
 Give a ⭐️ if this project helped you!
 
-## contributors
+## Contributors
 
-@altagir - Helping make Canada work
+[altagir](https://github.com/altagir) - Canada wizard 🧙‍♂️
 
-@SondreNjaastad - Helping make Europe wrok
+[SondreNjaastad](https://github.com/SondreNjaastad) - Europe wizard 🧙‍♂️
+
+[aleGuardiola](https://github.com/aleGuardiola) - Fixed generation one cars 😎
