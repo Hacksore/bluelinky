@@ -187,7 +187,7 @@ export class EuropeanController implements SessionController {
 
     this.vehicles = [];
 
-    await this.asyncForEach(response.body.resMsg.vehicles,  async v => {
+    await this.asyncForEach(response.body.resMsg.vehicles, async v => {
 
       const vehicleProfileReponse = await got(`${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`, {
         method: 'GET',
