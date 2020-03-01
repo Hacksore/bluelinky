@@ -1,6 +1,6 @@
 # bluelinky
 
-> An unoffcial API wrapper for Hyundai BlueLink
+An unoffcial API wrapper for Hyundai BlueLink
 
 [![CI](https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg)](https://circleci.com/gh/Hacksore/bluelinky/tree/master)
 [![npm](https://img.shields.io/npm/v/bluelinky.svg)](https://www.npmjs.com/package/bluelinky)
@@ -30,11 +30,15 @@ client.on('ready', async () => {
 
 ```
 
+## Documentation
+Checkout out the docs [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) for more info.
+
 ## Supported Features
 - Lock
 - Unlock
 - Start (with climate control)
 - Stop
+- Status
 
 ## Supported Regions
 | [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) | Current Status |
