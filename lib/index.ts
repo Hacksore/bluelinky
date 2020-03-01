@@ -70,7 +70,7 @@ class BlueLinky extends EventEmitter {
     
     logger.debug(`Found ${this.vehicles.length} on the account`);
 
-    this.emit('ready');
+    this.emit('ready', this.vehicles);
     return response;
   }
 
