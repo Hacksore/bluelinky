@@ -12,7 +12,8 @@ const client = new BlueLinky({
 });
 
 
-const onReadyHandler = async () => {
+const onReadyHandler = async (vehicles) => {
+  console.log(vehicles);
   const vehicle = client.getVehicle(vin);
   const response = await vehicle.status();
   console.log(response);

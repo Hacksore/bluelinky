@@ -11,6 +11,7 @@ const client = new BlueLinky({
 	deviceUuid
 });
 
-client.on('ready', vehicles => {
-	console.log(vehicles);
-});
+const onReadyHandler = async (vehicles) => {
+  console.log(vehicles);
+}
+client.on('ready', onReadyHandler);
