@@ -16,11 +16,11 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   get vin(): string {
-    return 'NOT YET IMPLEMENTED';
+    return this.config.vin;
   }
 
   get gen(): string {
-    return 'NOT YET IMPLEMENTED';
+    return this.config.gen;
   }
 
   get type(): string {

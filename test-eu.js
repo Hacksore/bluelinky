@@ -12,6 +12,10 @@ const client = new BlueLinky({
 });
 
 const onReadyHandler = async (vehicles) => {
-  console.log(vehicles);
+	await client.enterPin();
+  vehicles.forEach(car => {
+		console.log(car.vin);
+		console.log(car.gen);
+	})
 }
 client.on('ready', onReadyHandler);
