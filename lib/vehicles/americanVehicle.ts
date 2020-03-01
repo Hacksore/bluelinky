@@ -30,11 +30,15 @@ export default class AmericanVehicle extends Vehicle {
     throw new Error('Method not implemented.');
   }
 
+  get status(): VehicleStatus | null {
+    return this._status;
+  }
+
   get vin(): string {
     return this.config.vin;
   }
 
-  public async startClimate(): Promise<string> {
+  public async start(): Promise<string> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/start`, {
       method: 'POST',
       headers: {
@@ -70,7 +74,7 @@ export default class AmericanVehicle extends Vehicle {
     return Promise.resolve('all good');
   }
 
-  public async stopClimate(): Promise<string> {
+  public async stop(): Promise<string> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/stop`, {
       method: 'POST',
       headers: {
@@ -106,7 +110,8 @@ export default class AmericanVehicle extends Vehicle {
     return this.type;
   }
 
-  public async status(refresh = false): Promise<VehicleStatus> {
+  public async update(): Promise<VehicleStatus> {
+    const refresh = true;
     const response = await got(`${BASE_URL}/ac/v2/rcs/rvs/vehicleStatus`, {
       method: 'GET',
       headers: {
@@ -123,6 +128,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     const data = JSON.parse(response.body);
+    this._status = data.vehicleStatus as VehicleStatus;
     return Promise.resolve(data.vehicleStatus as VehicleStatus);
   }
 

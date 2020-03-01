@@ -34,6 +34,10 @@ export default class EuropeanVehicle extends Vehicle {
   get location(): VehicleLocation | null {
     return this._location;
   }
+
+  get status(): VehicleStatus|null {
+    return this._status;
+  }
   
   public region = REGIONS.EU;
   private _status: VehicleStatus | null = null;
@@ -49,11 +53,7 @@ export default class EuropeanVehicle extends Vehicle {
     logger.info(`EU Vehicle ${this.config.id} created`);
   }
 
-  public async status(): Promise<VehicleStatus|null> {
-    return this._status;
-  }
-
-  public async startClimate(config: ClimateConfig): Promise<string> {
+  public async start(config: ClimateConfig): Promise<string> {
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`,
       {
@@ -82,7 +82,7 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.resolve(response.body);
   }
 
-  public async stopClimate(): Promise<string> {
+  public async stop(): Promise<string> {
     if (this.config.controlToken === '') {
       Promise.reject('Token not set');
     }
@@ -139,7 +139,7 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.resolve(response.body);
   }
 
-  public async updateStatus(): Promise<VehicleStatus> {
+  public async update(): Promise<VehicleStatus> {
     if (this.session.controlToken === '') {
       return Promise.reject('Token not set');
     }
