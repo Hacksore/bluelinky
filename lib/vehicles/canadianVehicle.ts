@@ -61,12 +61,10 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async unlock(): Promise<string> {
-    console.log('TODO');
     return Promise.reject();
   }
 
   public async lock(): Promise<string> {
-    console.log('TODO');
     return Promise.reject();
   }
 }

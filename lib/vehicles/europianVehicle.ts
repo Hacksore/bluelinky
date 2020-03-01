@@ -34,10 +34,6 @@ export default class EuropeanVehicle extends Vehicle {
   get location(): VehicleLocation | null {
     return this._location;
   }
-
-  get status(): VehicleStatus|null {
-    return this._status;
-  }
   
   public region = REGIONS.EU;
   private _status: VehicleStatus | null = null;
@@ -139,7 +135,7 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.resolve(response.body);
   }
 
-  public async update(): Promise<VehicleStatus> {
+  public async status(): Promise<VehicleStatus> {
     if (this.session.controlToken === '') {
       return Promise.reject('Token not set');
     }

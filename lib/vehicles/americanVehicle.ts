@@ -6,6 +6,7 @@ import { Vehicle } from './vehicle';
 import got from 'got';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
 import { URLSearchParams } from 'url';
+import { StartConfig } from '../interfaces/american.interfaces';
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
   public region = REGIONS.US;
@@ -15,10 +16,6 @@ export default class AmericanVehicle extends Vehicle {
     logger.info(`US Vehicle ${this.config.regId} created`);
   }
 
-  // get status(): VehicleStatus | null {
-  //   return this._status;
-  // }
-  
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
   }
@@ -30,15 +27,34 @@ export default class AmericanVehicle extends Vehicle {
     throw new Error('Method not implemented.');
   }
 
-  get status(): VehicleStatus | null {
-    return this._status;
-  }
-
   get vin(): string {
     return this.config.vin;
   }
 
-  public async start(): Promise<string> {
+  get name(): string {
+    return this.config.nickname;
+  }
+
+  get vinNumber(): string {
+    return '';
+  }
+
+  get type(): string {
+    return this.type;
+  }
+
+  public async start(startConfig: StartConfig): Promise<string> {
+    const mergedConfig = {
+      ...{
+        airCtrl: false,
+        igniOnDuration: 10,
+        airTempvalue: 70,
+        defrost: false,
+        heating1: false
+      },
+      ...startConfig,
+    }
+
     const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/start`, {
       method: 'POST',
       headers: {
@@ -54,15 +70,15 @@ export default class AmericanVehicle extends Vehicle {
       },
       body: {
         "Ims": 0,
-        "airCtrl": 1,
+        "airCtrl": mergedConfig.airCtrl,
         "airTemp": {
           "unit": 1,
-          "value": 72
+          "value": mergedConfig.airTempvalue
         },
-        "defrost": false,
-        "heating1": 0,
-        "igniOnDuration": 1,
-        "seatHeaterVentInfo": null,
+        "defrost": mergedConfig.defrost,
+        "heating1": mergedConfig.heating1,
+        "igniOnDuration": mergedConfig.igniOnDuration,
+        "seatHeaterVentInfo": null, // need to figure out what this is
         "username": this.controller.config.username,
         "vin": this.config.vin
       },
@@ -70,7 +86,6 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     logger.debug(JSON.stringify(response));
-    // const data = JSON.parse(response.body);
     return Promise.resolve('all good');
   }
 
@@ -90,28 +105,10 @@ export default class AmericanVehicle extends Vehicle {
       }
     });
     logger.debug(JSON.stringify(response));
-    // const data = JSON.parse(response.body);
     return Promise.resolve('all good');
   }
 
-  updateStatus(): Promise<VehicleStatus> {
-    throw new Error('Method not implemented.');
-  }
-
-  get name(): string {
-    return this.config.nickname;
-  }
-
-  get vinNumber(): string {
-    return '';
-  }
-
-  get type(): string {
-    return this.type;
-  }
-
-  public async update(): Promise<VehicleStatus> {
-    const refresh = true;
+  public async status(refresh = false): Promise<VehicleStatus> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rvs/vehicleStatus`, {
       method: 'GET',
       headers: {
@@ -205,23 +202,4 @@ export default class AmericanVehicle extends Vehicle {
     return Promise.reject('Something went wrong!');  
   }
 
-  // we dont need this yet
-  // private async getPinToken(): Promise<any> {
-  //   const response = await got(`${BASE_URL}/v2/ac/oauth/pintoken/refresh`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'access_token': this.controller.session.accessToken,
-  //       'Client_Id': CLIENT_ID,
-  //       'client_secret': CLIENT_SECRET,
-  //       'Host': API_HOST,
-  //       'User-Agent': 'okhttp/3.12.0',
-  //     },
-  //     body: {
-  //       refreshToken: this.config.accessToken
-  //     },
-  //     json: true
-  //   });
-
-  //   return Promise.resolve(response.body);
-  // }
 }
