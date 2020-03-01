@@ -187,20 +187,42 @@ export class EuropeanController implements SessionController {
 
     this.vehicles = [];
 
-    response.body.resMsg.vehicles.forEach(v => {
+    await this.asyncForEach(response.body.resMsg.vehicles, async v => {
+
+      const vehicleProfileReponse = await got(`${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`, {
+        method: 'GET',
+        headers: {
+          'Authorization': this.session.accessToken,
+          'ccsp-device-id': this.session.deviceId
+        },
+        json: true
+      });
+
+      const vehicleProfile = vehicleProfileReponse.body.resMsg;
+
       const config = {
         master: v.master,
         nickname: v.nickname,
         regDate: v.regDate,
         type: v.type,
         id: v.vehicleId,
-        name: v.vehicleName
+        name: v.vehicleName,
+        vin: vehicleProfile.vinInfo[0].basic.vin,
+        gen: vehicleProfile.vinInfo[0].basic.modelYear
       }
+
       this.vehicles.push(new EuropeanVehicle(config, this.session));
+      logger.info(`Added vehicle ${config.id}`);
     });
 
     logger.info(`Success! Got ${this.vehicles.length} vehicles`)
     return Promise.resolve(this.vehicles);
       
+  }
+
+  async asyncForEach(array, callback): Promise<any> {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
   }
 }

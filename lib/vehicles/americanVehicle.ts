@@ -125,6 +125,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     const data = JSON.parse(response.body);
+    this._status = data.vehicleStatus as VehicleStatus;
     return Promise.resolve(data.vehicleStatus as VehicleStatus);
   }
 

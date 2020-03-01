@@ -16,11 +16,11 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   get vin(): string {
-    return 'NOT YET IMPLEMENTED';
+    return this.config.vin;
   }
 
   get gen(): string {
-    return 'NOT YET IMPLEMENTED';
+    return this.config.gen;
   }
 
   get type(): string {
@@ -48,10 +48,6 @@ export default class EuropeanVehicle extends Vehicle {
   private onInit(): void {
     logger.info(`EU Vehicle ${this.config.id} created`);
   }
-
-  // public async status(): Promise<VehicleStatus|null> {
-  //   return this._status;
-  // }
 
   public async start(config: ClimateConfig): Promise<string> {
     const response = await got(
