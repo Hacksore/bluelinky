@@ -187,7 +187,7 @@ export class EuropeanController implements SessionController {
 
     this.vehicles = [];
 
-    response.body.resMsg.vehicles.forEach(async (v: any) => {
+    await this.asyncForEach(response.body.resMsg.vehicles,  async v => {
 
       const vehicleProfileReponse = await got(`${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`, {
         method: 'GET',
@@ -218,5 +218,11 @@ export class EuropeanController implements SessionController {
     logger.info(`Success! Got ${this.vehicles.length} vehicles`)
     return Promise.resolve(this.vehicles);
       
+  }
+
+  async asyncForEach(array, callback): Promise<any> {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
   }
 }
