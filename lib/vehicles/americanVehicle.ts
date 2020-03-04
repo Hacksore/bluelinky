@@ -7,6 +7,7 @@ import got from 'got';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
 import { URLSearchParams } from 'url';
 import { StartConfig } from '../interfaces/american.interfaces';
+
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
   public region = REGIONS.US;

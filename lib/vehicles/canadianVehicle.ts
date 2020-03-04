@@ -3,31 +3,45 @@ import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.i
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
+import { StartConfig } from '../interfaces/american.interfaces';
 
-export default class EuropeanVehicle extends Vehicle {
+export default class CanadianVehicle extends Vehicle {
+  private _status: VehicleStatus | null = null;
+  public region = REGIONS.CA;
+
+  constructor(public config, public controller) {
+    super(controller);
+    logger.info(`CA Vehicle ${this.config.regId} created`);
+  }
 
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
   }
+  
   get odometer(): Odometer | null {
     throw new Error('Method not implemented.');
   }
 
-  get status(): VehicleStatus {
+  get gen(): string {
     throw new Error('Method not implemented.');
   }
 
+  get vin(): string {
+    return this.config.vin;
+  }
+
+  updateStatus(): Promise<VehicleStatus> {
+    throw new Error('Method not implemented.');
+  }
   startClimate(): Promise<string> {
     throw new Error('Method not implemented.');
   }
   stopClimate(): Promise<string> {
     throw new Error('Method not implemented.');
   }
-  updateStatus(): Promise<VehicleStatus> {
-    throw new Error('Method not implemented.');
-  }
+
   get name(): string {
-    return this.nickname;
+    return this.config.nickname;
   }
 
   get vinNumber(): string {
@@ -38,26 +52,11 @@ export default class EuropeanVehicle extends Vehicle {
     return this.type;
   }
 
-  public region = REGIONS.CA;
 
-  constructor(
-    public master: boolean,
-    public nickname: string,
-    public regDate: string,
-    public vehicleId: string,
-    public vehicleName: string,
-    public session
-  ) {
-    super(session);
-    this.onInit();
-  }
 
-  onInit(): void {
-    logger.info(`CA Vehicle ${this.vehicleId} created`);
-  }
 
-  public getStatus(): void {
-    // TODO:
+  public async status(refresh = false): Promise<VehicleStatus> {
+    throw new Error('Method not implemented.');
   }
 
   public async unlock(): Promise<string> {
@@ -67,4 +66,13 @@ export default class EuropeanVehicle extends Vehicle {
   public async lock(): Promise<string> {
     return Promise.reject();
   }
+
+  public async start(startConfig: StartConfig): Promise<string> {
+    return Promise.reject();
+  }
+
+  public async stop(): Promise<string> {
+    return Promise.reject();
+  }
+
 }

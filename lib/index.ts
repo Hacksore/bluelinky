@@ -1,5 +1,6 @@
 import { AmericanController } from './controllers/american.controller';
 import { EuropeanController } from './controllers/european.controller';
+import { CanadianController } from './controllers/canadian.controller';
 import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
@@ -32,13 +33,12 @@ class BlueLinky extends EventEmitter {
       case REGIONS.US:
         this.controller = new AmericanController(config);
         break;
-      default:
-        this.controller = new AmericanController(config);
+      case REGIONS.CA:
+        this.controller = new CanadianController(config);
         break;
-    }
-
-    if(this.controller === null){
-      throw new Error('Your region is not supported yet.');
+      default:
+        throw new Error('Your region is not supported yet.');
+        break;
     }
 
     // merge configs

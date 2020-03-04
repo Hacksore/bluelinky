@@ -36,24 +36,6 @@ export interface RegisterVehicleConfig {
   region: string|null;
 }
 
-export interface CanadianEndpoints {
-  login: string;
-  logout: string;
-  list: string;
-  lock: string;
-  unlock: string;
-  start: string;
-  stop: string;
-  myAccount: string;
-  status: string;
-  remoteStatus: string;
-  verifyPin: string;
-  verifyToken: string;
-  vehicleInfo: string;
-  nextService: string;
-  preferedDealer: string;
-}
-
 export interface AmericanEndpoints {
   getToken: string;
   validateToken: string;
