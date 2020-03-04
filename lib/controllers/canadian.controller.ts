@@ -1,4 +1,5 @@
 import { BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
+import got from 'got';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
 import SessionController from './controller';
@@ -36,25 +37,25 @@ export class CanadianController implements SessionController {
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(((+new Date() / 1000)) - this.session.tokenExpiresAt) <= 10;
 
-    if (this.session.refreshToken && shouldRefreshToken) {
-      const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
-        method: 'POST',
-        body: {
-          'refresh_token': this.session.refreshToken
-        },
-        headers: {
-          'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID
-        },
-        json: true
-      });
+    // if (this.session.refreshToken && shouldRefreshToken) {
+    //   const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
+    //     method: 'POST',
+    //     body: {
+    //       'refresh_token': this.session.refreshToken
+    //     },
+    //     headers: {
+    //       'client_secret': CLIENT_SECRET,
+    //       'client_id': CLIENT_ID
+    //     },
+    //     json: true
+    //   });
 
-      this.session.accessToken = response.body.access_token;
-      this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor((+new Date() / 1000) + response.body.expires_in);
+      // this.session.accessToken = response.body.access_token;
+      // this.session.refreshToken = response.body.refresh_token;
+      // this.session.tokenExpiresAt = Math.floor((+new Date() / 1000) + response.body.expires_in);
 
-      return Promise.resolve('Token refreshed');
-    }
+    //   return Promise.resolve('Token refreshed');
+    // }
 
     return Promise.resolve('Token not expired, no need to refresh');
   }
@@ -70,7 +71,7 @@ export class CanadianController implements SessionController {
 
   async getVehicles(): Promise<Array<Vehicle>> {
     console.log('getVehicleList');
-    const token = this.bluelinky.getAccessToken() || '';
+    const token = this.session.accessToken || '';
     const response = await this._request(this.endpoints.vehicleList, {});
     console.log(JSON.stringify(response.body, null, 2));
     return response.body.result.vehicles;
@@ -98,5 +99,43 @@ export class CanadianController implements SessionController {
     logger.info('Begin preferedDealer request');
     const response = await this._request(this.endpoints.preferedDealer, {});
     return response.body;
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Internal
+  //////////////////////////////////////////////////////////////////////////////
+
+  private async getPreAuth() {
+    const response = await this._request(this.endpoints.verifyPin, {});
+    const pAuth = response.body.result.pAuth;
+    logger.info('pAuth ' + pAuth);
+    return pAuth;
+  }
+
+  private async _request(endpoint, headers, body: object | null = null): Promise<any | null> {
+    logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
+
+    const response = await got(endpoint, {
+      method: 'POST',
+      json: true,
+      headers: {
+        from: 'SPA',
+        language: '1',
+        Host: 'mybluelink.ca',
+        Origin: 'https://mybluelink.ca',
+        offset: '-5',
+        pin: this.pin,
+        accessToken: this.bluelinky.getAccessToken(),
+        vehicleId: this.vehicleId,
+        ...headers
+      },
+      body: {
+        pin: this.pin,
+        ...body
+      }
+    });
+
+    return response;
   }
 }
