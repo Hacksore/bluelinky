@@ -25,13 +25,14 @@ export class AmericanController implements SessionController {
   private vehicles: Array<AmericanVehicle> = [];
 
   public config: BlueLinkyConfig = {
-    username: null,
-    password: null,
+    username: undefined,
+    password: undefined,
     region: REGIONS.US,
-    vin: null,
     autoLogin: true,
-    pin: null,
-    deviceUuid: null,
+    pin: undefined,
+    vin: undefined,
+    vehicleId: undefined,
+    deviceUuid: undefined,
   };
 
   public async refreshAccessToken(): Promise<string> {
@@ -81,7 +82,7 @@ export class AmericanController implements SessionController {
 
       return Promise.resolve('login good');
     } catch (err) {
-      Promise.reject('error')
+      Promise.reject('error: ' + err)
     }
 
     return Promise.reject('login bad');

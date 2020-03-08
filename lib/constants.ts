@@ -4,28 +4,28 @@ export const CA_BASE_URL = 'https://mybluelink.ca';
 export const EU_BASE_URL = 'https://prd.eu-ccapi.hyundai.com:8080';
 
 export const CA_ENDPOINTS = {
-  login: 'https://mybluelink.ca/tods/api/lgn',
-  logout: 'https://mybluelink.ca/tods/api/lgout',
+  login: `${CA_BASE_URL}/tods/api/lgn`,
+  logout: `${CA_BASE_URL}/tods/api/lgout`,
   // Account
-  myAccount: 'https://mybluelink.ca/tods/api/acctinfo',
-  nextService: 'https://mybluelink.ca/tods/api/nxtsvc',
-  preferedDealer : 'https://mybluelink.ca/tods/api/gtprfrdlr',
+  myAccount: `${CA_BASE_URL}/tods/api/acctinfo`,
+  nextService: `${CA_BASE_URL}/tods/api/nxtsvc`,
+  preferedDealer : `${CA_BASE_URL}/tods/api/gtprfrdlr`,
   // Vehicle
-  vehicleList: 'https://mybluelink.ca/tods/api/vhcllst',
-  vehicleInfo: "https://mybluelink.ca/tods/api/sltvhcl",
-  status: 'https://mybluelink.ca/tods/api/lstvhclsts',
-  remoteStatus: 'https://mybluelink.ca/tods/api/rltmvhclsts',
+  vehicleList: `${CA_BASE_URL}/tods/api/vhcllst`,
+  vehicleInfo: `${CA_BASE_URL}/tods/api/sltvhcl`,
+  status: `${CA_BASE_URL}/tods/api/lstvhclsts`,
+  remoteStatus: `${CA_BASE_URL}/tods/api/rltmvhclsts`,
   // Car commands with preauth (PIN)
-  lock: 'https://mybluelink.ca/tods/api/drlck',
-  unlock: 'https://mybluelink.ca/tods/api/drulck',
-  start: 'https://mybluelink.ca/tods/api/evc/rfon',
-  stop: 'https://mybluelink.ca/tods/api/evc/rfoff',
-  locate: 'https://mybluelink.ca/tods/api/fndmcr',
-  hornlight: "https://mybluelink.ca/tods/api/hornlight",
+  lock: `${CA_BASE_URL}/tods/api/drlck`,
+  unlock: `${CA_BASE_URL}/tods/api/drulck`,
+  start: `${CA_BASE_URL}/tods/api/evc/rfon`,
+  stop: `${CA_BASE_URL}/tods/api/evc/rfoff`,
+  locate: `${CA_BASE_URL}/tods/api/fndmcr`,
+  hornlight: `${CA_BASE_URL}/tods/api/hornlight`,
   // System
-  verifyAccountToken: "https://mybluelink.ca/tods/api/vrfyacctkn",
-  verifyPin: 'https://mybluelink.ca/tods/api/vrfypin',
-  verifyToken: 'https://mybluelink.ca/tods/api/vrfytnc',
+  verifyAccountToken: `${CA_BASE_URL}/tods/api/vrfyacctkn`,
+  verifyPin: `${CA_BASE_URL}/tods/api/vrfypin`,
+  verifyToken: `${CA_BASE_URL}/tods/api/vrfytnc`,
 };
 
 export const EU_ENDPOINTS = {

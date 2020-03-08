@@ -3,13 +3,8 @@ const config = require('./config.json');
 const BlueLinky = require('./dist/index');
 const inquirer = require('inquirer');
 
-const { username, password, pin, vin } = config;
 const client = new BlueLinky({
-    username,
-    password,
-    region: 'CA',
-    pin,
-    // autoLogin: false
+    ...config
 });
 
 const apiCalls = [
@@ -31,13 +26,14 @@ const apiCalls = [
 
 var vehicle
 
-const onReadyHandler = async (vehicles) => {
-    const vehicle = await client.getVehicle(vin);
+const onReadyHandler = async(vehicles) => {
+    vehicle = await client.getVehicle();
     const response = await vehicle.status();
-    console.log(response);
     askForInput();
 }
 client.on('ready', onReadyHandler);
+
+return
 
 function askForInput() {
     console.log("")

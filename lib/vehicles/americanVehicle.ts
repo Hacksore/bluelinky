@@ -32,6 +32,10 @@ export default class AmericanVehicle extends Vehicle {
     return this.config.vin;
   }
 
+  get vehicleId(): string {
+    return this.config.vehicleId;
+  }
+
   get name(): string {
     return this.config.nickname;
   }
