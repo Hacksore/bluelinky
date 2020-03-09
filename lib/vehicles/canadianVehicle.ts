@@ -18,12 +18,8 @@ export default class CanadianVehicle extends Vehicle {
     logger.info(`CA Vehicle ${this.config.vehicleId} created`);
   }
   
-  get odometer(): Odometer | null {
-    throw new Error('Method not implemented.');
-  }
-
-  get gen(): string {
-    throw new Error('Method not implemented.');
+  get name(): string {
+    return this.config.nickname;
   }
 
   get vin(): string {
@@ -33,25 +29,28 @@ export default class CanadianVehicle extends Vehicle {
   get vehicleId(): string {
     return this.config.vehicleId;
   }
-  
-  // updateStatus(): Promise<VehicleStatus> {
-  //   throw new Error('Method not implemented.');
-  // }
 
-  get name(): string {
-    return this.config.nickname;
+  get gen(): string {
+    throw new Error('Method not implemented.');
   }
-
+  
   get type(): string {
     return this.type;
   }
 
+  get location(): VehicleLocation|null {
+    return null
+  }
+
+  get odometer(): Odometer | null {
+    throw new Error('Method not implemented.');
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
 
-  async vehicleInfo(): Promise<any> {
+  public async vehicleInfo(): Promise<any> {
     logger.info('Begin vehicleInfo request');
     const response = await this.request(this.endpoints.vehicleInfo, {});
     return response.body.result;
@@ -95,7 +94,7 @@ export default class CanadianVehicle extends Vehicle {
   defrost: Boolean,  // side mirrors & rear defrost
   airTempvalue: number | null  // temp in degrees for clim and heating 17-27
   */
- public async startClimate(startConfig: StartConfig): Promise<string> {
+ public async start(startConfig: StartConfig): Promise<string> {
   const body =  
   { hvacInfo: {
     airCtrl: ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) ? 1 : 0,
@@ -127,7 +126,7 @@ export default class CanadianVehicle extends Vehicle {
   return response.body;
  }
 
- public async stopClimate(): Promise<string> {
+ public async stop(): Promise<string> {
     logger.info('Begin stop request');
     const preAuth = await this.getPreAuth();
     const response = await this.request(CA_ENDPOINTS.stop, {
@@ -136,17 +135,17 @@ export default class CanadianVehicle extends Vehicle {
     return response.body;
   }
 
-  public async location(): Promise<VehicleLocation> {
-    logger.info('Begin location request');
+  public async locate(): Promise<VehicleLocation> {
+    logger.info('Begin locate request');
     const preAuth = await this.getPreAuth();
-    const response = await this.request(CA_ENDPOINTS.location, {
+    const response = await this.request(CA_ENDPOINTS.locate, {
       pAuth: preAuth
     });
     return response.body;
   }
 
   public async  lights(withHorn = false): Promise<any> {
-    logger.info('Begin location request');
+    logger.info('Begin lights request with horn ' + withHorn);
     const preAuth = await this.getPreAuth();
     const response = await this.request(
       CA_ENDPOINTS.hornlight, 

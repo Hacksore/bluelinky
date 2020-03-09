@@ -9,7 +9,7 @@ const client = new BlueLinky({
 
 const apiCalls = [
     { name: 'exit', value: 'exit' },
-    { name: 'location', value: 'location' },
+    { name: 'locate', value: 'locate' },
     { name: 'status (on bluelink)', value: 'status' },
     { name: 'status refresh (fetch vehicle)', value: 'statusR' },
     { name: 'start', value: 'start' },
@@ -59,9 +59,9 @@ async function performCommand(command) {
         switch (command) {
             case 'exit':
                 return
-            case 'location':
-                const location = await vehicle.location();
-                console.log('location : ' + JSON.stringify(location, null, 2));
+            case 'locate':
+                const locate = await vehicle.locate();
+                console.log('locate : ' + JSON.stringify(locate, null, 2));
                 break
             case 'status':
                 const status = await vehicle.status(false);

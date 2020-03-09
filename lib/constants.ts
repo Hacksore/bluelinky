@@ -20,7 +20,7 @@ export const CA_ENDPOINTS = {
   unlock: `${CA_BASE_URL}/tods/api/drulck`,
   start: `${CA_BASE_URL}/tods/api/evc/rfon`,
   stop: `${CA_BASE_URL}/tods/api/evc/rfoff`,
-  location: `${CA_BASE_URL}/tods/api/fndmcr`,
+  locate: `${CA_BASE_URL}/tods/api/fndmcr`,
   hornlight: `${CA_BASE_URL}/tods/api/hornlight`,
   // System
   verifyAccountToken: `${CA_BASE_URL}/tods/api/vrfyacctkn`,

@@ -241,11 +241,11 @@ status remote : {
     }
   }
 }
-[2020-02-14 13:08:27] info: Begin location request
+[2020-02-14 13:08:27] info: Begin locate request
 [2020-02-14 13:08:27] info: [https://mybluelink.ca/tods/api/vrfypin] {}
 [2020-02-14 13:08:29] info: pAuth RtnchvyYDigwszafItNTrmfVfwWbXVYh
 [2020-02-14 13:08:29] info: [https://mybluelink.ca/tods/api/fndmcr] {"pAuth":"RtnchvyYDigwszafItNTrmfVfwWbXVYh"}
-location : {
+locate : {
   "responseHeader": {
     "responseCode": 0,
     "responseDesc": "Success"
@@ -269,11 +269,11 @@ location : {
     }
   }
 }
-[2020-02-16 16:37:37] [32minfo[39m: Begin location request
+[2020-02-16 16:37:37] [32minfo[39m: Begin locate request
 [2020-02-16 16:37:37] [32minfo[39m: [https://mybluelink.ca/tods/api/vrfypin] {} null
 [2020-02-16 16:37:38] [32minfo[39m: pAuth dSnWaKGbkkDLdaKamXsQMfbbKQwBlacp
 [2020-02-16 16:37:38] [32minfo[39m: [https://mybluelink.ca/tods/api/fndmcr] {"pAuth":"dSnWaKGbkkDLdaKamXsQMfbbKQwBlacp"} null
-location : {
+locate : {
   "responseHeader": {
     "responseCode": 0,
     "responseDesc": "Success"
