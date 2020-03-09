@@ -28,7 +28,6 @@ var vehicle
 
 const onReadyHandler = async(vehicles) => {
     vehicle = await client.getVehicle();
-    const response = await vehicle.status();
     askForInput();
 }
 client.on('ready', onReadyHandler);
@@ -100,20 +99,21 @@ async function performCommand(command) {
                 const lightRes = await vehicle.lights();
                 console.log('ilght : ' + JSON.stringify(lightRes, null, 2));
                 break
-            case 'myAccount':
-                const myAccount = await vehicle.myAccount();
-                console.log('myAccount : ' + JSON.stringify(myAccount, null, 2));
-                break
             case 'vehicleInfo':
                 const vehicleInfo = await vehicle.vehicleInfo();
                 console.log('vehicleInfo : ' + JSON.stringify(vehicleInfo, null, 2));
                 break
             case 'nextService':
-                const nextService = await vehicle.status();
+                const nextService = await vehicle.nextService();
                 console.log('nextService : ' + JSON.stringify(nextService, null, 2));
                 break
+
+            case 'myAccount':
+                const myAccount = await client.controller.myAccount();
+                console.log('myAccount : ' + JSON.stringify(myAccount, null, 2));
+                break
             case 'preferedDealer':
-                const preferedDealer = await vehicle.status();
+                const preferedDealer = await client.controller.preferedDealer();
                 console.log('preferedDealer : ' + JSON.stringify(preferedDealer, null, 2));
                 break
         }

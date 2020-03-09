@@ -8,16 +8,19 @@ import { Vehicle } from './vehicle';
 import { StartConfig } from '../interfaces/american.interfaces';
 
 export default class CanadianVehicle extends Vehicle {
+
   private _status: VehicleStatus | null = null;
+  private _location: VehicleLocation | null = null;
+
   public region = REGIONS.CA;
 
-  private timeOffset = -(new Date().getTimezoneOffset() / 60) 
+  private timeOffset = -(new Date().getTimezoneOffset() / 60)
 
   constructor(public config, public controller) {
     super(controller);
     logger.info(`CA Vehicle ${this.config.vehicleId} created`);
   }
-  
+
   get name(): string {
     return this.config.nickname;
   }
@@ -33,13 +36,13 @@ export default class CanadianVehicle extends Vehicle {
   get gen(): string {
     throw new Error('Method not implemented.');
   }
-  
+
   get type(): string {
     return this.type;
   }
 
-  get location(): VehicleLocation|null {
-    return null
+  get location(): VehicleLocation | null {
+    return this._location
   }
 
   get odometer(): Odometer | null {
@@ -52,17 +55,35 @@ export default class CanadianVehicle extends Vehicle {
 
   public async vehicleInfo(): Promise<any> {
     logger.info('Begin vehicleInfo request');
-    const response = await this.request(this.endpoints.vehicleInfo, {});
-    return response.body.result;
+    try {
+      const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
+      return Promise.resolve(response.result);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   public async status(refresh = false): Promise<VehicleStatus> {
-    const endpoint = refresh ? ALL_ENDPOINTS.CA.remoteStatus : ALL_ENDPOINTS.CA.status;
-    const response = await this.request(endpoint, {});
-    this._status = response.result as VehicleStatus;
-    return Promise.resolve(this._status);
+    logger.info('Begin status request, polling car: ' + refresh);
+    try {
+      const endpoint = refresh ? CA_ENDPOINTS.remoteStatus : CA_ENDPOINTS.status;
+      const response = await this.request(endpoint, {});
+      this._status = response.result as VehicleStatus;
+      return Promise.resolve(this._status);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
+  public async nextService(): Promise<String> {
+    logger.info('Begin nextService request');
+    try {
+      const response = await this.request(CA_ENDPOINTS.nextService, {});
+      return Promise.resolve(response.result);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   // Car commands with preauth (PIN)
@@ -70,22 +91,30 @@ export default class CanadianVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     logger.info('Begin lock request');
-    // get pAuth header
-    const preAuth = await this.getPreAuth();
-    // do lock request
-    const response = await this.request(CA_ENDPOINTS.lock, {
-      pAuth: preAuth
-    });
-    return response.body;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        CA_ENDPOINTS.lock,
+        {},
+        { pAuth: preAuth });
+      return Promise.resolve(response);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   public async unlock(): Promise<string> {
     logger.info('Begin unlock request');
-    const preAuth = await this.getPreAuth();
-    const response = await this.request(CA_ENDPOINTS.unlock, {
-      pAuth: preAuth
-    });
-    return response.body;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        CA_ENDPOINTS.unlock,
+        {},
+        { pAuth: preAuth });
+      return Promise.resolve(response);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   /*
@@ -94,66 +123,88 @@ export default class CanadianVehicle extends Vehicle {
   defrost: Boolean,  // side mirrors & rear defrost
   airTempvalue: number | null  // temp in degrees for clim and heating 17-27
   */
- public async start(startConfig: StartConfig): Promise<string> {
-  const body =  
-  { hvacInfo: {
-    airCtrl: ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) ? 1 : 0,
-    defrost: startConfig.defrost ?? false,
-    // postRemoteFatcStart: 1,
-    heating1: startConfig.heating1 ? 1 : 0
-  }}
+  public async start(startConfig: StartConfig): Promise<string> {
+    logger.info('Begin startClimate request');
+    try {
+      const body =
+      {
+        hvacInfo: {
+          airCtrl: ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) ? 1 : 0,
+          defrost: startConfig.defrost ?? false,
+          // postRemoteFatcStart: 1,
+          heating1: startConfig.heating1 ? 1 : 0
+        }
+      }
 
-  let airTemp = startConfig.airTempvalue
-  if (airTemp != null) {
-    if (airTemp > 27 || airTemp < 17) {
-      return Promise.reject("air temperature should be between 17 and 27 degrees");
+      let airTemp = startConfig.airTempvalue
+      if (airTemp != null) {
+        if (airTemp > 27 || airTemp < 17) {
+          return Promise.reject("air temperature should be between 17 and 27 degrees");
+        }
+        var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
+        if (airTempValue.length == 2) {
+          airTempValue = '0' + airTempValue
+        }
+        body.hvacInfo['airTemp'] = { value: airTempValue, unit: 0, hvacTempType: 1 }
+      } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
+        return Promise.reject("air temperature should be specified")
+      }
+
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        CA_ENDPOINTS.start,
+        body,
+        { pAuth: preAuth });
+
+      return Promise.resolve(response);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
     }
-    var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
-    if (airTempValue.length == 2) {
-      airTempValue = '0' + airTempValue
-    }
-    body.hvacInfo['airTemp'] = {value: airTempValue,unit:0,hvacTempType:1}
-  } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
-    return Promise.reject("air temperature should be specified")
   }
 
-  logger.info('Begin start request ' + JSON.stringify(body));
-  const preAuth = await this.getPreAuth();
-  const response = await this.request(CA_ENDPOINTS.start, {
-    pAuth: preAuth
-  }, body);
-
-  return response.body;
- }
-
- public async stop(): Promise<string> {
+  public async stop(): Promise<string> {
     logger.info('Begin stop request');
-    const preAuth = await this.getPreAuth();
-    const response = await this.request(CA_ENDPOINTS.stop, {
-      pAuth: preAuth
-    });
-    return response.body;
-  }
-
-  public async locate(): Promise<VehicleLocation> {
-    logger.info('Begin locate request');
-    const preAuth = await this.getPreAuth();
-    const response = await this.request(CA_ENDPOINTS.locate, {
-      pAuth: preAuth
-    });
-    return response.body;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(CA_ENDPOINTS.stop, {
+        pAuth: preAuth
+      });
+      return Promise.resolve(response);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   public async  lights(withHorn = false): Promise<any> {
     logger.info('Begin lights request with horn ' + withHorn);
-    const preAuth = await this.getPreAuth();
-    const response = await this.request(
-      CA_ENDPOINTS.hornlight, 
-      { pAuth: preAuth},
-      { horn: withHorn });
-    return response.body;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        CA_ENDPOINTS.hornlight,
+        { horn: withHorn },
+        { pAuth: preAuth }
+      );
+      return Promise.resolve(response);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
+  public async locate(): Promise<VehicleLocation> {
+    logger.info('Begin locate request');
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        CA_ENDPOINTS.locate,
+        {},
+        { pAuth: preAuth }
+      );
+      this._location = response.result as VehicleLocation
+      return Promise.resolve(this._location);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   // Internal
@@ -161,8 +212,7 @@ export default class CanadianVehicle extends Vehicle {
 
   private async getPreAuth() {
     const response = await this.request(CA_ENDPOINTS.verifyPin, {});
-    const pAuth = response.body.result.pAuth;
-    logger.info('pAuth ' + pAuth);
+    const pAuth = response.result.pAuth;
     return pAuth;
   }
 
@@ -187,9 +237,7 @@ export default class CanadianVehicle extends Vehicle {
         }
       });
 
-
-      if (response.body.responseHeader.responseCode != 0)
-      {
+      if (response.body.responseHeader.responseCode != 0) {
         return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc)
       }
 

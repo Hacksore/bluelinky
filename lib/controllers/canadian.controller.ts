@@ -43,30 +43,24 @@ export class CanadianController implements SessionController {
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(((+new Date() / 1000)) - this.session.tokenExpiresAt) <= 10;
 
-    // if (this.session.refreshToken && shouldRefreshToken) {
-    //   const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
-    //     method: 'POST',
-    //     body: {
-    //       'refresh_token': this.session.refreshToken
-    //     },
-    //     headers: {
-    //       'client_secret': CLIENT_SECRET,
-    //       'client_id': CLIENT_ID
-    //     },
-    //     json: true
-    //   });
+    if (this.session.refreshToken && shouldRefreshToken) {
+      // TODO , right call ?
+      const response = await this.request(CA_ENDPOINTS.verifyToken,
+        {},
+        {})
 
-      // this.session.accessToken = response.body.access_token;
-      // this.session.refreshToken = response.body.refresh_token;
-      // this.session.tokenExpiresAt = Math.floor((+new Date() / 1000) + response.body.expires_in);
+      this.session.accessToken = response.body.access_token;
+      this.session.refreshToken = response.body.refresh_token;
+      this.session.tokenExpiresAt = Math.floor((+new Date() / 1000) + response.body.expires_in);
 
-    //   return Promise.resolve('Token refreshed');
-    // }
+      return Promise.resolve('Token refreshed');
+    }
 
     return Promise.resolve('Token not expired, no need to refresh');
   }
 
   public async login(): Promise<string> {
+    console.log('Begin login request');
     try {
       const response = await this.request(
         CA_ENDPOINTS.login,
@@ -74,11 +68,6 @@ export class CanadianController implements SessionController {
           loginId: this.config.username,
           password: this.config.password
         })
-
-      if (response.responseHeader.responseCode != 0)
-      {
-        return Promise.reject('bad login: ' + response.responseHeader.responseDesc)
-      }
 
       this.session.accessToken = response.result.accessToken;
       this.session.refreshToken = response.result.refreshToken;
@@ -95,57 +84,63 @@ export class CanadianController implements SessionController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    console.log('getVehicleList');
-    const response = await this.request(
-      CA_ENDPOINTS.vehicleList, {});
- 
-    const data = response.result
-    if (data.vehicles === undefined) {
-      this.vehicles = [];
-      return Promise.reject('No vehicles found for account!');
-    }
+    console.log('Begin getVehicleList request');
+    try {
+      const response = await this.request(
+        CA_ENDPOINTS.vehicleList, {});
 
-    data.vehicles.forEach(vehicle => {
-      const config = {
-        pin: this.config.pin,
-        vehicleId: vehicle.vehicleId,
-        vin: vehicle.vin,
-        nickname: vehicle.nickName,
-        defaultVehicle: vehicle.defaultVehicle,
-        modelName: vehicle.modelName,
-        modelYear: vehicle.modelYear,
-        fuelKindCode: vehicle.fuelKindCode,
-        genType: vehicle.genType,
-        subscriptionEndDate: vehicle.subscriptionEndDate,
-        mileageForNextService: vehicle.mileageForNextService,
-        daysForNextService: vehicle.daysForNextService
+      const data = response.result
+      if (data.vehicles === undefined) {
+        this.vehicles = [];
+        return Promise.reject('No vehicles found for account!');
       }
-      this.vehicles.push(new CanadianVehicle(config, this));
-    })
 
-    return Promise.resolve(this.vehicles);
+      data.vehicles.forEach(vehicle => {
+        const config = {
+          pin: this.config.pin,
+          vehicleId: vehicle.vehicleId,
+          vin: vehicle.vin,
+          nickname: vehicle.nickName,
+          defaultVehicle: vehicle.defaultVehicle,
+          modelName: vehicle.modelName,
+          modelYear: vehicle.modelYear,
+          fuelKindCode: vehicle.fuelKindCode,
+          genType: vehicle.genType,
+          subscriptionEndDate: vehicle.subscriptionEndDate,
+          mileageForNextService: vehicle.mileageForNextService,
+          daysForNextService: vehicle.daysForNextService
+        }
+        this.vehicles.push(new CanadianVehicle(config, this));
+      })
+
+      return Promise.resolve(this.vehicles);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Account
   //////////////////////////////////////////////////////////////////////////////
 
-  async myAccount(): Promise<any> {
+  public async myAccount(): Promise<String> {
     logger.info('Begin myAccount request');
-    const response = await this.request(ALL_ENDPOINTS.CA.myAccount, {});
-    return response.result;
+    try {
+      const response = await this.request(CA_ENDPOINTS.myAccount, {});
+      return Promise.resolve(response.result);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
-  async nextService(): Promise<any> {
-    logger.info('Begin nextService request');
-    const response = await this.request(ALL_ENDPOINTS.CA.nextService, {});
-    return response;
-  }
-
-  async preferedDealer(): Promise<any> {
+  public async preferedDealer(): Promise<String> {
     logger.info('Begin preferedDealer request');
-    const response = await this.request(ALL_ENDPOINTS.CA.preferedDealer, {});
-    return response;
+    try {
+      const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
+      return Promise.resolve(response.result);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
 
@@ -153,16 +148,8 @@ export class CanadianController implements SessionController {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
 
-  private async getPreAuth() {
-    const response = await this.request(ALL_ENDPOINTS.CA.verifyPin, {});
-    const pAuth = response.result.pAuth;
-    logger.info('pAuth ' + pAuth);
-    return pAuth;
-  }
-
   private async request(endpoint, body: object, headers: object = {}, ): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
-
     try {
       const response = await got(endpoint, {
         method: 'POST',
@@ -171,16 +158,13 @@ export class CanadianController implements SessionController {
           from: 'SPA',
           language: 1,
           offset: this.timeOffset,
-          // pin: this.config.pin,
           accessToken: this.session.accessToken,
-          // vehicleId: this.config.vehicleId,
           ...headers
         },
         body: {
           ...body
         }
       });
-
 
       if (response.body.responseHeader.responseCode != 0)
       {
