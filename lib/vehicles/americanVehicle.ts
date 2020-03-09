@@ -20,6 +20,7 @@ export default class AmericanVehicle extends Vehicle {
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
   }
+  
   get odometer(): Odometer | null {
     throw new Error('Method not implemented.');
   }

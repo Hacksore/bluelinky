@@ -8,7 +8,7 @@ export interface CanadianEndpoints {
     unlock: string;
     start: string;
     stop: string;
-    locate: string;
+    location: string;
     hornlight: string,
     status: string;
     remoteStatus: string;
