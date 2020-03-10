@@ -123,7 +123,7 @@ export class AmericanController implements SessionController {
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
         // unsure if this is right but the new endpoint does not seem to have gen        
-        gen: vehicleInfo.modelYear > 2016 ? 2 : 1,
+        gen: vehicleInfo.modelYear > 2016 ? '2' : '1',
         name: vehicleInfo.nickName
       }
       this.vehicles.push(new AmericanVehicle(config, this));

@@ -1,7 +1,7 @@
 import got from 'got';
 import { REGIONS } from '../constants';
 import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
-import { ALL_ENDPOINTS, CA_BASE_URL, CA_ENDPOINTS } from '../constants';
+import { CA_ENDPOINTS } from '../constants';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
@@ -52,7 +52,7 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
-
+  // TODO: type this
   public async vehicleInfo(): Promise<any> {
     logger.info('Begin vehicleInfo request');
     try {
@@ -75,7 +75,7 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
-  public async nextService(): Promise<String> {
+  public async nextService(): Promise<string> {
     logger.info('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
@@ -136,12 +136,12 @@ export default class CanadianVehicle extends Vehicle {
         }
       }
 
-      let airTemp = startConfig.airTempvalue
+      const airTemp = startConfig.airTempvalue
       if (airTemp != null) {
         if (airTemp > 27 || airTemp < 17) {
           return Promise.reject("air temperature should be between 17 and 27 degrees");
         }
-        var airTempValue: String = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
+        let airTempValue: string = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
         if (airTempValue.length == 2) {
           airTempValue = '0' + airTempValue
         }
@@ -175,6 +175,7 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
+  // TODO: type this
   public async  lights(withHorn = false): Promise<any> {
     logger.info('Begin lights request with horn ' + withHorn);
     try {
@@ -209,7 +210,7 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Internal
   //////////////////////////////////////////////////////////////////////////////
-
+  // TODO: type this
   private async getPreAuth() {
     const response = await this.request(CA_ENDPOINTS.verifyPin, {});
     const pAuth = response.result.pAuth;
@@ -241,7 +242,6 @@ export default class CanadianVehicle extends Vehicle {
         return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc)
       }
 
-      // console.log( '********* response ' + JSON.stringify(response))
       return Promise.resolve(response.body);
     } catch (err) {
       return Promise.reject('error: ' + err)

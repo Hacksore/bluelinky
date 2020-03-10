@@ -5,7 +5,7 @@ export interface BlueLinkyConfig {
   autoLogin: boolean;
   pin: string|undefined;
   vin: string|undefined;
-  vehicleId: string|undefined
+  vehicleId: string|undefined;
   deviceUuid: string|undefined;
 }
 

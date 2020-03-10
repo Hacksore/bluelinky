@@ -8,7 +8,7 @@ export abstract class Vehicle {
   abstract get vehicleId(): string;
   abstract get gen(): string|null;
   abstract get type(): string;
-  abstract get location(): VehicleLocation|null;
+  abstract get location(): VehicleLocation|null;  
   abstract get odometer(): Odometer|null;
   abstract async status(refresh: boolean): Promise<VehicleStatus>;
   abstract async unlock(): Promise<string>;
