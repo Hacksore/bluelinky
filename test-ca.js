@@ -4,7 +4,8 @@ const BlueLinky = require('./dist/index');
 const inquirer = require('inquirer');
 
 const client = new BlueLinky({
-    ...config
+    region: 'CA',
+   ...config
 });
 
 const apiCalls = [
