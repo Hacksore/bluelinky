@@ -1,4 +1,4 @@
-import { EU_CONSTANTS } from './../constants';
+import { EU_CONSTANTS, REGIONS } from './../constants';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
@@ -11,6 +11,7 @@ import logger from '../logger';
 import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
+
 export class EuropeanController implements SessionController {
 
   constructor(config: BlueLinkyConfig) {
@@ -29,13 +30,14 @@ export class EuropeanController implements SessionController {
   private vehicles: Array<EuropeanVehicle> = [];
 
   public config: BlueLinkyConfig = {
-    username: null,
-    password: null,
-    region: 'EU',
+    username: undefined,
+    password: undefined,
+    region: REGIONS.EU,
     autoLogin: true,
-    pin: null,
-    vin: null,
-    deviceUuid: null
+    pin: undefined,
+    vin: undefined,
+    vehicleId: undefined,
+    deviceUuid: undefined
   };
 
   public async refreshAccessToken(): Promise<string> {

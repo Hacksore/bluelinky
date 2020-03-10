@@ -20,6 +20,11 @@ const onReadyHandler = async vehicles => {
   }
 };
 
+const onReadyHandler = async(vehicles) => {
+    const vehicle = client.getVehicle();
+    const response = await vehicle.status();
+    console.log(response);
+}
 client.on('ready', onReadyHandler);
 
 //manual way
