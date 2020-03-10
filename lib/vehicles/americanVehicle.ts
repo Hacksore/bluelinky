@@ -7,6 +7,7 @@ import got from 'got';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
 import { URLSearchParams } from 'url';
 import { StartConfig } from '../interfaces/american.interfaces';
+
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
   public region = REGIONS.US;
@@ -19,6 +20,7 @@ export default class AmericanVehicle extends Vehicle {
   get location(): VehicleLocation | null {
     throw new Error('Method not implemented.');
   }
+  
   get odometer(): Odometer | null {
     throw new Error('Method not implemented.');
   }
@@ -29,6 +31,10 @@ export default class AmericanVehicle extends Vehicle {
 
   get vin(): string {
     return this.config.vin;
+  }
+
+  get vehicleId(): string {
+    return this.config.vehicleId;
   }
 
   get name(): string {

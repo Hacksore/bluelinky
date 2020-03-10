@@ -1,5 +1,6 @@
 import { AmericanController } from './controllers/american.controller';
 import { EuropeanController } from './controllers/european.controller';
+import { CanadianController } from './controllers/canadian.controller';
 import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
@@ -15,10 +16,11 @@ class BlueLinky extends EventEmitter {
   private config: BlueLinkyConfig = {
     username: '',
     password: '',
-    region: 'US',
-    pin: '1234',
+    region: REGIONS.US,
     autoLogin: true,
+    pin: '1234',
     vin: '',
+    vehicleId: undefined,
     deviceUuid: '',
   }
 
@@ -32,13 +34,11 @@ class BlueLinky extends EventEmitter {
       case REGIONS.US:
         this.controller = new AmericanController(config);
         break;
-      default:
-        this.controller = new AmericanController(config);
+      case REGIONS.CA:
+        this.controller = new CanadianController(config);
         break;
-    }
-
-    if(this.controller === null){
-      throw new Error('Your region is not supported yet.');
+      default:
+        throw new Error('Your region is not supported yet.');
     }
 
     // merge configs
@@ -46,6 +46,8 @@ class BlueLinky extends EventEmitter {
       ...this.config,
       ...config,
     }
+
+    console.log(this.config)
 
     if (config.autoLogin === undefined) {
       this.config.autoLogin = true;
@@ -77,12 +79,24 @@ class BlueLinky extends EventEmitter {
     return this.controller.getVehicles() || [];   
   }
 
-  public getVehicle(vin: string): Vehicle|undefined {
-    try {
-      return this.vehicles.find(car => car.vin === vin) as Vehicle;
-    } catch (err) {
-      throw new Error('Vehicle not found!');
+  public getVehicle(): Vehicle|undefined {
+    if (this.vehicles.length == 0) {
+      throw new Error('No Vehicle found!');
     }
+    if (this.config.vehicleId != undefined) {
+      try {
+        return this.vehicles.find(car => car.vehicleId === this.config.vehicleId) as Vehicle;
+      } catch (err) {
+        throw new Error('Vehicle not found!');
+      }
+    } else if (this.config.vin != undefined) {
+      try {
+        return this.vehicles.find(car => car.vin === this.config.vin) as Vehicle;
+      } catch (err) {
+        throw new Error('Vehicle not found!');
+      } 
+    }
+    return this.vehicles[0];
   }
 
   public async refreshAccessToken(): Promise<string> {
