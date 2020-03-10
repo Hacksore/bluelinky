@@ -19,7 +19,7 @@ export default class EuropeanVehicle extends Vehicle {
     return this.config.vin;
   }
 
-  get gen(): string {
+  get gen(): number {
     return this.config.gen;
   }
 
