@@ -241,7 +241,6 @@ export default class CanadianVehicle extends Vehicle {
         return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc)
       }
 
-      // console.log( '********* response ' + JSON.stringify(response))
       return Promise.resolve(response.body);
     } catch (err) {
       return Promise.reject('error: ' + err)

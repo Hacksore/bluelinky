@@ -99,7 +99,6 @@ export default class AmericanVehicle extends Vehicle {
       ...startConfig,
     };
 
-    console.log(this.session)
     const body = {
       'Ims': 0,
       'airCtrl': + mergedConfig.airCtrl, // use the unary method to convert to int
@@ -115,7 +114,6 @@ export default class AmericanVehicle extends Vehicle {
       'vin': this.config.vin,
     };
 
-    console.log(body);
     const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/start`, {
       method: 'POST',
       headers: {
@@ -126,7 +124,6 @@ export default class AmericanVehicle extends Vehicle {
       json: true,
     });
 
-    console.log(response.body);
     // logger.debug(JSON.stringify(response.body));
 
     if (response.statusCode === 200) {

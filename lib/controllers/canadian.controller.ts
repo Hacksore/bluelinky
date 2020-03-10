@@ -60,7 +60,7 @@ export class CanadianController implements SessionController {
   }
 
   public async login(): Promise<string> {
-    console.log('Begin login request');
+    logger.info('Begin login request');
     try {
       const response = await this.request(
         CA_ENDPOINTS.login,
@@ -84,7 +84,7 @@ export class CanadianController implements SessionController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    console.log('Begin getVehicleList request');
+    logger.info('Begin getVehicleList request');
     try {
       const response = await this.request(
         CA_ENDPOINTS.vehicleList, {});

@@ -47,8 +47,6 @@ class BlueLinky extends EventEmitter {
       ...config,
     }
 
-    console.log(this.config)
-
     if (config.autoLogin === undefined) {
       this.config.autoLogin = true;
     }
@@ -79,24 +77,26 @@ class BlueLinky extends EventEmitter {
     return this.controller.getVehicles() || [];   
   }
 
-  public getVehicle(): Vehicle|undefined {
-    if (this.vehicles.length == 0) {
+  public getVehicle(input: string): Vehicle|undefined {
+    if (this.vehicles.length === 0) {
       throw new Error('No Vehicle found!');
     }
-    if (this.config.vehicleId != undefined) {
-      try {
-        return this.vehicles.find(car => car.vehicleId === this.config.vehicleId) as Vehicle;
-      } catch (err) {
-        throw new Error('Vehicle not found!');
-      }
-    } else if (this.config.vin != undefined) {
-      try {
-        return this.vehicles.find(car => car.vin === this.config.vin) as Vehicle;
-      } catch (err) {
-        throw new Error('Vehicle not found!');
+
+    try {
+      const foundCar = this.vehicles.find(car => {
+        car.vin === input ||
+        car.vehicleId === input
+      });
+
+      if (!foundCar && this.vehicles.length > 0) {
+        return this.vehicles[0];
       } 
+      
+      return foundCar;
+
+    } catch (err) {
+      throw new Error('Vehicle not found!');
     }
-    return this.vehicles[0];
   }
 
   public async refreshAccessToken(): Promise<string> {

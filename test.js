@@ -10,21 +10,17 @@ const client = new BlueLinky({
   pin
 });
 
-const onReadyHandler = async vehicles => {
+const onReadyHandler = async () => {
   try {
     const vehicle = client.getVehicle(vin);
-    const response = await vehicle.unlock();
+    const response = await vehicle.status();
     console.log(response);
   } catch (err) {
     console.log(err.body);
   }
 };
 
-const onReadyHandler = async(vehicles) => {
-    const vehicle = client.getVehicle();
-    const response = await vehicle.status();
-    console.log(response);
-}
+
 client.on('ready', onReadyHandler);
 
 //manual way
