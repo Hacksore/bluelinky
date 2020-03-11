@@ -1,16 +1,24 @@
 import got from 'got';
+import logger from '../logger';
+
 import { REGIONS } from '../constants';
-import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
-import logger from '../logger';
+import { 
+  StartConfig,
+  VehicleStatus, 
+  VehicleLocation, 
+  VehicleNextService, 
+  Odometer 
+} from '../interfaces/common.interfaces';
+
 import { Vehicle } from './vehicle';
-import { StartConfig } from '../interfaces/american.interfaces';
 
 export default class CanadianVehicle extends Vehicle {
 
   private _status: VehicleStatus | null = null;
   private _location: VehicleLocation | null = null;
+  private _nextService: VehicleNextService | null = null;
 
   public region = REGIONS.CA;
 
@@ -75,11 +83,12 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
-  public async nextService(): Promise<string> {
+  public async nextService(): Promise<VehicleNextService> {
     logger.info('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
-      return Promise.resolve(response.result);
+      this._nextService = response.result as VehicleNextService
+      return Promise.resolve(this._nextService);
     } catch (err) {
       return Promise.reject('error: ' + err)
     }

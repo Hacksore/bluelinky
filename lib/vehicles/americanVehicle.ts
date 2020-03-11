@@ -1,12 +1,18 @@
-import { REGIONS } from '../constants';
-import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
-
-import logger from '../logger';
-import { Vehicle } from './vehicle';
 import got from 'got';
+import logger from '../logger';
+
+import { REGIONS } from '../constants';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
+
+import { 
+  StartConfig,
+  VehicleStatus, 
+  VehicleLocation, 
+  Odometer 
+} from '../interfaces/common.interfaces';
+
+import { Vehicle } from './vehicle';
 import { URLSearchParams } from 'url';
-import { StartConfig } from '../interfaces/american.interfaces';
 
 export default class AmericanVehicle extends Vehicle {
   private _status: VehicleStatus | null = null;
