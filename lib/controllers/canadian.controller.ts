@@ -1,7 +1,6 @@
 import got from 'got';
 import { VehicleStatus, BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS } from '../constants';
-import { CLIENT_ORIGIN } from '../constants/canada';
+import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
 import SessionController from './controller';

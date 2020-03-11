@@ -1,8 +1,7 @@
 import got from 'got';
 import { REGIONS } from '../constants';
 import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS } from '../constants';
-import { CLIENT_ORIGIN } from '../constants/canada';
+import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
