@@ -2,6 +2,7 @@ import got from 'got';
 import { REGIONS } from '../constants';
 import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS } from '../constants';
+import { CLIENT_ORIGIN } from '../constants/canada';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
@@ -225,7 +226,7 @@ export default class CanadianVehicle extends Vehicle {
         method: 'POST',
         json: true,
         headers: {
-          from: 'SPA',
+          from: CLIENT_ORIGIN,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.controller.session.accessToken,

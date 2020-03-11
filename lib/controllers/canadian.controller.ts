@@ -1,6 +1,7 @@
 import got from 'got';
 import { VehicleStatus, BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS } from '../constants';
+import { CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
 import SessionController from './controller';
@@ -148,7 +149,7 @@ export class CanadianController implements SessionController {
         method: 'POST',
         json: true,
         headers: {
-          from: 'SPA',
+          from: CLIENT_ORIGIN,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.session.accessToken,
