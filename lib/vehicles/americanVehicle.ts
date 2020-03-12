@@ -98,7 +98,7 @@ export default class AmericanVehicle extends Vehicle {
       ...{
         airCtrl: false,
         igniOnDuration: 10,
-        airTempvalue: '70',
+        airTempvalue: 70,
         defrost: false,
         heating1: false,
       },
@@ -142,12 +142,15 @@ export default class AmericanVehicle extends Vehicle {
   public async stop(): Promise<string> {
     const response = await got(`${BASE_URL}/ac/v2/rcs/rsc/stop`, {
       method: 'POST',
-      headers: this.getHeaders(),
+      headers: { 
+        ...this.getHeaders(),
+        'offset': '-4',
+      }
     });
 
     logger.debug(JSON.stringify(response));
     if (response.statusCode === 200) {
-      return Promise.resolve('all good');
+      return Promise.resolve('Vehicle stopped');
     }
 
     return Promise.reject('Failed to stop vehicle!');
