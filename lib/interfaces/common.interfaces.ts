@@ -24,8 +24,9 @@ export interface Session {
   tokenExpiresAt: number;
 }
 
-// Status 
+// Status
 export interface VehicleStatus {
+  lastStatusDate: String
   dateTime: string;
   acc: boolean;
   trunkOpen: boolean;
@@ -35,6 +36,7 @@ export interface VehicleStatus {
   doorLockStatus: string;
   doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
   airCtrlOn: boolean;
+  airTempUnit: String;
   airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
     batSignalReferenceValue: {};
@@ -60,6 +62,82 @@ export interface VehicleStatus {
     tirePressureWarningLampRearRight: number;
   };
   trunkOpenStatus: string;
+  evStatus: {
+    batteryCharge: Boolean;
+    batteryStatus: number;
+    batteryPlugin: number;
+    remainTime2: {
+      etc1: { value: number; unit: number; };
+      etc2: { value: number; unit: number; };
+      etc3: { value: number; unit: number; };
+      atc: { value: number; unit: number; };
+    };
+    drvDistance: [{
+      rangeByFuel: {
+        gasModeRange: { value: number; unit: number; };
+        evModeRange: { value: number; unit: number; };
+        totalAvailableRange: { value: number; unit: number; };
+      };
+      type: number;
+    }]
+  };
+  remoteIgnition: Boolean;
+  seatHeaterVentInfo: {};
+  sleepModeCheck: Boolean;
+  lampWireStatus: {
+    headLamp: {};
+    stopLamp: {};
+    turnSignalLamp: {};
+  };
+  windowOpen: {};
+  engineRuntime: {}
+}
+
+// Vehicle Info
+export interface VehicleInfo {
+  vehicleId: String;
+  nickName: String;
+  modelCode: String;
+  modelName: String;
+  modelYear: String;
+  fuelKindCode: String;
+  trim: String;
+  engine: String;
+  exteriorColor: String;
+  dtcCount: number;
+  subscriptionStatus: String;
+  subscriptionEndDate: String;
+  overviewMessage: String;
+  odometer: number;
+  odometerUnit: number;
+  defaultVehicle: Boolean;
+  enrollmentStatus: String;
+  genType: String;
+  transmissionType: String;
+  vin: String;
+}
+
+export interface VehicleFeature {
+  category: String;
+  features: [ { featureName: String; } ] 
+}
+
+export interface VehicleInfoResponse {
+  vehicleInfo: VehicleInfo;
+  features: {
+    seatHeatVent : {
+      drvSeatHeatOption: number;
+      astSeatHeatOption: number;
+      rlSeatHeatOption: number;
+      rrSeatHeatOption: number;
+    };
+    hvacTempType: number;
+    targetMinSoc: number;
+  };
+  featuresModel: {
+    features: [ VehicleFeature ]
+  };
+  status: VehicleStatus;
 }
 
 // Location
