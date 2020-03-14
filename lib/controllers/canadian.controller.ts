@@ -145,6 +145,7 @@ export class CanadianController implements SessionController {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
 
+  // TODO: type this
   private async request(endpoint, body: object, headers: object = {}): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
     try {

@@ -185,7 +185,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: type this
-  public async  lights(withHorn = false): Promise<any> {
+  public async lights(withHorn = false): Promise<any> {
     logger.info('Begin lights request with horn ' + withHorn);
     try {
       const preAuth = await this.getPreAuth();

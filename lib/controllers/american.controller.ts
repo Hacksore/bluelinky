@@ -39,6 +39,7 @@ export class AmericanController implements SessionController {
     const shouldRefreshToken = Math.floor(((+new Date()/1000)) - this.session.tokenExpiresAt) <= 10;
 
     if (this.session.refreshToken && shouldRefreshToken) {
+      logger.debug('refreshing token');
       const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
         method: 'POST',
         body: {
@@ -53,7 +54,7 @@ export class AmericanController implements SessionController {
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + response.body.expires_in);
+      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + parseInt(response.body.expires_in));
 
       return Promise.resolve('Token refreshed');
     }
@@ -78,7 +79,7 @@ export class AmericanController implements SessionController {
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + response.body.expires_in);
+      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + parseInt(response.body.expires_in));
 
       return Promise.resolve('login good');
     } catch (err) {

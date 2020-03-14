@@ -222,7 +222,7 @@ export class EuropeanController implements SessionController {
       
   }
 
-  // TODO: type this or replace it with
+  // TODO: type this or replace it with a normal loop
   async asyncForEach(array, callback): Promise<any> {
     for (let index = 0; index < array.length; index++) {
       await callback(array[index], index, array);

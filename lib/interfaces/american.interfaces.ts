@@ -41,3 +41,22 @@ export interface AmericanEndpoints {
   enrollmentStatus: string;
   subscriptions: string;
 }
+
+export interface RequestHeaders {
+  'access_token': string;
+  'client_id': string;
+  'Host': string;
+  'User-Agent': string;
+  'registrationId': string;
+  'gen': string;
+  'username': string;
+  'vin': string;
+  'APPCLOUD-VIN': string;
+  'Language': string;
+  'to': string;
+  'encryptFlag': string;
+  'from': string;
+  'brandIndicator': string;
+  'bluelinkservicepin': string;
+  'offset': string;
+}
