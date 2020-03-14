@@ -223,7 +223,7 @@ export default class CanadianVehicle extends Vehicle {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
   // TODO: type this
-  private async getPreAuth() {
+  private async getPreAuth(): Promise<any> {
     const response = await this.request(CA_ENDPOINTS.verifyPin, {});
     const pAuth = response.result.pAuth;
     return pAuth;

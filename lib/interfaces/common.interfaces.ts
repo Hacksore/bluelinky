@@ -176,10 +176,10 @@ export interface VehicleStatusReponse {
 export interface VehicleNextService {
   msopServiceOdometer: number;
   msopServiceOdometerUnit: number;
-  mtspServiceDate: String;
+  mtspServiceDate: string;
   imatServiceOdometer: number;
   imatServiceOdometerUnit: number;
-  mtitServiceDate: String;
+  mtitServiceDate: string;
   currentOdometer: number;
   currentOdometerUnit: number;
   serviceOdometerDuration: number;
@@ -208,51 +208,57 @@ export interface ClimateConfig {
 
 // Account Info
 export interface Address {
-  street: String;
-  city: String;
-  province: String;
-  postalCode: String;
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
 }
 
 export interface AccountInfo {
-  firstName: String;
-  lastName: String;
-  notificationEmail: String;
-  phones: { primary: String | null, secondary: String | null };
-  addresses: { primary: Address | null, secondary: Address | null };
+  firstName: string;
+  lastName: string;
+  notificationEmail: string;
+  phones: { 
+    primary: string | null;
+    secondary: string | null;
+  };
+  addresses: {
+    primary: Address | null;
+    secondary: Address | null;
+  };
   preference: { 
     odometerUnit: number;
-    climateUnit: String;  // "C" / "F"
+    climateUnit: string;  // "C" / "F"
     languageId: number;
     maintenanceAlert: boolean;
     preferredDealer: PreferedDealer | null;
-    promotionMessage: String | null;
+    promotionMessage: string | null;
   };
 }
 
 // PreferedDealer
 export interface PreferedDealerHour {
   dayCode: number;
-  startTime: String;
-  startTimeUnit: String;
-  endTime: String;
-  endTimeUnit: String
+  startTime: string;
+  startTimeUnit: string;
+  endTime: string;
+  endTimeUnit: string;
 }
 
 export interface PreferedDealer {
-  dealerCode: String;
-  dealerName: String;
-  street: String;
-  province: String;
-  city: String;
-  postalCode: String;
-  tel: String;
-  fax: String;
-  fullAddress: String;
-  distance: String;
-  lat: String;
-  lng: String;
-  webSite: String;
+  dealerCode: string;
+  dealerName: string;
+  street: string;
+  province: string;
+  city: string;
+  postalCode: string;
+  tel: string;
+  fax: string;
+  fullAddress: string;
+  distance: string;
+  lat: string;
+  lng: string;
+  webSite: string;
   salesHourList: [PreferedDealerHour];
   serviceHourList: [PreferedDealerHour];
 }

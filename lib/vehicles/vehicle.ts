@@ -1,5 +1,6 @@
 import { VehicleStatus, VehicleLocation, Odometer, ClimateConfig } from '../interfaces/common.interfaces';
-import { Session, StartConfig } from '../interfaces/common.interfaces';
+import { Session } from '../interfaces/common.interfaces';
+import { StartConfig } from '../interfaces/common.interfaces';
 
 export abstract class Vehicle {
   abstract get name(): string;

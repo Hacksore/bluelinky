@@ -1,5 +1,5 @@
 import got from 'got';
-import { VehicleStatus, AccountInfo, BlueLinkyConfig, Session, PreferedDealer } from '../interfaces/common.interfaces';
+import { AccountInfo, BlueLinkyConfig, Session, PreferedDealer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
