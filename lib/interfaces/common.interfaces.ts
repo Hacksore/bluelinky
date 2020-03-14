@@ -26,7 +26,7 @@ export interface Session {
 
 // Status
 export interface VehicleStatus {
-  lastStatusDate: String
+  lastStatusDate: string;
   dateTime: string;
   acc: boolean;
   trunkOpen: boolean;
@@ -36,7 +36,7 @@ export interface VehicleStatus {
   doorLockStatus: string;
   doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
   airCtrlOn: boolean;
-  airTempUnit: String;
+  airTempUnit: string;
   airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
     batSignalReferenceValue: {};
@@ -63,69 +63,69 @@ export interface VehicleStatus {
   };
   trunkOpenStatus: string;
   evStatus: {
-    batteryCharge: Boolean;
+    batteryCharge: boolean;
     batteryStatus: number;
     batteryPlugin: number;
     remainTime2: {
-      etc1: { value: number; unit: number; };
-      etc2: { value: number; unit: number; };
-      etc3: { value: number; unit: number; };
-      atc: { value: number; unit: number; };
+      etc1: { value: number; unit: number };
+      etc2: { value: number; unit: number };
+      etc3: { value: number; unit: number };
+      atc: { value: number; unit: number };
     };
     drvDistance: [{
       rangeByFuel: {
-        gasModeRange: { value: number; unit: number; };
-        evModeRange: { value: number; unit: number; };
-        totalAvailableRange: { value: number; unit: number; };
+        gasModeRange: { value: number; unit: number };
+        evModeRange: { value: number; unit: number };
+        totalAvailableRange: { value: number; unit: number };
       };
       type: number;
-    }]
+    }];
   };
-  remoteIgnition: Boolean;
+  remoteIgnition: boolean;
   seatHeaterVentInfo: {};
-  sleepModeCheck: Boolean;
+  sleepModeCheck: boolean;
   lampWireStatus: {
     headLamp: {};
     stopLamp: {};
     turnSignalLamp: {};
   };
   windowOpen: {};
-  engineRuntime: {}
+  engineRuntime: {};
 }
 
 // Vehicle Info
 export interface VehicleInfo {
-  vehicleId: String;
-  nickName: String;
-  modelCode: String;
-  modelName: String;
-  modelYear: String;
-  fuelKindCode: String;
-  trim: String;
-  engine: String;
-  exteriorColor: String;
+  vehicleId: string;
+  nickName: string;
+  modelCode: string;
+  modelName: string;
+  modelYear: string;
+  fuelKindCode: string;
+  trim: string;
+  engine: string;
+  exteriorColor: string;
   dtcCount: number;
-  subscriptionStatus: String;
-  subscriptionEndDate: String;
-  overviewMessage: String;
+  subscriptionStatus: string;
+  subscriptionEndDate: string;
+  overviewMessage: string;
   odometer: number;
   odometerUnit: number;
-  defaultVehicle: Boolean;
-  enrollmentStatus: String;
-  genType: String;
-  transmissionType: String;
-  vin: String;
+  defaultVehicle: boolean;
+  enrollmentStatus: string;
+  genType: string;
+  transmissionType: string;
+  vin: string;
 }
 
 export interface VehicleFeature {
-  category: String;
-  features: [ { featureName: String; } ] 
+  category: string;
+  features: [ { featureName: string } ];
 }
 
 export interface VehicleInfoResponse {
   vehicleInfo: VehicleInfo;
   features: {
-    seatHeatVent : {
+    seatHeatVent: {
       drvSeatHeatOption: number;
       astSeatHeatOption: number;
       rlSeatHeatOption: number;
@@ -135,7 +135,7 @@ export interface VehicleInfoResponse {
     targetMinSoc: number;
   };
   featuresModel: {
-    features: [ VehicleFeature ]
+    features: [ VehicleFeature ];
   };
   status: VehicleStatus;
 }

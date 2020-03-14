@@ -205,6 +205,8 @@ export default class AmericanVehicle extends Vehicle {
     return Promise.reject('Something went wrong!');
   }
 
+  // TODO: not sure how to type a dynamic response
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private async _request(service: string, options): Promise<got.Response<any>> {
     const currentTime = Math.floor(+new Date()/1000);
     const tokenDelta = -(currentTime - (this.controller.session.tokenExpiresAt));

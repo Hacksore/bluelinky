@@ -62,7 +62,6 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
-  // TODO: type this
   public async vehicleInfo(): Promise<VehicleInfoResponse> {
     logger.info('Begin vehicleInfo request');
     try {
@@ -229,6 +228,8 @@ export default class CanadianVehicle extends Vehicle {
     return pAuth;
   }
 
+  // TODO: not sure how to type a dynamic response
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: object, headers: object = {}, ): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 

@@ -145,7 +145,8 @@ export class CanadianController implements SessionController {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
 
-  // TODO: type this
+  // TODO: not quite sure how to type this if it's dynamic?
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: object, headers: object = {}): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
     try {
