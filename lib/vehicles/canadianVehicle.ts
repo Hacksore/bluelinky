@@ -6,7 +6,8 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import { 
   StartConfig,
-  VehicleStatus, 
+  VehicleStatus,
+  VehicleInfoResponse,
   VehicleLocation, 
   VehicleNextService, 
   Odometer 
@@ -17,6 +18,7 @@ import { Vehicle } from './vehicle';
 export default class CanadianVehicle extends Vehicle {
 
   private _status: VehicleStatus | null = null;
+  private _info: VehicleInfoResponse | null = null;
   private _location: VehicleLocation | null = null;
   private _nextService: VehicleNextService | null = null;
 
@@ -61,11 +63,12 @@ export default class CanadianVehicle extends Vehicle {
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
   // TODO: type this
-  public async vehicleInfo(): Promise<any> {
+  public async vehicleInfo(): Promise<VehicleInfoResponse> {
     logger.info('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
-      return Promise.resolve(response.result);
+      this._info = response.result as VehicleInfoResponse;
+      return Promise.resolve(this._info);
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
