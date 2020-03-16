@@ -3,11 +3,11 @@ export interface BlueLinkyConfig {
   username: string|undefined;
   password: string|undefined;
   region: string|undefined;
-  autoLogin: boolean;
+  autoLogin?: boolean;
   pin: string|undefined;
-  vin: string|undefined;
-  vehicleId: string|undefined;
-  deviceUuid: string|undefined;
+  vin?: string|undefined;
+  vehicleId?: string|undefined;
+  deviceUuid?: string|undefined;
 }
 
 export interface BluelinkVehicle {

@@ -55,7 +55,7 @@ class BlueLinky extends EventEmitter {
   }
 
   private onInit(): void {
-    if(this.config.autoLogin){
+    if (this.config.autoLogin) {
       logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
       this.login();
     }

@@ -1,6 +1,9 @@
+
 /* eslint-disable */
-const config = require('./config.json');
-const BlueLinky = require('./dist/index');
+// TODO: merge this into one file onl
+
+const config = require('.__tests__');
+const BlueLinky = require('../dist/index');
 const inquirer = require('inquirer');
 
 const client = new BlueLinky({
@@ -91,6 +94,6 @@ async function performCommand(command) {
 
     askForInput();
   } catch (err) {
-    console.log(err);
+    console.log(err.body);
   }
 }

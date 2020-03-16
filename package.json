@@ -1,6 +1,6 @@
 {
   "name": "bluelinky",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,28 +9,41 @@
     "dev": "rollup -w -c rollup.config.js",
     "lint": "eslint ./lib --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
-    "test": "npm run build && node test.js",
+    "test": "jest --verbose",
     "test-ca": "npm run build && node test-ca.js",
     "watch": "tsc -w"
   },
   "author": "Hacksore",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^13.7.4",
     "got": "^9.6.0",
     "push-receiver": "^2.1.0",
     "tough-cookie": "^3.0.1",
     "url": "^0.11.0",
-    "inquirer": "^7.0.4",
     "winston": "^3.2.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm test",
+      "pre-push": "npm test"
+    }
   },
   "homepage": "https://github.com/Hacksore/bluelinky",
   "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-typescript": "^7.8.3",
     "@types/form-data": "^2.2.1",
     "@types/got": "^9.4.4",
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.1",
     "@typescript-eslint/eslint-plugin": "^2.21.0",
     "@typescript-eslint/parser": "^2.21.0",
+    "babel-jest": "^25.1.0",
     "eslint": "^6.8.0",
+    "husky": "^4.2.3",
+    "inquirer": "^7.0.4",
+    "jest": "^25.1.0",
     "rollup": "^1.15.6",
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-license": "^0.12.1",
@@ -38,9 +51,10 @@
     "rollup-plugin-node-resolve": "^5.0.3",
     "rollup-plugin-typescript2": "^0.21.1",
     "rollup-plugin-uglify": "^6.0.4",
+    "ts-jest": "^25.2.1",
     "tslib": "^1.11.0",
     "tslint": "^6.0.0",
     "tslint-formatter-beauty": "^3.0.0",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.3"
   }
 }
