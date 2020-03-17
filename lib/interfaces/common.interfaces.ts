@@ -117,26 +117,35 @@ export interface VehicleInfo {
   vin: String;
 }
 
-export interface VehicleFeature {
+export interface VehicleFeatures {
+  seatHeatVent : {
+    drvSeatHeatOption: number;
+    astSeatHeatOption: number;
+    rlSeatHeatOption: number;
+    rrSeatHeatOption: number;
+  };
+  hvacTempType: number;
+  targetMinSoc: number;
+}
+
+export interface VehicleFeatureEntry {
   category: String;
-  features: [ { featureName: String; } ] 
+  features: [ {
+    featureName: String;
+    features: [ {
+      subFeatureName: String;
+      subFeatureValue: String;
+    }] 
+  }] 
+}
+export interface VehicleFeaturesModel {
+  features: [ VehicleFeatureEntry ]
 }
 
 export interface VehicleInfoResponse {
   vehicleInfo: VehicleInfo;
-  features: {
-    seatHeatVent : {
-      drvSeatHeatOption: number;
-      astSeatHeatOption: number;
-      rlSeatHeatOption: number;
-      rrSeatHeatOption: number;
-    };
-    hvacTempType: number;
-    targetMinSoc: number;
-  };
-  featuresModel: {
-    features: [ VehicleFeature ]
-  };
+  features: VehicleFeatures;
+  featuresModel: VehicleFeaturesModel
   status: VehicleStatus;
 }
 
@@ -188,6 +197,11 @@ export interface VehicleNextService {
 }
 
 // VEHICLE COMMANDS /////////////////////////////////////////////
+
+export interface VehicleCommandResponse {
+  responseCode: number;   // 0 is success
+  responseDesc: String;
+}
 
 export interface StartConfig {
   airCtrl?: boolean | string;
