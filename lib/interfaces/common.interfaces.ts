@@ -26,7 +26,7 @@ export interface Session {
 
 // Status
 export interface VehicleStatus {
-  lastStatusDate: String
+  lastStatusDate: string
   dateTime: string;
   acc: boolean;
   trunkOpen: boolean;
@@ -36,7 +36,7 @@ export interface VehicleStatus {
   doorLockStatus: string;
   doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
   airCtrlOn: boolean;
-  airTempUnit: String;
+  airTempUnit: string;
   airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
     batSignalReferenceValue: {};
@@ -63,7 +63,7 @@ export interface VehicleStatus {
   };
   trunkOpenStatus: string;
   evStatus: {
-    batteryCharge: Boolean;
+    batteryCharge: boolean;
     batteryStatus: number;
     batteryPlugin: number;
     remainTime2: {
@@ -81,9 +81,9 @@ export interface VehicleStatus {
       type: number;
     }]
   };
-  remoteIgnition: Boolean;
+  remoteIgnition: boolean;
   seatHeaterVentInfo: {};
-  sleepModeCheck: Boolean;
+  sleepModeCheck: boolean;
   lampWireStatus: {
     headLamp: {};
     stopLamp: {};
@@ -95,26 +95,26 @@ export interface VehicleStatus {
 
 // Vehicle Info
 export interface VehicleInfo {
-  vehicleId: String;
-  nickName: String;
-  modelCode: String;
-  modelName: String;
-  modelYear: String;
-  fuelKindCode: String;
-  trim: String;
-  engine: String;
-  exteriorColor: String;
+  vehicleId: string;
+  nickName: string;
+  modelCode: string;
+  modelName: string;
+  modelYear: string;
+  fuelKindCode: string;
+  trim: string;
+  engine: string;
+  exteriorColor: string;
   dtcCount: number;
-  subscriptionStatus: String;
-  subscriptionEndDate: String;
-  overviewMessage: String;
+  subscriptionStatus: string;
+  subscriptionEndDate: string;
+  overviewMessage: string;
   odometer: number;
   odometerUnit: number;
-  defaultVehicle: Boolean;
-  enrollmentStatus: String;
-  genType: String;
-  transmissionType: String;
-  vin: String;
+  defaultVehicle: boolean;
+  enrollmentStatus: string;
+  genType: string;
+  transmissionType: string;
+  vin: string;
 }
 
 export interface VehicleFeatures {
@@ -129,12 +129,12 @@ export interface VehicleFeatures {
 }
 
 export interface VehicleFeatureEntry {
-  category: String;
+  category: string;
   features: [ {
-    featureName: String;
+    featureName: string;
     features: [ {
-      subFeatureName: String;
-      subFeatureValue: String;
+      subFeatureName: string;
+      subFeatureValue: string;
     }] 
   }] 
 }
@@ -200,7 +200,7 @@ export interface VehicleNextService {
 
 export interface VehicleCommandResponse {
   responseCode: number;   // 0 is success
-  responseDesc: String;
+  responseDesc: string;
 }
 
 export interface StartConfig {
