@@ -13,10 +13,10 @@ const client = new BlueLinky({
 const onReadyHandler = async () => {
   try {
     const vehicle = client.getVehicle(vin);
-    const response = await vehicle.status();
+    const response = await vehicle.stop();
     console.log(response);
   } catch (err) {
-    console.log(err.body);
+    console.log('error', err.body);
   }
 };
 
