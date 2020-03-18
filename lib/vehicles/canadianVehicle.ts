@@ -6,10 +6,14 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import { 
   StartConfig,
-  VehicleStatus,
+  VehicleCommandResponse,
+  VehicleFeatures,
+  VehicleFeaturesModel,
+  VehicleInfo,
   VehicleInfoResponse,
-  VehicleLocation, 
-  VehicleNextService, 
+  VehicleLocation,
+  VehicleNextService,
+  VehicleStatus,
   Odometer 
 } from '../interfaces/common.interfaces';
 
@@ -17,10 +21,13 @@ import { Vehicle } from './vehicle';
 
 export default class CanadianVehicle extends Vehicle {
 
-  private _status: VehicleStatus | null = null;
-  private _info: VehicleInfoResponse | null = null;
-  private _location: VehicleLocation | null = null;
   private _nextService: VehicleNextService | null = null;
+  private _location: VehicleLocation | null = null;
+
+  private _info: VehicleInfo | null = null;
+  private _features: VehicleFeatures | null = null;
+  private _featuresModel: VehicleFeaturesModel | null = null;
+  private _status: VehicleStatus | null = null;
 
   public region = REGIONS.CA;
 
@@ -66,8 +73,12 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
-      this._info = response.result as VehicleInfoResponse;
-      return Promise.resolve(this._info);
+      const vehicleInfoResponse = response.result as VehicleInfoResponse;
+      this._info = vehicleInfoResponse.vehicleInfo;
+      this._status = vehicleInfoResponse.status;
+      this._features = vehicleInfoResponse.features;
+      this._featuresModel = vehicleInfoResponse.featuresModel;
+      return Promise.resolve(vehicleInfoResponse);
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -221,11 +232,15 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Internal
   //////////////////////////////////////////////////////////////////////////////
-  // TODO: type this
-  private async getPreAuth(): Promise<any> {
-    const response = await this.request(CA_ENDPOINTS.verifyPin, {});
-    const pAuth = response.result.pAuth;
-    return pAuth;
+
+  private async getPreAuth(): Promise<String> {
+    logger.info('Begin pre-authentication');
+    try {
+      const response = await this.request(CA_ENDPOINTS.verifyPin, {});
+      return Promise.resolve(response.result.pAuth);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
   // TODO: not sure how to type a dynamic response
