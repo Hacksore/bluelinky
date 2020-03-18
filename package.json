@@ -53,8 +53,6 @@
     "rollup-plugin-uglify": "^6.0.4",
     "ts-jest": "^25.2.1",
     "tslib": "^1.11.0",
-    "tslint": "^6.0.0",
-    "tslint-formatter-beauty": "^3.0.0",
     "typescript": "^3.8.3"
   }
 }
