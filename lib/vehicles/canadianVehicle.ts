@@ -6,7 +6,6 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import { 
   StartConfig,
-  VehicleCommandResponse,
   VehicleFeatures,
   VehicleFeaturesModel,
   VehicleInfo,
@@ -115,7 +114,8 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin lock request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(
+      // assuming the API returns a bad status code for failed attempts
+      await this.request(
         CA_ENDPOINTS.lock,
         {},
         { pAuth: preAuth });
@@ -129,11 +129,11 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin unlock request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(
+      await this.request(
         CA_ENDPOINTS.unlock,
         {},
         { pAuth: preAuth });
-      return Promise.resolve(response);
+      return Promise.resolve('Unlock successful');
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -198,7 +198,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: type this
-  public async lights(withHorn = false): Promise<any> {
+  public async lights(withHorn = false): Promise<string> {
     logger.info('Begin lights request with horn ' + withHorn);
     try {
       const preAuth = await this.getPreAuth();
@@ -233,7 +233,7 @@ export default class CanadianVehicle extends Vehicle {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
 
-  private async getPreAuth(): Promise<String> {
+  private async getPreAuth(): Promise<string> {
     logger.info('Begin pre-authentication');
     try {
       const response = await this.request(CA_ENDPOINTS.verifyPin, {});

@@ -1,13 +1,13 @@
 // config
 export interface BlueLinkyConfig {
-  username: string|undefined;
-  password: string|undefined;
-  region: string|undefined;
+  username: string | undefined;
+  password: string | undefined;
+  region: string | undefined;
   autoLogin?: boolean;
-  pin: string|undefined;
-  vin?: string|undefined;
-  vehicleId?: string|undefined;
-  deviceUuid?: string|undefined;
+  pin: string | undefined;
+  vin?: string | undefined;
+  vehicleId?: string | undefined;
+  deviceUuid?: string | undefined;
 }
 
 export interface BluelinkVehicle {
@@ -72,14 +72,16 @@ export interface VehicleStatus {
       etc3: { value: number; unit: number };
       atc: { value: number; unit: number };
     };
-    drvDistance: [{
-      rangeByFuel: {
-        gasModeRange: { value: number; unit: number };
-        evModeRange: { value: number; unit: number };
-        totalAvailableRange: { value: number; unit: number };
-      };
-      type: number;
-    }];
+    drvDistance: [
+      {
+        rangeByFuel: {
+          gasModeRange: { value: number; unit: number };
+          evModeRange: { value: number; unit: number };
+          totalAvailableRange: { value: number; unit: number };
+        };
+        type: number;
+      }
+    ];
   };
   remoteIgnition: boolean;
   seatHeaterVentInfo: {};
@@ -118,7 +120,7 @@ export interface VehicleInfo {
 }
 
 export interface VehicleFeatures {
-  seatHeatVent : {
+  seatHeatVent: {
     drvSeatHeatOption: number;
     astSeatHeatOption: number;
     rlSeatHeatOption: number;
@@ -130,16 +132,20 @@ export interface VehicleFeatures {
 
 export interface VehicleFeatureEntry {
   category: string;
-  features: [ {
-    featureName: string;
-    features: [ {
-      subFeatureName: string;
-      subFeatureValue: string;
-    }] 
-  }] 
+  features: [
+    {
+      featureName: string;
+      features: [
+        {
+          subFeatureName: string;
+          subFeatureValue: string;
+        }
+      ];
+    }
+  ];
 }
 export interface VehicleFeaturesModel {
-  features: [ VehicleFeatureEntry ]
+  features: [VehicleFeatureEntry];
 }
 
 export interface VehicleInfoResponse {
@@ -156,15 +162,15 @@ export interface VehicleLocation {
     pdop: number;
   };
   coord: {
-      alt: number;
-      lat: number;
-      lon: number;
-      type: number;
+    alt: number;
+    lat: number;
+    lon: number;
+    type: number;
   };
   head: number;
   speed: {
-      unit: number;
-      value: number;
+    unit: number;
+    value: number;
   };
   time: string;
 }
@@ -199,7 +205,7 @@ export interface VehicleNextService {
 // VEHICLE COMMANDS /////////////////////////////////////////////
 
 export interface VehicleCommandResponse {
-  responseCode: number;   // 0 is success
+  responseCode: number; // 0 is success
   responseDesc: string;
 }
 
@@ -232,7 +238,7 @@ export interface AccountInfo {
   firstName: string;
   lastName: string;
   notificationEmail: string;
-  phones: { 
+  phones: {
     primary: string | null;
     secondary: string | null;
   };
@@ -240,9 +246,9 @@ export interface AccountInfo {
     primary: Address | null;
     secondary: Address | null;
   };
-  preference: { 
+  preference: {
     odometerUnit: number;
-    climateUnit: string;  // "C" / "F"
+    climateUnit: string; // "C" / "F"
     languageId: number;
     maintenanceAlert: boolean;
     preferredDealer: PreferedDealer | null;
