@@ -8,7 +8,7 @@ jest.mock('got');
 describe('BlueLinky', () => {
   
   beforeEach(() => {
-    got.mockReturnValueOnce({ 
+    (got as any).mockReturnValueOnce({ 
       body: {
         'access_token': 'test',
         'refresh_token': 'test',
@@ -22,7 +22,7 @@ describe('BlueLinky', () => {
     });
   });
 
-  it('Creates a client with valid config', () => {
+  it('creates a client with valid config', () => {
     const client = new BlueLinky({
       username: 'someone@gmail.com',
       password: 'hunter1',
@@ -31,9 +31,15 @@ describe('BlueLinky', () => {
     });
     
     expect(client).toBeDefined();
+
+    client.on('ready', () => {
+      expect(client.getSession()).toBeDefined();
+      expect(client.getSession().accessToken).toEqual('test');
+    });
+
   });
 
-  it('Throws error when you pass invalid region', () => {
+  it('throws error when you pass invalid region', () => {
     expect(() => {
       const client = new BlueLinky({
         username: 'someone@gmail.com',
@@ -44,7 +50,7 @@ describe('BlueLinky', () => {
     }).toThrowError('Your region is not supported yet.');
   });
 
-  it('ready method is called after login', (done) => {
+  it('ready event is called after login', (done) => {
     const client = new BlueLinky({
       username: 'someone@gmai.com',
       password: 'hunter1',

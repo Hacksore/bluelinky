@@ -108,7 +108,7 @@ export default class CanadianVehicle extends Vehicle {
         CA_ENDPOINTS.lock,
         {},
         { pAuth: preAuth });
-      return Promise.resolve(response);
+      return Promise.resolve('Lock successful');
     } catch (err) {
       return Promise.reject('error: ' + err)
     }

@@ -88,7 +88,7 @@ export class CanadianController implements SessionController {
       const data = response.result;
       if (data.vehicles === undefined) {
         this.vehicles = [];
-        return Promise.reject('No vehicles found for account!');
+        return Promise.resolve(this.vehicles);
       }
 
       data.vehicles.forEach(vehicle => {

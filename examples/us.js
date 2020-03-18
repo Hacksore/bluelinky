@@ -2,14 +2,10 @@
 /* eslint-disable */
 // TODO: merge this into one file onl
 
-const config = require('.__tests__');
+const config = require('../config.json');
 const BlueLinky = require('../dist/index');
 const inquirer = require('inquirer');
 
-const client = new BlueLinky({
-  region: 'US',
-  ...config,
-});
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -23,14 +19,49 @@ const apiCalls = [
 ];
 
 let vehicle;
+const { username, password, vin, pin, deviceUuid } = config;
 
-const onReadyHandler = async vehicles => {
-  vehicle = await client.getVehicle();
-  askForInput();
+const onReadyHandler = vehicles => {
+  vehicle = vehicles[0];
 };
-client.on('ready', onReadyHandler);
 
-function askForInput() {
+const askForRegionInput = () => {
+
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'region',
+        message: 'What Region are you in?',
+        choices: [
+          'US', 'EU', 'CA'
+        ],
+      }
+    ])
+    .then(answers => {
+      if (answers.command == 'exit') {
+        console.log('bye');
+        return;
+      } else {
+        console.log(answers)
+        createInstance(answers.region);
+        askForCommandInput();
+      }
+    });
+}
+
+const createInstance = (region) => {
+  const client = new BlueLinky({
+    username,
+    password,
+    region: region,
+    pin,
+    deviceUuid
+  });
+  client.on('ready', onReadyHandler);
+}
+
+function askForCommandInput() {
   console.log('');
   inquirer
     .prompt([
@@ -48,8 +79,9 @@ function askForInput() {
       } else {
         performCommand(answers.command);
       }
-    });
+    });    
 }
+
 
 async function performCommand(command) {
   try {
@@ -92,8 +124,11 @@ async function performCommand(command) {
         break;
     }
 
-    askForInput();
+    askForCommandInput();
   } catch (err) {
     console.log(err.body);
   }
 }
+
+
+askForRegionInput();
