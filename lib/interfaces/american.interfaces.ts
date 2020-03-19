@@ -1,13 +1,5 @@
 import BlueLinky from '../index';
 
-export interface StartConfig {
-  airCtrl?: boolean|string;
-  igniOnDuration: number;
-  airTempvalue?: number;
-  defrost?: boolean|string;
-  heating1?: boolean|string;
-}
-
 export interface HyundaiResponse {
   status: string;
   // I think this is dynamic so hard to type it?
@@ -48,4 +40,23 @@ export interface AmericanEndpoints {
   status: string;
   enrollmentStatus: string;
   subscriptions: string;
+}
+
+export interface RequestHeaders {
+  'access_token': string;
+  'client_id': string;
+  'Host': string;
+  'User-Agent': string;
+  'registrationId': string;
+  'gen': string;
+  'username': string;
+  'vin': string;
+  'APPCLOUD-VIN': string;
+  'Language': string;
+  'to': string;
+  'encryptFlag': string;
+  'from': string;
+  'brandIndicator': string;
+  'bluelinkservicepin': string;
+  'offset': string;
 }

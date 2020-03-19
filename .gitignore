@@ -4,3 +4,6 @@ node_modules/
 .rpt2_cache
 dist/
 config*.json
+.vs/
+.vscode/
+coverage/

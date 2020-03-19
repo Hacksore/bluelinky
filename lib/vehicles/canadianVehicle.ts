@@ -1,16 +1,32 @@
 import got from 'got';
-import { REGIONS } from '../constants';
-import { VehicleStatus, VehicleLocation, Odometer } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS } from '../constants';
-
 import logger from '../logger';
+
+import { REGIONS } from '../constants';
+import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
+
+import { 
+  StartConfig,
+  VehicleFeatures,
+  VehicleFeaturesModel,
+  VehicleInfo,
+  VehicleInfoResponse,
+  VehicleLocation,
+  VehicleNextService,
+  VehicleStatus,
+  Odometer 
+} from '../interfaces/common.interfaces';
+
 import { Vehicle } from './vehicle';
-import { StartConfig } from '../interfaces/american.interfaces';
 
 export default class CanadianVehicle extends Vehicle {
 
-  private _status: VehicleStatus | null = null;
+  private _nextService: VehicleNextService | null = null;
   private _location: VehicleLocation | null = null;
+
+  private _info: VehicleInfo | null = null;
+  private _features: VehicleFeatures | null = null;
+  private _featuresModel: VehicleFeaturesModel | null = null;
+  private _status: VehicleStatus | null = null;
 
   public region = REGIONS.CA;
 
@@ -52,12 +68,16 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
-  // TODO: type this
-  public async vehicleInfo(): Promise<any> {
+  public async vehicleInfo(): Promise<VehicleInfoResponse> {
     logger.info('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
-      return Promise.resolve(response.result);
+      const vehicleInfoResponse = response.result as VehicleInfoResponse;
+      this._info = vehicleInfoResponse.vehicleInfo;
+      this._status = vehicleInfoResponse.status;
+      this._features = vehicleInfoResponse.features;
+      this._featuresModel = vehicleInfoResponse.featuresModel;
+      return Promise.resolve(vehicleInfoResponse);
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -75,11 +95,12 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
-  public async nextService(): Promise<string> {
+  public async nextService(): Promise<VehicleNextService> {
     logger.info('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
-      return Promise.resolve(response.result);
+      this._nextService = response.result as VehicleNextService
+      return Promise.resolve(this._nextService);
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -93,11 +114,12 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin lock request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(
+      // assuming the API returns a bad status code for failed attempts
+      await this.request(
         CA_ENDPOINTS.lock,
         {},
         { pAuth: preAuth });
-      return Promise.resolve(response);
+      return Promise.resolve('Lock successful');
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -107,11 +129,11 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin unlock request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(
+      await this.request(
         CA_ENDPOINTS.unlock,
         {},
         { pAuth: preAuth });
-      return Promise.resolve(response);
+      return Promise.resolve('Unlock successful');
     } catch (err) {
       return Promise.reject('error: ' + err)
     }
@@ -176,7 +198,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: type this
-  public async  lights(withHorn = false): Promise<any> {
+  public async lights(withHorn = false): Promise<string> {
     logger.info('Begin lights request with horn ' + withHorn);
     try {
       const preAuth = await this.getPreAuth();
@@ -210,13 +232,19 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Internal
   //////////////////////////////////////////////////////////////////////////////
-  // TODO: type this
-  private async getPreAuth() {
-    const response = await this.request(CA_ENDPOINTS.verifyPin, {});
-    const pAuth = response.result.pAuth;
-    return pAuth;
+
+  private async getPreAuth(): Promise<string> {
+    logger.info('Begin pre-authentication');
+    try {
+      const response = await this.request(CA_ENDPOINTS.verifyPin, {});
+      return Promise.resolve(response.result.pAuth);
+    } catch (err) {
+      return Promise.reject('error: ' + err)
+    }
   }
 
+  // TODO: not sure how to type a dynamic response
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: object, headers: object = {}, ): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
@@ -225,7 +253,7 @@ export default class CanadianVehicle extends Vehicle {
         method: 'POST',
         json: true,
         headers: {
-          from: 'SPA',
+          from: CLIENT_ORIGIN,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.controller.session.accessToken,

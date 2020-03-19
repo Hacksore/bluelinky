@@ -1,6 +1,6 @@
 import got from 'got';
-import { VehicleStatus, BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS } from '../constants';
+import { AccountInfo, BlueLinkyConfig, Session, PreferedDealer } from '../interfaces/common.interfaces';
+import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
 import SessionController from './controller';
@@ -9,7 +9,9 @@ import logger from '../logger';
 import { REGIONS } from '../constants';
 
 export class CanadianController implements SessionController {
-  private _status: VehicleStatus | null = null;
+
+  private _preferredDealer: PreferedDealer | null = null
+  private _accountInfo: AccountInfo | null = null
 
   constructor(config: BlueLinkyConfig) {
     this.config = config;
@@ -86,7 +88,7 @@ export class CanadianController implements SessionController {
       const data = response.result;
       if (data.vehicles === undefined) {
         this.vehicles = [];
-        return Promise.reject('No vehicles found for account!');
+        return Promise.resolve(this.vehicles);
       }
 
       data.vehicles.forEach(vehicle => {
@@ -117,21 +119,23 @@ export class CanadianController implements SessionController {
   // Account
   //////////////////////////////////////////////////////////////////////////////
 
-  public async myAccount(): Promise<string> {
+  public async myAccount(): Promise<AccountInfo> {
     logger.info('Begin myAccount request');
     try {
       const response = await this.request(CA_ENDPOINTS.myAccount, {});
-      return Promise.resolve(response.result);
+      this._accountInfo = response.result as AccountInfo
+      return Promise.resolve(this._accountInfo);
     } catch (err) {
       return Promise.reject('error: ' + err);
     }
   }
 
-  public async preferedDealer(): Promise<string> {
+  public async preferedDealer(): Promise<PreferedDealer> {
     logger.info('Begin preferedDealer request');
     try {
       const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
-      return Promise.resolve(response.result);
+      this._preferredDealer = response.result as PreferedDealer
+      return Promise.resolve(this._preferredDealer);
     } catch (err) {
       return Promise.reject('error: ' + err);
     }
@@ -141,6 +145,8 @@ export class CanadianController implements SessionController {
   // Internal
   //////////////////////////////////////////////////////////////////////////////
 
+  // TODO: not quite sure how to type this if it's dynamic?
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: object, headers: object = {}): Promise<any | null> {
     logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
     try {
@@ -148,7 +154,7 @@ export class CanadianController implements SessionController {
         method: 'POST',
         json: true,
         headers: {
-          from: 'SPA',
+          from: CLIENT_ORIGIN,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.session.accessToken,

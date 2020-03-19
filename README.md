@@ -44,8 +44,8 @@ Checkout out the docs [bluelinky-docs](https://hacksore.github.io/bluelinky-docs
 | [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) | Current Status |
 |-----------|--------------|
 | USA       | Working      |
-| Canada    | WIP (soon™)  |
-| Europe    | WIP (soon™)  |
+| Canada    | Working      |
+| Europe    | Working      |
 | Korea     | ▯▯▯▯▯▯  |
 | Australia | sorry m8     |
 

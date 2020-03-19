@@ -4,7 +4,7 @@ import { CanadianController } from './controllers/canadian.controller';
 import SessionController from './controllers/controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
-import { BlueLinkyConfig } from './interfaces/common.interfaces';
+import { BlueLinkyConfig, Session } from './interfaces/common.interfaces';
 import { REGIONS } from './constants';
 import { Vehicle } from './vehicles/vehicle';
 
@@ -55,7 +55,7 @@ class BlueLinky extends EventEmitter {
   }
 
   private onInit(): void {
-    if(this.config.autoLogin){
+    if (this.config.autoLogin) {
       logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
       this.login();
     }
@@ -105,6 +105,10 @@ class BlueLinky extends EventEmitter {
 
   public async logout(): Promise<string> {
     return this.controller.logout();
+  }
+
+  public getSession(): Session {
+    return this.controller.session;
   }
 
   // This is EU specific from what I know

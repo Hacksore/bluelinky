@@ -115,6 +115,31 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.resolve(response.body);
   }
 
+  public async lock(): Promise<string> {
+
+    const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
+      method: 'POST',
+      headers: {
+        'Authorization': this.session.controlToken,
+        'ccsp-device-id': this.session.deviceId,
+        'Content-Type': 'application/json',
+      },
+      body: {
+        action: 'close',
+        deviceId: this.session.deviceId,
+      },
+      json: true,
+    });
+
+    if (response.statusCode === 200) {
+      logger.info(`Vehicle ${this.config.id} locked`);
+      return Promise.resolve('Lock successful');
+    }
+
+    return Promise.reject('Something went wrong!');
+
+  }
+
   public async unlock(): Promise<string> {
 
     if (this.session.controlToken === '') {
@@ -135,8 +160,12 @@ export default class EuropeanVehicle extends Vehicle {
       json: true,
     });
 
-    logger.info(`Vehicle ${this.config.id} unlocked`);
-    return Promise.resolve(response.body);
+    if (response.statusCode === 200) {
+      logger.info(`Vehicle ${this.config.id} unlocked`);
+      return Promise.resolve('Unlock successful');
+    }
+
+    return Promise.reject('Something went wrong!');
   }
 
   public async status(): Promise<VehicleStatus> {
@@ -164,31 +193,6 @@ export default class EuropeanVehicle extends Vehicle {
     logger.info(`Got new status for vehicle ${this.config.id}`);
 
     return Promise.resolve(this._status);
-
-  }
-
-  public async lock(): Promise<string> {
-
-    if (this.session.controlToken === '') {
-      return Promise.reject('Token not set');
-    }
-
-    const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
-      method: 'POST',
-      headers: {
-        'Authorization': this.session.controlToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        action: 'close',
-        deviceId: this.session.deviceId,
-      },
-      json: true,
-    });
-
-    logger.info(`Vehicle ${this.config.id} locked`);
-    return Promise.resolve(response.body);
 
   }
 
