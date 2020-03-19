@@ -1,11 +1,10 @@
 
 /* eslint-disable */
-// TODO: merge this into one file onl
+// TODO: add all calls from EU and CA
 
 const config = require('../config.json');
-const BlueLinky = require('../dist/index');
+const BlueLinky = require('./dist/index');
 const inquirer = require('inquirer');
-
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -81,7 +80,6 @@ function askForCommandInput() {
       }
     });    
 }
-
 
 async function performCommand(command) {
   try {
