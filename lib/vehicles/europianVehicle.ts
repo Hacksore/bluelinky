@@ -55,7 +55,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   private async checkControlToken(){
-    if(this.controller.session.controlTokenExpiresAt !== undefined){
+    if(this.controller.session?.controlTokenExpiresAt !== undefined){
       if((this.controller.session.controlToken === '') || new Date().getTime() > this.controller.session.controlTokenExpiresAt){
         await this.controller.enterPin();
       }
