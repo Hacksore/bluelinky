@@ -35,8 +35,7 @@ const getVehicle = region => {
     autoLogin: true,
     pin: '1234',
     vin: '4444444444444',
-    vehicleId: undefined,
-    deviceUuid: '',
+    vehicleId: undefined
   });
 
   const vehicle = new referenceMap[region].vehicle(
@@ -115,23 +114,23 @@ describe('EuropeanVehicle', () => {
     expect(vehicle.config.nickname).toEqual('Jest is best');
   });
 
-  it('call lock commmand', async () => {
-    (got as any).mockReturnValueOnce({
-      body: {},
-      statusCode: 200
-    });
+  // it('call lock commmand', async () => {
+  //   (got as any).mockReturnValueOnce({
+  //     body: {},
+  //     statusCode: 200
+  //   });
 
-    const response = await vehicle.lock();
-    expect(response).toEqual('Lock successful');
-  });
+  //   const response = await vehicle.lock();
+  //   expect(response).toEqual('Lock successful');
+  // });
 
-  it('call unlock commmand', async () => {
-    (got as any).mockReturnValueOnce({
-      body: {},
-      statusCode: 200
-    });
+  // it('call unlock commmand', async () => {
+  //   (got as any).mockReturnValueOnce({
+  //     body: {},
+  //     statusCode: 200
+  //   });
 
-    const response = await vehicle.unlock();
-    expect(response).toEqual('Unlock successful');
-  });
+  //   const response = await vehicle.unlock();
+  //   expect(response).toEqual('Unlock successful');
+  // });
 });

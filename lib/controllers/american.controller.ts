@@ -33,8 +33,7 @@ export class AmericanController implements SessionController {
     autoLogin: true,
     pin: undefined,
     vin: undefined,
-    vehicleId: undefined,
-    deviceUuid: undefined,
+    vehicleId: undefined
   };
 
   public async refreshAccessToken(): Promise<string> {

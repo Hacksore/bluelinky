@@ -7,7 +7,6 @@ export interface BlueLinkyConfig {
   pin: string | undefined;
   vin?: string | undefined;
   vehicleId?: string | undefined;
-  deviceUuid?: string | undefined;
 }
 
 export interface BluelinkVehicle {
@@ -22,6 +21,7 @@ export interface Session {
   controlToken?: string;
   deviceId?: string;
   tokenExpiresAt: number;
+  controlTokenExpiresAt?: number;
 }
 
 // Status
