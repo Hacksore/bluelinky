@@ -21,7 +21,7 @@ export interface Session {
   controlToken?: string;
   deviceId?: string;
   tokenExpiresAt: number;
-  controlTokenExpiresAt: number;
+  controlTokenExpiresAt?: number;
 }
 
 // Status

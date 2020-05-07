@@ -35,8 +35,7 @@ export class CanadianController implements SessionController {
     autoLogin: true,
     pin: undefined,
     vin: undefined,
-    vehicleId: undefined,
-    deviceUuid: undefined,
+    vehicleId: undefined
   };
 
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
