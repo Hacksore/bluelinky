@@ -23,11 +23,19 @@ export class EuropeanController implements SessionController {
     accessToken: '',
     refreshToken: '',
     controlToken: '',
-    deviceId: '',
+    deviceId: this.uuidv4(),
     tokenExpiresAt: 0,
+    controlTokenExpiresAt: 0
   };
 
   private vehicles: Array<EuropeanVehicle> = [];
+
+  private uuidv4(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
   public config: BlueLinkyConfig = {
     username: undefined,
@@ -36,8 +44,7 @@ export class EuropeanController implements SessionController {
     autoLogin: true,
     pin: undefined,
     vin: undefined,
-    vehicleId: undefined,
-    deviceUuid: undefined
+    vehicleId: undefined
   };
 
   public async refreshAccessToken(): Promise<string> {
@@ -63,11 +70,7 @@ export class EuropeanController implements SessionController {
     });
 
     this.session.controlToken = 'Bearer ' + response.body.controlToken;
-    setTimeout(() => {
-        this.session.controlToken = '';
-        logger.info('Control token timed out!');
-    }, response.body.expiresTime * 1000);
-    logger.info('PIN entered OK, The pin is valid for 10 minutes')
+    this.session.controlTokenExpiresAt = new Date().getTime() + (1000 * 60 * 10);
     return Promise.resolve('PIN entered OK, The pin is valid for 10 minutes');
 
   }
@@ -92,8 +95,12 @@ export class EuropeanController implements SessionController {
       });
 
       // spooky :), seems like regex might work better here?
-      const authCode = authCodeResponse.body.redirectUrl.split('?')[1].split('&')[0].split('=')[1];
-      this.session.refreshToken = authCode;
+      const regexMatch = /.*code=(\w*)&.*/g.exec(authCodeResponse.body.redirectUrl);
+      if(regexMatch !== null){
+        this.session.refreshToken = regexMatch[1];
+      } else {
+        throw new Error("@EuropeControllerLogin: AuthCode was not found (Regex match was null)");
+      }
       
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
       
@@ -111,7 +118,7 @@ export class EuropeanController implements SessionController {
         body: {
           pushRegId: credentials.gcm.token,
           pushType: 'GCM',
-          uuid: this.config.deviceUuid
+          uuid: this.session.deviceId
         },
         json: true
       });
@@ -121,7 +128,7 @@ export class EuropeanController implements SessionController {
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
       formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
-      formData.append('code', authCode);
+      formData.append('code', this.session.refreshToken);
 
       const response = await got(ALL_ENDPOINTS.EU.token, {
         method: 'POST',
@@ -143,22 +150,6 @@ export class EuropeanController implements SessionController {
       this.session.accessToken = 'Bearer ' + responseBody.access_token;
 
       logger.info(`Login successful for user ${this.config.username}`, this.session.accessToken);
-
-      // I think we should just tell them the token has expired, and either we refresh it or they do
-      /*
-
-      if (handleTokenRefresh)
-        // They handle it
-        this.emit('tokenExpired');
-      else
-        // check if token is expired and before doing a new request call
-        this.refreshAccessToken();
-      */
-
-      // setInterval(() => {
-      //   logger.info(`Access token expiered, getting a new one for ${this.config.username}`);
-      //   this.refreshAccessToken();
-      // }, responseBody.expires_in * 1000);
 
       return Promise.resolve('Login success');
     } catch (err) {
@@ -213,7 +204,7 @@ export class EuropeanController implements SessionController {
         gen: vehicleProfile.vinInfo[0].basic.modelYear
       }
 
-      this.vehicles.push(new EuropeanVehicle(config, this.session));
+      this.vehicles.push(new EuropeanVehicle(config, this.session, this));
       logger.info(`Added vehicle ${config.id}`);
     });
 

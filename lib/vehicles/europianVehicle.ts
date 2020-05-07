@@ -9,6 +9,7 @@ import got from 'got';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
+import { EuropeanController } from '../controllers/european.controller';
 
 export default class EuropeanVehicle extends Vehicle {
   get name(): string {
@@ -44,7 +45,7 @@ export default class EuropeanVehicle extends Vehicle {
   private _location: VehicleLocation | null = null;
   private _odometer: Odometer | null = null;
   
-  constructor(public config, public session) {
+  constructor(public config, public session, private controller: EuropeanController) {
     super(session);
     this.onInit();
   }
@@ -53,7 +54,14 @@ export default class EuropeanVehicle extends Vehicle {
     logger.info(`EU Vehicle ${this.config.id} created`);
   }
 
+  private async checkControlToken(){
+    if(this.controller.session.controlToken === '' || new Date().getTime() > this.controller.session.controlTokenExpiresAt){
+      await this.controller.enterPin();
+    }
+  }
+
   public async start(config: ClimateConfig): Promise<string> {
+    await this.checkControlToken();
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`,
       {
@@ -83,10 +91,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    if (this.config.controlToken === '') {
-      Promise.reject('Token not set');
-    }
-
+    await this.checkControlToken();
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`,
       {
@@ -116,7 +121,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async lock(): Promise<string> {
-
+    await this.checkControlToken();
     const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
       method: 'POST',
       headers: {
@@ -141,12 +146,8 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async unlock(): Promise<string> {
-
-    if (this.session.controlToken === '') {
-      return Promise.reject('Token not set');
-    }
-
-    const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
+      await this.checkControlToken();
+      const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
       method: 'POST',
       headers: {
         'Authorization': this.session.controlToken,
@@ -169,10 +170,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async status(): Promise<VehicleStatus> {
-    if (this.session.controlToken === '') {
-      return Promise.reject('Token not set');
-    }
-  
+    await this.checkControlToken();
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/status/latest`,
       {

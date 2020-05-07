@@ -6,7 +6,6 @@ export default interface SessionController {
   login(): Promise<string>;
   logout(): Promise<string>;
   getVehicles(): Promise<Array<Vehicle>>;
-  enterPin?(): Promise<string>;  
   refreshAccessToken(): Promise<string>;
   session: Session;
 }

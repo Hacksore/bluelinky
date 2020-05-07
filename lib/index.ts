@@ -20,8 +20,7 @@ class BlueLinky extends EventEmitter {
     autoLogin: true,
     pin: '1234',
     vin: '',
-    vehicleId: undefined,
-    deviceUuid: '',
+    vehicleId: undefined
   }
 
   constructor(config: BlueLinkyConfig) {
@@ -62,15 +61,15 @@ class BlueLinky extends EventEmitter {
   }
 
   public async login(): Promise<string> {
-    const response = await this.controller.login();
+      const response = await this.controller.login();
 
-    // get all cars from the controller
-    this.vehicles = await this.controller.getVehicles();
-    
-    logger.debug(`Found ${this.vehicles.length} on the account`);
+      // get all cars from the controller
+      this.vehicles = await this.controller.getVehicles();
+      
+      logger.debug(`Found ${this.vehicles.length} on the account`);
 
-    this.emit('ready', this.vehicles);
-    return response;
+      this.emit('ready', this.vehicles);
+      return response;
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
@@ -109,13 +108,6 @@ class BlueLinky extends EventEmitter {
 
   public getSession(): Session {
     return this.controller.session;
-  }
-
-  // This is EU specific from what I know
-  public async enterPin(): Promise<string|undefined> {
-    if (this.controller.enterPin) {
-      return this.controller.enterPin();
-    }
   }
 }
 
