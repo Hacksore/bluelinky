@@ -9,7 +9,6 @@ import { REGIONS } from './constants';
 import { Vehicle } from './vehicles/vehicle';
 
 class BlueLinky extends EventEmitter {
-
   private controller: SessionController;
   private vehicles: Array<Vehicle> = [];
 
@@ -20,13 +19,13 @@ class BlueLinky extends EventEmitter {
     autoLogin: true,
     pin: '1234',
     vin: '',
-    vehicleId: undefined
-  }
+    vehicleId: undefined,
+  };
 
   constructor(config: BlueLinkyConfig) {
     super();
 
-    switch(config.region){
+    switch (config.region) {
       case REGIONS.EU:
         this.controller = new EuropeanController(config);
         break;
@@ -41,10 +40,10 @@ class BlueLinky extends EventEmitter {
     }
 
     // merge configs
-    this.config = {      
+    this.config = {
       ...this.config,
       ...config,
-    }
+    };
 
     if (config.autoLogin === undefined) {
       this.config.autoLogin = true;
@@ -55,44 +54,42 @@ class BlueLinky extends EventEmitter {
 
   private onInit(): void {
     if (this.config.autoLogin) {
-      logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false')
+      logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false');
       this.login();
     }
   }
 
   public async login(): Promise<string> {
-      const response = await this.controller.login();
+    const response = await this.controller.login();
 
-      // get all cars from the controller
-      this.vehicles = await this.controller.getVehicles();
-      
-      logger.debug(`Found ${this.vehicles.length} on the account`);
+    // get all cars from the controller
+    this.vehicles = await this.controller.getVehicles();
 
-      this.emit('ready', this.vehicles);
-      return response;
+    logger.debug(`Found ${this.vehicles.length} on the account`);
+
+    this.emit('ready', this.vehicles);
+    return response;
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    return this.controller.getVehicles() || [];   
+    return this.controller.getVehicles() || [];
   }
 
-  public getVehicle(input: string): Vehicle|undefined {
+  public getVehicle(input: string): Vehicle | undefined {
     if (this.vehicles.length === 0) {
       throw new Error('No Vehicle found!');
     }
 
     try {
-      const foundCar = this.vehicles.find(car => {
-        car.vin === input ||
-        car.vehicleId === input
+      const foundCar = this.vehicles.find((car) => {
+        return car.vin === input || car.vehicleId === input;
       });
 
       if (!foundCar && this.vehicles.length > 0) {
-        return this.vehicles[0];
-      } 
-      
-      return foundCar;
+        throw new Error(`Could not find vehicle with id: ${input}`);
+      }
 
+      return foundCar;
     } catch (err) {
       throw new Error('Vehicle not found!');
     }
