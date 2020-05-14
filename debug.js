@@ -2,7 +2,7 @@
 /* eslint-disable */
 // TODO: add all calls from EU and CA
 
-const config = require('../config.json');
+const config = require('./config.json');
 const BlueLinky = require('./dist/index');
 const inquirer = require('inquirer');
 
