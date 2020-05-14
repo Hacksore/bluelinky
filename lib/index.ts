@@ -86,7 +86,7 @@ class BlueLinky extends EventEmitter {
       });
 
       if (!foundCar && this.vehicles.length > 0) {
-        throw new Error(`Could not find any vehicle based on the input`);
+        throw new Error(`Could not find vehicle with id: ${input}`);
       }
 
       return foundCar;
