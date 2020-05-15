@@ -23,7 +23,7 @@ export default class EuropeanVehicle extends Vehicle {
   get vehicleId(): string {
     return this.config.vehicleId;
   }
-  
+
   get gen(): string {
     return this.config.gen;
   }
@@ -31,32 +31,35 @@ export default class EuropeanVehicle extends Vehicle {
   get type(): string {
     return this.type;
   }
-  
+
   get odometer(): Odometer | null {
     return this._odometer;
   }
-  
+
   get location(): VehicleLocation | null {
     return this._location;
   }
-  
+
   public region = REGIONS.EU;
   private _status: VehicleStatus | null = null;
   private _location: VehicleLocation | null = null;
   private _odometer: Odometer | null = null;
-  
+
   constructor(public config, public session, private controller: EuropeanController) {
     super(session);
     this.onInit();
   }
-  
+
   private onInit(): void {
     logger.info(`EU Vehicle ${this.config.id} created`);
   }
 
-  private async checkControlToken(){
-    if(this.controller.session?.controlTokenExpiresAt !== undefined){
-      if((this.controller.session.controlToken === '') || new Date().getTime() > this.controller.session.controlTokenExpiresAt){
+  private async checkControlToken(): Promise<void> {
+    if (this.controller.session?.controlTokenExpiresAt !== undefined) {
+      if (
+        this.controller.session.controlToken === '' ||
+        new Date().getTime() > this.controller.session.controlTokenExpiresAt
+      ) {
         await this.controller.enterPin();
       }
     }
@@ -124,19 +127,22 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     await this.checkControlToken();
-    const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
-      method: 'POST',
-      headers: {
-        'Authorization': this.session.controlToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        action: 'close',
-        deviceId: this.session.deviceId,
-      },
-      json: true,
-    });
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.session.controlToken,
+          'ccsp-device-id': this.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'close',
+          deviceId: this.session.deviceId,
+        },
+        json: true,
+      }
+    );
 
     if (response.statusCode === 200) {
       logger.info(`Vehicle ${this.config.id} locked`);
@@ -144,24 +150,26 @@ export default class EuropeanVehicle extends Vehicle {
     }
 
     return Promise.reject('Something went wrong!');
-
   }
 
   public async unlock(): Promise<string> {
-      await this.checkControlToken();
-      const response = await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`, {
-      method: 'POST',
-      headers: {
-        'Authorization': this.session.controlToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        action: 'open',
-        deviceId: this.session.deviceId,
-      },
-      json: true,
-    });
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.session.controlToken,
+          'ccsp-device-id': this.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'open',
+          deviceId: this.session.deviceId,
+        },
+        json: true,
+      }
+    );
 
     if (response.statusCode === 200) {
       logger.info(`Vehicle ${this.config.id} unlocked`);
@@ -193,7 +201,6 @@ export default class EuropeanVehicle extends Vehicle {
     logger.info(`Got new status for vehicle ${this.config.id}`);
 
     return Promise.resolve(this._status);
-
   }
 
   getTempCode(temperature: number): string {
