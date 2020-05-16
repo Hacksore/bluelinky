@@ -15,15 +15,15 @@ export class AmericanController implements SessionController {
     this.config = config;
     logger.info(`${this.config.region} Controller created`);
   }
-  
+
   private vehicles: Array<AmericanVehicle> = [];
-  
+
   public session: Session = {
     accessToken: '',
     refreshToken: '',
     controlToken: '',
     deviceId: '',
-    tokenExpiresAt: 0
+    tokenExpiresAt: 0,
   };
 
   public config: BlueLinkyConfig = {
@@ -33,55 +33,58 @@ export class AmericanController implements SessionController {
     autoLogin: true,
     pin: undefined,
     vin: undefined,
-    vehicleId: undefined
+    vehicleId: undefined,
   };
 
   public async refreshAccessToken(): Promise<string> {
-    const shouldRefreshToken = Math.floor(((+new Date()/1000)) - this.session.tokenExpiresAt) <= 10;
+    const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
 
     if (this.session.refreshToken && shouldRefreshToken) {
       logger.debug('refreshing token');
       const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
         method: 'POST',
         body: {
-          'refresh_token': this.session.refreshToken
+          'refresh_token': this.session.refreshToken,
         },
         headers: {
           'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID
+          'client_id': CLIENT_ID,
         },
-        json: true
-      });  
+        json: true,
+      });
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + parseInt(response.body.expires_in));
+      this.session.tokenExpiresAt = Math.floor(
+        +new Date() / 1000 + parseInt(response.body.expires_in)
+      );
 
       return Promise.resolve('Token refreshed');
     }
-    
+
     return Promise.resolve('Token not expired, no need to refresh');
   }
 
   public async login(): Promise<string> {
-    
     try {
       const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
         method: 'POST',
         body: {
           username: this.config.username,
-          password: this.config.password
+          password: this.config.password,
         },
         headers: {
           'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID
+          'client_id': CLIENT_ID,
         },
-        json: true
+        json: true,
       });
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor((+new Date()/1000) + parseInt(response.body.expires_in));
+      this.session.tokenExpiresAt = Math.floor(
+        +new Date() / 1000 + parseInt(response.body.expires_in)
+      );
 
       return Promise.resolve('login good');
     } catch (err) {
@@ -96,7 +99,6 @@ export class AmericanController implements SessionController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-
     const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.config.username}`, {
       method: 'GET',
       headers: {
@@ -105,8 +107,8 @@ export class AmericanController implements SessionController {
         'Host': API_HOST,
         'User-Agent': 'okhttp/3.12.0',
         'payloadGenerated': '20200226171938',
-        'includeNonConnectedVehicles': 'Y'
-      }
+        'includeNonConnectedVehicles': 'Y',
+      },
     });
 
     const data = JSON.parse(response.body);
@@ -116,19 +118,19 @@ export class AmericanController implements SessionController {
       return Promise.resolve(this.vehicles);
     }
 
-    data.enrolledVehicleDetails.forEach(vehicle => {
+    data.enrolledVehicleDetails.forEach((vehicle) => {
       const vehicleInfo = vehicle.vehicleDetails;
-    
+
       const config = {
         nickname: vehicleInfo.nickName,
         vin: vehicleInfo.vin,
         regDate: vehicleInfo.enrollmentDate,
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
-        // unsure if this is right but the new endpoint does not seem to have gen        
+        // unsure if this is right but the new endpoint does not seem to have gen
         gen: vehicleInfo.modelYear > 2016 ? '2' : '1',
-        name: vehicleInfo.nickName
-      }
+        name: vehicleInfo.nickName,
+      };
       this.vehicles.push(new AmericanVehicle(config, this));
     });
 

@@ -4,5 +4,5 @@
   "semi": true,
   "printWidth": 100,
   "singleQuote": true,
-  "quoteProps": "consistent"
+  "quoteProps": "preserve"
 }
