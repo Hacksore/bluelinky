@@ -1,4 +1,4 @@
-name: Build & Test
+name: npm
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -15,4 +15,12 @@ jobs:
           node-version: 12
       - run: npm ci
       - run: npm test
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
       - run: npm run build
