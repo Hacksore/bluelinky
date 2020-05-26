@@ -8,8 +8,7 @@ import SessionController from './controller';
 import logger from '../logger';
 import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
 import { REGIONS } from '../constants';
-
-// const got = _got;
+import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 export class AmericanController implements SessionController {
   constructor(config: BlueLinkyConfig) {
     this.config = config;
@@ -94,7 +93,7 @@ export class AmericanController implements SessionController {
     return Promise.reject('login bad');
   }
 
-  logout(): Promise<string> {
+  public async logout(): Promise<string> {
     return Promise.resolve('OK');
   }
 
@@ -120,18 +119,19 @@ export class AmericanController implements SessionController {
 
     data.enrolledVehicleDetails.forEach((vehicle) => {
       const vehicleInfo = vehicle.vehicleDetails;
+      // console.log(vehicleInfo);
 
-      const config = {
+      const vehicleConfig = {
         nickname: vehicleInfo.nickName,
+        name: vehicleInfo.nickName,
         vin: vehicleInfo.vin,
         regDate: vehicleInfo.enrollmentDate,
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
-        // unsure if this is right but the new endpoint does not seem to have gen
-        gen: vehicleInfo.modelYear > 2016 ? '2' : '1',
-        name: vehicleInfo.nickName,
-      };
-      this.vehicles.push(new AmericanVehicle(config, this));
+        generation: vehicleInfo.modelYear > 2016 ? '2' : '1',
+      } as RegisterVehicleConfig;
+
+      this.vehicles.push(new AmericanVehicle(vehicleConfig, this));
     });
 
     return Promise.resolve(this.vehicles);

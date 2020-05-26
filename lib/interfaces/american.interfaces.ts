@@ -16,16 +16,10 @@ export interface TokenResponse {
 }
 
 export interface VehicleConfig {
-  vin: string|null;
-  pin: string|null;
-  token: string|null;
+  vin: string | null;
+  pin: string | null;
+  token: string | null;
   bluelinky: BlueLinky;
-}
-
-export interface RegisterVehicleConfig {
-  vin: string;
-  pin: string;
-  region: string|null;
 }
 
 export interface AmericanEndpoints {

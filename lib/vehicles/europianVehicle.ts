@@ -4,6 +4,7 @@ import {
   Odometer,
   VehicleLocation,
   ClimateConfig,
+  RegisterVehicleConfig,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -12,41 +13,13 @@ import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 
 export default class EuropeanVehicle extends Vehicle {
-  get name(): string {
-    return this.config.nickname;
-  }
-
-  get vin(): string {
-    return this.config.vin;
-  }
-
-  get vehicleId(): string {
-    return this.config.vehicleId;
-  }
-
-  get gen(): string {
-    return this.config.gen;
-  }
-
-  get type(): string {
-    return this.type;
-  }
-
-  get odometer(): Odometer | null {
-    return this._odometer;
-  }
-
-  get location(): VehicleLocation | null {
-    return this._location;
-  }
-
   public region = REGIONS.EU;
   private _status: VehicleStatus | null = null;
   private _location: VehicleLocation | null = null;
   private _odometer: Odometer | null = null;
 
-  constructor(public config, public session, private controller: EuropeanController) {
-    super(session);
+  constructor(public config: RegisterVehicleConfig, public controller: EuropeanController) {
+    super(config, controller);
     this.onInit();
   }
 
@@ -63,6 +36,14 @@ export default class EuropeanVehicle extends Vehicle {
         await this.controller.enterPin();
       }
     }
+  }
+
+  public odometer(): Promise<Odometer | null> {
+    throw new Error('Method not implemented.');
+  }
+
+  public location(): Promise<VehicleLocation> {
+    throw new Error('Method not implemented.');
   }
 
   public async start(config: ClimateConfig): Promise<string> {
@@ -82,8 +63,8 @@ export default class EuropeanVehicle extends Vehicle {
           unit: config.unit,
         },
         headers: {
-          'Authorization': this.session.controlToken,
-          'ccsp-device-id': this.session.deviceId,
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
         },
         json: true,
@@ -112,8 +93,8 @@ export default class EuropeanVehicle extends Vehicle {
           unit: 'C',
         },
         headers: {
-          'Authorization': this.session.controlToken,
-          'ccsp-device-id': this.session.deviceId,
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
         },
         json: true,
@@ -132,13 +113,13 @@ export default class EuropeanVehicle extends Vehicle {
       {
         method: 'POST',
         headers: {
-          'Authorization': this.session.controlToken,
-          'ccsp-device-id': this.session.deviceId,
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
         },
         body: {
           action: 'close',
-          deviceId: this.session.deviceId,
+          deviceId: this.controller.session.deviceId,
         },
         json: true,
       }
@@ -159,13 +140,13 @@ export default class EuropeanVehicle extends Vehicle {
       {
         method: 'POST',
         headers: {
-          'Authorization': this.session.controlToken,
-          'ccsp-device-id': this.session.deviceId,
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
         },
         body: {
           action: 'open',
-          deviceId: this.session.deviceId,
+          deviceId: this.controller.session.deviceId,
         },
         json: true,
       }
@@ -186,8 +167,8 @@ export default class EuropeanVehicle extends Vehicle {
       {
         method: 'GET',
         headers: {
-          'Authorization': this.session.controlToken,
-          'ccsp-device-id': this.session.deviceId,
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
         },
         json: true,

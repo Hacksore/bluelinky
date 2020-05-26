@@ -1,4 +1,3 @@
-
 /* eslint-disable */
 // TODO: add all calls from EU and CA
 
@@ -20,34 +19,31 @@ const apiCalls = [
 let vehicle;
 const { username, password, vin, pin, deviceUuid } = config;
 
-const onReadyHandler = vehicles => {
+const onReadyHandler = (vehicles) => {
   vehicle = vehicles[0];
 };
 
 const askForRegionInput = () => {
-
   inquirer
     .prompt([
       {
         type: 'list',
         name: 'region',
         message: 'What Region are you in?',
-        choices: [
-          'US', 'EU', 'CA'
-        ],
-      }
+        choices: ['US', 'EU', 'CA'],
+      },
     ])
-    .then(answers => {
+    .then((answers) => {
       if (answers.command == 'exit') {
         console.log('bye');
         return;
       } else {
-        console.log(answers)
+        console.log(answers);
         createInstance(answers.region);
         askForCommandInput();
       }
     });
-}
+};
 
 const createInstance = (region) => {
   const client = new BlueLinky({
@@ -55,10 +51,10 @@ const createInstance = (region) => {
     password,
     region: region,
     pin,
-    deviceUuid
+    deviceUuid,
   });
   client.on('ready', onReadyHandler);
-}
+};
 
 function askForCommandInput() {
   console.log('');
@@ -71,14 +67,14 @@ function askForCommandInput() {
         choices: apiCalls,
       },
     ])
-    .then(answers => {
+    .then((answers) => {
       if (answers.command == 'exit') {
         console.log('bye');
         return;
       } else {
         performCommand(answers.command);
       }
-    });    
+    });
 }
 
 async function performCommand(command) {
@@ -87,10 +83,12 @@ async function performCommand(command) {
       case 'exit':
         return;
       case 'locate':
-        const locate = await vehicle.locate();
+        const locate = await vehicle.location();
         console.log('locate : ' + JSON.stringify(locate, null, 2));
         break;
       case 'status':
+        console.log(vehicle);
+
         const status = await vehicle.status(false);
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
@@ -127,6 +125,5 @@ async function performCommand(command) {
     console.log(err.body);
   }
 }
-
 
 askForRegionInput();

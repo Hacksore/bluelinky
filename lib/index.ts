@@ -76,13 +76,9 @@ class BlueLinky extends EventEmitter {
   }
 
   public getVehicle(input: string): Vehicle | undefined {
-    if (this.vehicles.length === 0) {
-      throw new Error('No Vehicle found!');
-    }
-
     try {
       const foundCar = this.vehicles.find((car) => {
-        return car.vin === input || car.vehicleId === input;
+        return car.vin() === input || car.id() === input;
       });
 
       if (!foundCar && this.vehicles.length > 0) {
@@ -91,7 +87,7 @@ class BlueLinky extends EventEmitter {
 
       return foundCar;
     } catch (err) {
-      throw new Error('Vehicle not found!');
+      throw new Error(`Vehicle not found: ${input}!`);
     }
   }
 

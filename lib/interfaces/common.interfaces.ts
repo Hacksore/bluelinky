@@ -224,6 +224,17 @@ export interface ClimateConfig {
   unit: string;
 }
 
+export interface RegisterVehicleConfig {
+  nickname: string;
+  name: string;
+  vin: string;
+  regDate: string;
+  brandIndicator: string;
+  regId: string;
+  id: string;
+  generation: string;
+}
+
 // ACCOUNT //////////////////////////////////////////////////////
 
 // Account Info
