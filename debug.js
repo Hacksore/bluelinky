@@ -8,6 +8,7 @@ const inquirer = require('inquirer');
 const apiCalls = [
   { name: 'exit', value: 'exit' },
   { name: 'start', value: 'start' },
+  { name: 'odometer', value: 'odometer' },
   { name: 'stop', value: 'stop' },
   { name: 'status (on bluelink cache)', value: 'status' },
   { name: 'status refresh (fetch vehicle)', value: 'statusR' },
@@ -82,6 +83,10 @@ async function performCommand(command) {
       case 'locate':
         const locate = await vehicle.location();
         console.log('locate : ' + JSON.stringify(locate, null, 2));
+        break;
+      case 'odometer':
+        const odometer = await vehicle.odometer();
+        console.log('odometer', JSON.stringify(odometer, null, 2));
         break;
       case 'status':
         const status = await vehicle.status(false);

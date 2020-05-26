@@ -3,11 +3,13 @@ import logger from '../logger';
 
 import { REGIONS } from '../constants';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
+import SessionController from '../controllers/controller';
 
 import {
   StartConfig,
   VehicleStatus,
   VehicleLocation,
+  RegisterVehicleConfig,
   Odometer,
 } from '../interfaces/common.interfaces';
 import { RequestHeaders, VehicleConfig } from '../interfaces/american.interfaces';
@@ -20,7 +22,7 @@ export default class AmericanVehicle extends Vehicle {
 
   private _stats: VehicleConfig | null = null;
 
-  constructor(public vehicleConfig, public controller) {
+  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
     super(vehicleConfig, controller);
     logger.info(`US Vehicle ${this.config.regId} created`);
   }
@@ -32,7 +34,7 @@ export default class AmericanVehicle extends Vehicle {
       'Host': API_HOST,
       'User-Agent': 'okhttp/3.12.0',
       'registrationId': this.config.regId,
-      'gen': this.vehicleConfig.gen,
+      'gen': this.vehicleConfig.generation,
       'username': this.controller.config.username,
       'vin': this.config.vin,
       'APPCLOUD-VIN': this.config.vin,
@@ -47,7 +49,23 @@ export default class AmericanVehicle extends Vehicle {
   }
 
   public async odometer(): Promise<Odometer | null> {
-    throw new Error('Method not implemented.');
+    const response = await this._request(`/ac/v2/enrollment/details/${this.controller.config.username}`, {
+      method: 'GET',
+      headers: { ...this.getDefaultHeaders() },
+    });
+
+    if (response.statusCode !== 200) {
+      return Promise.reject('Failed to get odometer reading!');
+    }
+    const data = JSON.parse(response.body);
+    const foundVehicle = data.enrolledVehicleDetails.find(item => {
+      return item.vehicleDetails.vin === this.vin()
+    });
+
+    return Promise.resolve({
+      value: foundVehicle.vehicleDetails.odometer,
+      unit: 0 // unsure what this is :P
+    });
   }
 
   /**
@@ -185,7 +203,7 @@ export default class AmericanVehicle extends Vehicle {
 
   public async unlock(): Promise<string> {
     const formData = new URLSearchParams();
-    formData.append('userName', this.controller.config.username);
+    formData.append('userName', this.controller.config.username || '');
     formData.append('vin', this.config.vin);
 
     const response = await this._request('/ac/v2/rcs/rdo/on', {
@@ -203,7 +221,7 @@ export default class AmericanVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     const formData = new URLSearchParams();
-    formData.append('userName', this.controller.config.username);
+    formData.append('userName', this.controller.config.username || '');
     formData.append('vin', this.config.vin);
 
     const response = await this._request('/ac/v2/rcs/rdo/off', {
