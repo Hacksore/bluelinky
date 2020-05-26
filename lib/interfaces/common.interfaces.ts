@@ -24,8 +24,46 @@ export interface Session {
   controlTokenExpiresAt?: number;
 }
 
-// Status
+// Status remapped
 export interface VehicleStatus {
+  engine: {
+    ignition: boolean;
+    batteryCharge?: number;
+    charging?: boolean;
+    timeToFullCharge?: object;
+    range: number;
+    adaptiveCruiseControl: boolean;
+  };
+  climate: {
+    active: boolean;
+    steeringwheelHeat: boolean;
+    sideMirrorHeat: boolean;
+    rearWindowHeat: boolean;
+    temperatureSetpoint: number;
+    temperatureUnit: number;
+    defrost: boolean;
+  };
+  chassis: {
+    hoodOpen: boolean;
+    trunkOpen: boolean;
+    doors: {
+      frontRight: boolean;
+      frontLeft: boolean;
+      backLeft: boolean;
+      backRight: boolean;
+    };
+    tirePressureWarningLamp: {
+      rearLeft: boolean;
+      frontLeft: boolean;
+      frontRight: boolean;
+      rearRight: boolean;
+      all: boolean;
+    };
+  };
+}
+
+// TODO: remove
+export interface LegacyVehicleStatus {
   lastStatusDate: string;
   dateTime: string;
   acc: boolean;
@@ -157,6 +195,18 @@ export interface VehicleInfoResponse {
 
 // Location
 export interface VehicleLocation {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  speed: {
+    unit: number;
+    value: number;
+  };
+  heading: number;
+}
+
+// TODO: remove
+export interface LegacyVehicleLocation {
   accuracy: {
     hdop: number;
     pdop: number;

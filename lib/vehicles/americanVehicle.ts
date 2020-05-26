@@ -10,13 +10,15 @@ import {
   VehicleLocation,
   Odometer,
 } from '../interfaces/common.interfaces';
-import { RequestHeaders } from '../interfaces/american.interfaces';
+import { RequestHeaders, VehicleConfig } from '../interfaces/american.interfaces';
 
 import { Vehicle } from './vehicle';
 import { URLSearchParams } from 'url';
 
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
+
+  private _stats: VehicleConfig | null = null;
 
   constructor(public vehicleConfig, public controller) {
     super(vehicleConfig, controller);
@@ -48,18 +50,30 @@ export default class AmericanVehicle extends Vehicle {
     throw new Error('Method not implemented.');
   }
 
+  /**
+   * This is seems to always poll the modem directly, no caching
+   */
   public async location(): Promise<VehicleLocation> {
     const response = await this._request('/ac/v2/rcs/rfc/findMyCar', {
       method: 'GET',
       headers: { ...this.getDefaultHeaders() },
     });
 
-    if (response.statusCode === 200) {
-      const data = JSON.parse(response.body);
-      return Promise.resolve(data);
+    if (response.statusCode !== 200) {
+      return Promise.reject('Failed to get location!');
     }
 
-    return Promise.reject('Failed to get location!');
+    const data = JSON.parse(response.body);
+    return Promise.resolve({
+      latitude: data.coord.lat,
+      longitude: data.coord.lon,
+      altitude: data.coord.alt,
+      speed: {
+        unit: data.speed.unit,
+        value: data.speed.value,
+      },
+      heading: data.head,
+    });
   }
 
   public async start(startConfig: StartConfig): Promise<string> {
@@ -131,8 +145,42 @@ export default class AmericanVehicle extends Vehicle {
       },
     });
 
-    const data = JSON.parse(response.body);
-    return Promise.resolve(data.vehicleStatus as VehicleStatus);
+    const { vehicleStatus } = JSON.parse(response.body);
+    this._stats = vehicleStatus;
+
+    return Promise.resolve({
+      chassis: {
+        hoodOpen: vehicleStatus.hoodOpen,
+        trunkOpen: vehicleStatus.trunkOpen,
+        doors: {
+          frontRight: !!vehicleStatus.doorOpen.frontRight,
+          frontLeft: !!vehicleStatus.doorOpen.frontLeft,
+          backLeft: !!vehicleStatus.doorOpen.backLeft,
+          backRight: !!vehicleStatus.doorOpen.backRight,
+        },
+        tirePressureWarningLamp: {
+          rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearLeft,
+          frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontLeft,
+          frontRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontRight,
+          rearRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearRight,
+          all: !!vehicleStatus.tirePressureLamp.trunkOpenStatus,
+        },
+      },
+      climate: {
+        active: vehicleStatus.airCtrlOn,
+        steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+        sideMirrorHeat: false,
+        rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
+        defrost: vehicleStatus.defrost,
+        temperatureSetpoint: vehicleStatus.airTemp.value,
+        temperatureUnit: vehicleStatus.airTemp.unit,
+      },
+      engine: {
+        ignition: vehicleStatus.engine,
+        adaptiveCruiseControl: vehicleStatus.acc,
+        range: vehicleStatus.dte.value,
+      },
+    });
   }
 
   public async unlock(): Promise<string> {

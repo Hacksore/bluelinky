@@ -35,10 +35,8 @@ const askForRegionInput = () => {
     ])
     .then((answers) => {
       if (answers.command == 'exit') {
-        console.log('bye');
         return;
       } else {
-        console.log(answers);
         createInstance(answers.region);
         askForCommandInput();
       }
@@ -69,7 +67,6 @@ function askForCommandInput() {
     ])
     .then((answers) => {
       if (answers.command == 'exit') {
-        console.log('bye');
         return;
       } else {
         performCommand(answers.command);
@@ -87,8 +84,6 @@ async function performCommand(command) {
         console.log('locate : ' + JSON.stringify(locate, null, 2));
         break;
       case 'status':
-        console.log(vehicle);
-
         const status = await vehicle.status(false);
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
@@ -122,7 +117,7 @@ async function performCommand(command) {
 
     askForCommandInput();
   } catch (err) {
-    console.log(err.body);
+    // console.log(err.body);
   }
 }
 

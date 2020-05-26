@@ -131,6 +131,7 @@ export default class CanadianVehicle extends Vehicle {
       };
 
       const airTemp = startConfig.airTempvalue;
+      // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
         if (airTemp > 27 || airTemp < 17) {
           return Promise.reject('air temperature should be between 17 and 27 degrees');
@@ -197,7 +198,7 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Internal
   //////////////////////////////////////////////////////////////////////////////
-
+  // Does this have to be done before every command?
   private async getPreAuth(): Promise<string> {
     logger.info('Begin pre-authentication');
     try {
@@ -211,7 +212,7 @@ export default class CanadianVehicle extends Vehicle {
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: object, headers: object = {}): Promise<any | null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
+    logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
     try {
       const response = await got(endpoint, {

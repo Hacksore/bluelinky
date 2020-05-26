@@ -4,7 +4,7 @@ import got from 'got';
 import AmericanVehicle from '../lib/vehicles/americanVehicle';
 import { AmericanController } from '../lib/controllers/american.controller';
 
-import EuropeanVehicle from '../lib/vehicles/europianVehicle';
+import EuropeanVehicle from '../lib/vehicles/europeanVehicle';
 import { EuropeanController } from '../lib/controllers/european.controller';
 
 import CanadianVehicle from '../lib/vehicles/canadianVehicle';
@@ -12,7 +12,7 @@ import { CanadianController } from '../lib/controllers/canadian.controller';
 
 jest.mock('got');
 
-const getVehicle = region => {
+const getVehicle = (region) => {
   const referenceMap = {
     US: {
       controller: AmericanController,
@@ -35,7 +35,7 @@ const getVehicle = region => {
     autoLogin: true,
     pin: '1234',
     vin: '4444444444444',
-    vehicleId: undefined
+    vehicleId: undefined,
   });
 
   const vehicle = new referenceMap[region].vehicle(
@@ -69,7 +69,6 @@ describe('AmericanVehicle', () => {
 
     const response = await vehicle.lock();
     expect(response).toEqual('Lock successful');
-
   });
 });
 
@@ -84,7 +83,7 @@ describe('CanadianVehicle', () => {
     (got as any).mockReturnValueOnce({
       body: {
         result: {
-          pAuth: 'test'
+          pAuth: 'test',
         },
         responseHeader: {
           responseCode: 0,

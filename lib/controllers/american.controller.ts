@@ -119,7 +119,6 @@ export class AmericanController implements SessionController {
 
     data.enrolledVehicleDetails.forEach((vehicle) => {
       const vehicleInfo = vehicle.vehicleDetails;
-      // console.log(vehicleInfo);
 
       const vehicleConfig = {
         nickname: vehicleInfo.nickName,
