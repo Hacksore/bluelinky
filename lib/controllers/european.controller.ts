@@ -133,7 +133,7 @@ export class EuropeanController extends SessionController {
       const responseBody = JSON.parse(response.body);
       this.session.accessToken = 'Bearer ' + responseBody.access_token;
 
-      logger.info(
+      logger.debug(
         `Login successful for user ${this.userConfig.username}`,
         this.session.accessToken
       );
@@ -196,7 +196,7 @@ export class EuropeanController extends SessionController {
       logger.info(`Added vehicle ${vehicleConfig.id}`);
     });
 
-    logger.info(`Success! Got ${this.vehicles.length} vehicles`);
+    logger.debug(`Success! Got ${this.vehicles.length} vehicles`);
     return Promise.resolve(this.vehicles);
   }
 
