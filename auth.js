@@ -5,7 +5,7 @@ const BlueLinky = require('./dist/index');
 const { HYUNDAI_USER, HYUNDAI_PASS, HYUNDAI_PIN } = process.env;
 const REGION_TO_TEST = process.argv[2];
 
-const testRegionLogin = (region) => {
+const testRegionLogin = region => {
   const client = new BlueLinky({
     username: HYUNDAI_USER,
     password: HYUNDAI_PASS,
