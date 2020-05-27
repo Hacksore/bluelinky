@@ -77,16 +77,17 @@ export class EuropeanController extends SessionController {
         cookieJar,
       });
 
-      // spooky :), seems like regex might work better here?
-      const regexMatch = /.*code=(\w*)&.*/g.exec(authCodeResponse.body.redirectUrl);
-      if (regexMatch !== null) {
-        this.session.refreshToken = regexMatch[1];
+      const queryString = authCodeResponse.body.redirectUrl.split('?')[1];
+      const urlParams = new URLSearchParams(queryString);
+      const authToken = urlParams.get('code');
+
+      if (authToken !== null) {
+        this.session.refreshToken = authToken;
       } else {
-        throw new Error('@EuropeControllerLogin: AuthCode was not found (Regex match was null)');
+        throw new Error('@EuropeControllerLogin: AuthCode was not found');
       }
 
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
-
       const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
         method: 'POST',
         headers: {
