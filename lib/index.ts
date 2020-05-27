@@ -54,7 +54,7 @@ class BlueLinky extends EventEmitter {
 
   private onInit(): void {
     if (this.config.autoLogin) {
-      logger.info('Bluelinky is loging in automatically, to disable use autoLogin: false');
+      logger.debug('Bluelinky is loging in automatically, to disable use autoLogin: false');
       this.login();
     }
   }
@@ -77,7 +77,7 @@ class BlueLinky extends EventEmitter {
 
   public getVehicle(input: string): Vehicle | undefined {
     try {
-      const foundCar = this.vehicles.find((car) => {
+      const foundCar = this.vehicles.find(car => {
         return car.vin() === input || car.id() === input;
       });
 

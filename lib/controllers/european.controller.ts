@@ -16,7 +16,7 @@ import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.info(`${this.userConfig.region} Controller created`);
+    logger.debug(`EU Controller created`);
 
     this.session.deviceId = this.uuidv4();
   }

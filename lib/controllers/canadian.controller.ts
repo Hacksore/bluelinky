@@ -20,7 +20,7 @@ export class CanadianController extends SessionController {
 
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.info('CA Controller created');
+    logger.debug('CA Controller created');
   }
 
   session: Session = {
@@ -95,7 +95,7 @@ export class CanadianController extends SessionController {
         return Promise.resolve(this.vehicles);
       }
 
-      data.vehicles.forEach((vehicle) => {
+      data.vehicles.forEach(vehicle => {
         const vehicleConfig = {
           nickname: vehicle.nickName,
           name: vehicle.nickName,

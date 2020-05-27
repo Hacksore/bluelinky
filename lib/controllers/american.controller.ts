@@ -12,7 +12,7 @@ import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 export class AmericanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.info(`US Controller created`);
+    logger.debug(`US Controller created`);
   }
 
   private vehicles: Array<AmericanVehicle> = [];
@@ -102,7 +102,7 @@ export class AmericanController extends SessionController {
       return Promise.resolve(this.vehicles);
     }
 
-    data.enrolledVehicleDetails.forEach((vehicle) => {
+    data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
 
       const vehicleConfig = {

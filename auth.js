@@ -15,7 +15,7 @@ const testRegionLogin = region => {
   });
 
   client.on('ready', () => {
-    console.log(`Connected to region ${region} successfuly`);
+    console.log(`🦮 Connected to region ${region} successfuly 😎`);
   });
 };
 
