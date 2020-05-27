@@ -1,0 +1,14 @@
+name: auth
+
+on: push
+
+jobs:
+  us-eu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm run build
+      - run: node auth.js
