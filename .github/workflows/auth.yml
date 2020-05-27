@@ -15,8 +15,14 @@ jobs:
   us:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
       - run: node auth.js "US"
   eu:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
       - run: node auth.js "EU"

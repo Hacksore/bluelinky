@@ -46,7 +46,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async start(config: ClimateConfig): Promise<string> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
       {
         method: 'POST',
         body: {
@@ -68,7 +68,7 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    logger.info(`Climate started for vehicle ${this.config.id}`);
+    logger.info(`Climate started for vehicle ${this.vehicleConfig.id}`);
 
     return Promise.resolve(response.body);
   }
@@ -76,7 +76,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async stop(): Promise<string> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/temperature`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
       {
         method: 'POST',
         body: {
@@ -98,7 +98,7 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    logger.info(`Climate stopped for vehicle ${this.config.id}`);
+    logger.info(`Climate stopped for vehicle ${this.vehicleConfig.id}`);
 
     return Promise.resolve(response.body);
   }
@@ -106,7 +106,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async lock(): Promise<string> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
       {
         method: 'POST',
         headers: {
@@ -123,7 +123,7 @@ export default class EuropeanVehicle extends Vehicle {
     );
 
     if (response.statusCode === 200) {
-      logger.info(`Vehicle ${this.config.id} locked`);
+      logger.debug(`Vehicle ${this.vehicleConfig.id} locked`);
       return Promise.resolve('Lock successful');
     }
 
@@ -133,7 +133,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async unlock(): Promise<string> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/control/door`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
       {
         method: 'POST',
         headers: {
@@ -150,7 +150,7 @@ export default class EuropeanVehicle extends Vehicle {
     );
 
     if (response.statusCode === 200) {
-      logger.info(`Vehicle ${this.config.id} unlocked`);
+      logger.debug(`Vehicle ${this.vehicleConfig.id} unlocked`);
       return Promise.resolve('Unlock successful');
     }
 
@@ -160,7 +160,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async status(): Promise<VehicleStatus> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/status/latest`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
       {
         method: 'GET',
         headers: {
@@ -176,7 +176,7 @@ export default class EuropeanVehicle extends Vehicle {
     this._location = response.body.resMsg.vehicleStatusInfo.vehicleLocation as VehicleLocation;
     this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as Odometer;
 
-    logger.info(`Got new status for vehicle ${this.config.id}`);
+    logger.info(`Got new status for vehicle ${this.vehicleConfig.id}`);
 
     return Promise.resolve(this._status);
   }
