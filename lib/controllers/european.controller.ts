@@ -16,17 +16,10 @@ import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.info(`${this.config.region} Controller created`);
-  }
+    logger.info(`${this.userConfig.region} Controller created`);
 
-  session: Session = {
-    accessToken: '',
-    refreshToken: '',
-    controlToken: '',
-    deviceId: this.uuidv4(),
-    tokenExpiresAt: 0,
-    controlTokenExpiresAt: 0,
-  };
+    this.session.deviceId = this.uuidv4();
+  }
 
   private vehicles: Array<EuropeanVehicle> = [];
 
@@ -37,16 +30,6 @@ export class EuropeanController extends SessionController {
       return v.toString(16);
     });
   }
-
-  public config: BlueLinkyConfig = {
-    username: undefined,
-    password: undefined,
-    region: REGIONS.EU,
-    autoLogin: true,
-    pin: undefined,
-    vin: undefined,
-    vehicleId: undefined,
-  };
 
   public async refreshAccessToken(): Promise<string> {
     return this.login();
@@ -65,7 +48,7 @@ export class EuropeanController extends SessionController {
       },
       body: {
         deviceId: this.session.deviceId,
-        pin: this.config.pin,
+        pin: this.userConfig.pin,
       },
       json: true,
     });
@@ -88,8 +71,8 @@ export class EuropeanController extends SessionController {
         },
         json: true,
         body: {
-          email: this.config.username,
-          password: this.config.password,
+          email: this.userConfig.username,
+          password: this.userConfig.password,
         },
         cookieJar,
       });
@@ -149,7 +132,10 @@ export class EuropeanController extends SessionController {
       const responseBody = JSON.parse(response.body);
       this.session.accessToken = 'Bearer ' + responseBody.access_token;
 
-      logger.info(`Login successful for user ${this.config.username}`, this.session.accessToken);
+      logger.info(
+        `Login successful for user ${this.userConfig.username}`,
+        this.session.accessToken
+      );
 
       return Promise.resolve('Login success');
     } catch (err) {
@@ -178,7 +164,7 @@ export class EuropeanController extends SessionController {
 
     this.vehicles = [];
 
-    await this.asyncForEach(response.body.resMsg.vehicles, async (v) => {
+    await this.asyncForEach(response.body.resMsg.vehicles, async v => {
       const vehicleProfileReponse = await got(
         `${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
         {

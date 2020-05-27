@@ -12,24 +12,24 @@ import { CanadianController } from '../lib/controllers/canadian.controller';
 
 jest.mock('got');
 
-const getVehicle = (region) => {
-  const referenceMap = {
-    US: {
-      controller: AmericanController,
-      vehicle: AmericanVehicle,
-    },
-    EU: {
-      controller: EuropeanController,
-      vehicle: EuropeanVehicle,
-    },
-    CA: {
-      controller: CanadianController,
-      vehicle: CanadianVehicle,
-    },
-  };
+const referenceMap = {
+  US: {
+    controller: AmericanController,
+    vehicle: AmericanVehicle,
+  },
+  EU: {
+    controller: EuropeanController,
+    vehicle: EuropeanVehicle,
+  },
+  CA: {
+    controller: CanadianController,
+    vehicle: CanadianVehicle,
+  },
+};
 
+const getVehicle = region => {
   const Vehicle = referenceMap[region].vehicle;
-  const Controller = new referenceMap[region].controller();
+  const Controller = referenceMap[region].controller;
 
   const controller = new Controller({
     username: 'testuser@gmail.com',
@@ -44,12 +44,12 @@ const getVehicle = (region) => {
   const vehicle = new Vehicle(
     {
       nickname: 'Jest is best',
+      name: 'Jest is best',
       vin: '444',
       regDate: 'test',
       brandIndicator: 'H',
       regId: '123123',
-      gen: '2',
-      name: 'Jest is best',
+      generation: '2',
     },
     controller
   );
