@@ -5,7 +5,7 @@ import got from 'got';
 import { ALL_ENDPOINTS, EU_BASE_URL } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/europeanVehicle';
-import SessionController from './controller';
+import { SessionController } from './controller';
 
 import logger from '../logger';
 import { URLSearchParams } from 'url';
@@ -13,9 +13,9 @@ import { URLSearchParams } from 'url';
 import { CookieJar } from 'tough-cookie';
 import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 
-export class EuropeanController implements SessionController {
-  constructor(config: BlueLinkyConfig) {
-    this.config = config;
+export class EuropeanController extends SessionController {
+  constructor(userConfig: BlueLinkyConfig) {
+    super(userConfig);
     logger.info(`${this.config.region} Controller created`);
   }
 

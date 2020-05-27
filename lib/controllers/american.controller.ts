@@ -3,37 +3,19 @@ import got from 'got';
 
 import { Vehicle } from '../vehicles/vehicle';
 import AmericanVehicle from '../vehicles/americanVehicle';
-import SessionController from './controller';
+import { SessionController } from './controller';
 
 import logger from '../logger';
 import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
-import { REGIONS } from '../constants';
+
 import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
-export class AmericanController implements SessionController {
-  constructor(config: BlueLinkyConfig) {
-    this.config = config;
-    logger.info(`${this.config.region} Controller created`);
+export class AmericanController extends SessionController {
+  constructor(userConfig: BlueLinkyConfig) {
+    super(userConfig);
+    logger.info(`US Controller created`);
   }
 
   private vehicles: Array<AmericanVehicle> = [];
-
-  public session: Session = {
-    accessToken: '',
-    refreshToken: '',
-    controlToken: '',
-    deviceId: '',
-    tokenExpiresAt: 0,
-  };
-
-  public config: BlueLinkyConfig = {
-    username: undefined,
-    password: undefined,
-    region: REGIONS.US,
-    autoLogin: true,
-    pin: undefined,
-    vin: undefined,
-    vehicleId: undefined,
-  };
 
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
@@ -66,11 +48,14 @@ export class AmericanController implements SessionController {
 
   public async login(): Promise<string> {
     try {
+      logger.debug('Logging in to API');
+      console.log(this.userConfig);
+
       const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
         method: 'POST',
         body: {
-          username: this.config.username,
-          password: this.config.password,
+          username: this.userConfig.username,
+          password: this.userConfig.password,
         },
         headers: {
           'client_secret': CLIENT_SECRET,
@@ -87,6 +72,7 @@ export class AmericanController implements SessionController {
 
       return Promise.resolve('login good');
     } catch (err) {
+      logger.debug(JSON.stringify(err.body));
       Promise.reject(err);
     }
 
@@ -98,7 +84,7 @@ export class AmericanController implements SessionController {
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.config.username}`, {
+    const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.userConfig.username}`, {
       method: 'GET',
       headers: {
         'access_token': this.session.accessToken,

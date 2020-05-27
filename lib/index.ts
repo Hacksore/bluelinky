@@ -1,7 +1,7 @@
 import { AmericanController } from './controllers/american.controller';
 import { EuropeanController } from './controllers/european.controller';
 import { CanadianController } from './controllers/canadian.controller';
-import SessionController from './controllers/controller';
+import { SessionController } from './controllers/controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
 import { BlueLinkyConfig, Session } from './interfaces/common.interfaces';
@@ -99,7 +99,7 @@ class BlueLinky extends EventEmitter {
     return this.controller.logout();
   }
 
-  public getSession(): Session {
+  public getSession(): Session | null {
     return this.controller.session;
   }
 }

@@ -3,7 +3,7 @@ import logger from '../logger';
 
 import { REGIONS } from '../constants';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
-import SessionController from '../controllers/controller';
+import { SessionController } from '../controllers/controller';
 
 import {
   StartConfig,
@@ -19,12 +19,11 @@ import { URLSearchParams } from 'url';
 
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
-
   private _stats: VehicleConfig | null = null;
 
   constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
     super(vehicleConfig, controller);
-    logger.info(`US Vehicle ${this.config.regId} created`);
+    logger.info(`US Vehicle ${this.vehicleConfig.id} created`);
   }
 
   private getDefaultHeaders(): RequestHeaders {
@@ -33,23 +32,23 @@ export default class AmericanVehicle extends Vehicle {
       'client_id': CLIENT_ID,
       'Host': API_HOST,
       'User-Agent': 'okhttp/3.12.0',
-      'registrationId': this.config.regId,
+      'registrationId': this.vehicleConfig.regId,
       'gen': this.vehicleConfig.generation,
-      'username': this.controller.config.username,
-      'vin': this.config.vin,
-      'APPCLOUD-VIN': this.config.vin,
+      'username': this.userConfig.username,
+      'vin': this.vehicleConfig.vin,
+      'APPCLOUD-VIN': this.vehicleConfig.vin,
       'Language': '0',
       'to': 'ISS',
       'encryptFlag': 'false',
       'from': 'SPA',
-      'brandIndicator': this.config.brandIndicator,
-      'bluelinkservicepin': this.controller.config.pin,
+      'brandIndicator': this.vehicleConfig.brandIndicator,
+      'bluelinkservicepin': this.userConfig.pin,
       'offset': '-5',
     };
   }
 
   public async odometer(): Promise<Odometer | null> {
-    const response = await this._request(`/ac/v2/enrollment/details/${this.controller.config.username}`, {
+    const response = await this._request(`/ac/v2/enrollment/details/${this.userConfig.username}`, {
       method: 'GET',
       headers: { ...this.getDefaultHeaders() },
     });
@@ -58,13 +57,13 @@ export default class AmericanVehicle extends Vehicle {
       return Promise.reject('Failed to get odometer reading!');
     }
     const data = JSON.parse(response.body);
-    const foundVehicle = data.enrolledVehicleDetails.find(item => {
-      return item.vehicleDetails.vin === this.vin()
+    const foundVehicle = data.enrolledVehicleDetails.find((item) => {
+      return item.vehicleDetails.vin === this.vin();
     });
 
     return Promise.resolve({
       value: foundVehicle.vehicleDetails.odometer,
-      unit: 0 // unsure what this is :P
+      unit: 0, // unsure what this is :P
     });
   }
 
@@ -117,8 +116,8 @@ export default class AmericanVehicle extends Vehicle {
       'heating1': +mergedConfig.heating1, // use the unary method to convert to int
       'igniOnDuration': mergedConfig.igniOnDuration,
       'seatHeaterVentInfo': null, // need to figure out what this is
-      'username': this.controller.config.username,
-      'vin': this.config.vin,
+      'username': this.userConfig.username,
+      'vin': this.vehicleConfig.vin,
     };
 
     const response = await this._request('/ac/v2/rcs/rsc/start', {
@@ -203,8 +202,8 @@ export default class AmericanVehicle extends Vehicle {
 
   public async unlock(): Promise<string> {
     const formData = new URLSearchParams();
-    formData.append('userName', this.controller.config.username || '');
-    formData.append('vin', this.config.vin);
+    formData.append('userName', this.userConfig.username || '');
+    formData.append('vin', this.vehicleConfig.vin);
 
     const response = await this._request('/ac/v2/rcs/rdo/on', {
       method: 'POST',
@@ -221,8 +220,8 @@ export default class AmericanVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     const formData = new URLSearchParams();
-    formData.append('userName', this.controller.config.username || '');
-    formData.append('vin', this.config.vin);
+    formData.append('userName', this.userConfig.username || '');
+    formData.append('vin', this.vehicleConfig.vin);
 
     const response = await this._request('/ac/v2/rcs/rdo/off', {
       method: 'POST',

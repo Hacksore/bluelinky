@@ -19,13 +19,9 @@ export default class EuropeanVehicle extends Vehicle {
   private _location: VehicleLocation | null = null;
   private _odometer: Odometer | null = null;
 
-  constructor(public config: RegisterVehicleConfig, public controller: EuropeanController) {
-    super(config, controller);
-    this.onInit();
-  }
-
-  private onInit(): void {
-    logger.info(`EU Vehicle ${this.config.id} created`);
+  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: EuropeanController) {
+    super(vehicleConfig, controller);
+    logger.info(`EU Vehicle ${this.vehicleConfig.id} created`);
   }
 
   private async checkControlToken(): Promise<void> {

@@ -8,19 +8,19 @@ import {
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
-import SessionController from './controller';
+import { SessionController } from './controller';
 
 import logger from '../logger';
 import { REGIONS } from '../constants';
 import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 
-export class CanadianController implements SessionController {
+export class CanadianController extends SessionController {
   private _preferredDealer: PreferedDealer | null = null;
   private _accountInfo: AccountInfo | null = null;
 
-  constructor(config: BlueLinkyConfig) {
-    this.config = config;
-    logger.info(`${this.config.region} Controller created`);
+  constructor(userConfig: BlueLinkyConfig) {
+    super(userConfig);
+    logger.info('CA Controller created');
   }
 
   session: Session = {

@@ -6,8 +6,9 @@ import {
   RegisterVehicleConfig,
 } from '../interfaces/common.interfaces';
 
-import { StartConfig } from '../interfaces/common.interfaces';
-import SessionController from '../controllers/controller';
+import { StartConfig, BlueLinkyConfig } from '../interfaces/common.interfaces';
+import { SessionController } from '../controllers/controller';
+import { REGIONS } from '../constants';
 
 export abstract class Vehicle {
   // methods to override in each region vehicle
@@ -19,25 +20,37 @@ export abstract class Vehicle {
   abstract async location(): Promise<VehicleLocation | null>;
   abstract async odometer(): Promise<Odometer | null>;
 
-  constructor(public config: RegisterVehicleConfig, public controller: SessionController) {}
+  public userConfig: BlueLinkyConfig = {
+    username: undefined,
+    password: undefined,
+    region: REGIONS.EU,
+    autoLogin: true,
+    pin: undefined,
+    vin: undefined,
+    vehicleId: undefined,
+  };
+
+  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
+    this.userConfig = controller.userConfig;
+  }
 
   public vin(): string {
-    return this.config.vin;
+    return this.vehicleConfig.vin;
   }
 
   public name(): string {
-    return this.config.name;
+    return this.vehicleConfig.name;
   }
 
   public nickname(): string {
-    return this.config.name;
+    return this.vehicleConfig.name;
   }
 
   public id(): string {
-    return this.config.id;
+    return this.vehicleConfig.id;
   }
 
   public brandIndicator(): string {
-    return this.config.brandIndicator;
+    return this.vehicleConfig.brandIndicator;
   }
 }

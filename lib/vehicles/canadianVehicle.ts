@@ -36,17 +36,17 @@ export default class CanadianVehicle extends Vehicle {
     logger.info(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
 
-  location(): Promise<VehicleLocation | null> {
-    throw new Error('Method not implemented.');
-  }
-
-  odometer(): Promise<Odometer | null> {
-    throw new Error('Method not implemented.');
-  }
-
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
+  public location(): Promise<VehicleLocation | null> {
+    throw new Error('Method not implemented.');
+  }
+
+  public odometer(): Promise<Odometer | null> {
+    throw new Error('Method not implemented.');
+  }
+
   public async vehicleInfo(): Promise<VehicleInfoResponse> {
     logger.info('Begin vehicleInfo request');
     try {
@@ -223,7 +223,7 @@ export default class CanadianVehicle extends Vehicle {
           language: 1,
           offset: this.timeOffset,
           accessToken: this.controller.session.accessToken,
-          vehicleId: this.config.id,
+          vehicleId: this.vehicleConfig.id,
           ...headers,
         },
         body: {
