@@ -14,3 +14,7 @@ jobs:
       - run: npm run build
       - run: node auth.js "US"
       - run: node auth.js "EU"
+    env:
+      HYUNDAI_USER: ${{secrets.HYUNDAI_USER}}
+      HYUNDAI_PASS: ${{secrets.HYUNDAI_PASS}}
+      HYUNDAI_PIN: ${{secrets.HYUNDAI_PIN}}

@@ -49,7 +49,6 @@ export class AmericanController extends SessionController {
   public async login(): Promise<string> {
     try {
       logger.debug('Logging in to API');
-      console.log(this.userConfig);
 
       const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
         method: 'POST',
