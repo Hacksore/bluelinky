@@ -3,7 +3,7 @@ name: auth
 on: push
 
 jobs:
-  setup:
+  login:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,17 +12,5 @@ jobs:
           node-version: 12
       - run: npm ci
       - run: npm run build
-  us:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
       - run: node auth.js "US"
-  eu:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
       - run: node auth.js "EU"
