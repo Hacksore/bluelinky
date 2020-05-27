@@ -43,7 +43,7 @@ export abstract class Vehicle {
   }
 
   public nickname(): string {
-    return this.vehicleConfig.name;
+    return this.vehicleConfig.nickname;
   }
 
   public id(): string {

@@ -28,7 +28,10 @@ const getVehicle = (region) => {
     },
   };
 
-  const controller = new referenceMap[region].controller({
+  const Vehicle = referenceMap[region].vehicle;
+  const Controller = new referenceMap[region].controller();
+
+  const controller = new Controller({
     username: 'testuser@gmail.com',
     password: 'test',
     region: 'US',
@@ -38,7 +41,7 @@ const getVehicle = (region) => {
     vehicleId: undefined,
   });
 
-  const vehicle = new referenceMap[region].vehicle(
+  const vehicle = new Vehicle(
     {
       nickname: 'Jest is best',
       vin: '444',
@@ -46,7 +49,7 @@ const getVehicle = (region) => {
       brandIndicator: 'H',
       regId: '123123',
       gen: '2',
-      name: 'Car',
+      name: 'Jest is best',
     },
     controller
   );
@@ -58,7 +61,7 @@ describe('AmericanVehicle', () => {
   const vehicle = getVehicle('US');
 
   it('define new vehicle', () => {
-    expect(vehicle.config.nickname).toEqual('Jest is best');
+    expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
   it('call lock commmand', async () => {
@@ -76,7 +79,7 @@ describe('CanadianVehicle', () => {
   const vehicle = getVehicle('CA');
 
   it('define new vehicle', () => {
-    expect(vehicle.config.nickname).toEqual('Jest is best');
+    expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
   it('call lock commmand', async () => {
@@ -110,9 +113,10 @@ describe('EuropeanVehicle', () => {
   const vehicle = getVehicle('EU');
 
   it('define new vehicle', () => {
-    expect(vehicle.config.nickname).toEqual('Jest is best');
+    expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
+  // TODO: EU lead gets to write these :)
   // it('call lock commmand', async () => {
   //   (got as any).mockReturnValueOnce({
   //     body: {},
