@@ -1,5 +1,5 @@
-import { EU_CONSTANTS, REGIONS } from './../constants';
-import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
+import { EU_CONSTANTS } from './../constants';
+import { BlueLinkyConfig } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
 import { ALL_ENDPOINTS, EU_BASE_URL } from '../constants';

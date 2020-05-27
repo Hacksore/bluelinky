@@ -1,4 +1,4 @@
-import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
+import { BlueLinkyConfig } from './../interfaces/common.interfaces';
 import got from 'got';
 
 import { Vehicle } from '../vehicles/vehicle';
