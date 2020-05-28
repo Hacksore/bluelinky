@@ -20,12 +20,10 @@ import { Vehicle } from './vehicle';
 
 export default class CanadianVehicle extends Vehicle {
   private _nextService: VehicleNextService | null = null;
-  private _location: VehicleLocation | null = null;
 
   private _info: VehicleInfo | null = null;
   private _features: VehicleFeatures | null = null;
   private _featuresModel: VehicleFeaturesModel | null = null;
-  private _status: VehicleStatus | null = null;
 
   public region = REGIONS.CA;
 
@@ -33,22 +31,15 @@ export default class CanadianVehicle extends Vehicle {
 
   constructor(public vehicleConfig, public controller) {
     super(vehicleConfig, controller);
-    logger.info(`CA Vehicle ${this.vehicleConfig.id} created`);
+    logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
-  public location(): Promise<VehicleLocation | null> {
-    throw new Error('Method not implemented.');
-  }
-
-  public odometer(): Promise<Odometer | null> {
-    throw new Error('Method not implemented.');
-  }
 
   public async vehicleInfo(): Promise<VehicleInfoResponse> {
-    logger.info('Begin vehicleInfo request');
+    logger.debug('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
       const vehicleInfoResponse = response.result as VehicleInfoResponse;
@@ -63,7 +54,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   public async status(refresh = false): Promise<VehicleStatus> {
-    logger.info('Begin status request, polling car: ' + refresh);
+    logger.debug('Begin status request, polling car: ' + refresh);
     try {
       const endpoint = refresh ? CA_ENDPOINTS.remoteStatus : CA_ENDPOINTS.status;
       const response = await this.request(endpoint, {});
@@ -75,7 +66,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   public async nextService(): Promise<VehicleNextService> {
-    logger.info('Begin nextService request');
+    logger.debug('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
       this._nextService = response.result as VehicleNextService;
@@ -90,7 +81,7 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
 
   public async lock(): Promise<string> {
-    logger.info('Begin lock request');
+    logger.debug('Begin lock request');
     try {
       const preAuth = await this.getPreAuth();
       // assuming the API returns a bad status code for failed attempts
@@ -102,7 +93,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   public async unlock(): Promise<string> {
-    logger.info('Begin unlock request');
+    logger.debug('Begin unlock request');
     try {
       const preAuth = await this.getPreAuth();
       await this.request(CA_ENDPOINTS.unlock, {}, { pAuth: preAuth });
@@ -119,7 +110,7 @@ export default class CanadianVehicle extends Vehicle {
   airTempvalue: number | null  // temp in degrees for clim and heating 17-27
   */
   public async start(startConfig: StartConfig): Promise<string> {
-    logger.info('Begin startClimate request');
+    logger.debug('Begin startClimate request');
     try {
       const body = {
         hvacInfo: {
@@ -155,7 +146,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    logger.info('Begin stop request');
+    logger.debug('Begin stop request');
     try {
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.stop, {
@@ -169,7 +160,7 @@ export default class CanadianVehicle extends Vehicle {
 
   // TODO: type this
   public async lights(withHorn = false): Promise<string> {
-    logger.info('Begin lights request with horn ' + withHorn);
+    logger.debug('Begin lights request with horn ' + withHorn);
     try {
       const preAuth = await this.getPreAuth();
       const response = await this.request(
@@ -183,8 +174,13 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
-  public async locate(): Promise<VehicleLocation> {
-    logger.info('Begin locate request');
+  // TODO: @Seb to take a look at doing this
+  public odometer(): Promise<Odometer | null> {
+    throw new Error('Method not implemented.');
+  }
+
+  public async location(): Promise<VehicleLocation> {
+    logger.debug('Begin locate request');
     try {
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.locate, {}, { pAuth: preAuth });

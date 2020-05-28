@@ -35,7 +35,7 @@ export class EuropeanController extends SessionController {
     return this.login();
   }
 
-  async enterPin(): Promise<string> {
+  public async enterPin(): Promise<string> {
     if (this.session.accessToken === '') {
       Promise.reject('Token not set');
     }
@@ -58,7 +58,7 @@ export class EuropeanController extends SessionController {
     return Promise.resolve('PIN entered OK, The pin is valid for 10 minutes');
   }
 
-  async login(): Promise<string> {
+  public async login(): Promise<string> {
     try {
       // request cookie via got and store it to the cookieJar
       const cookieJar = new CookieJar();
@@ -133,11 +133,6 @@ export class EuropeanController extends SessionController {
       const responseBody = JSON.parse(response.body);
       this.session.accessToken = 'Bearer ' + responseBody.access_token;
 
-      logger.debug(
-        `Login successful for user ${this.userConfig.username}`,
-        this.session.accessToken
-      );
-
       return Promise.resolve('Login success');
     } catch (err) {
       logger.debug(JSON.stringify(err.message));
@@ -145,11 +140,11 @@ export class EuropeanController extends SessionController {
     }
   }
 
-  logout(): Promise<string> {
+  public logout(): Promise<string> {
     return Promise.resolve('OK');
   }
 
-  async getVehicles(): Promise<Array<Vehicle>> {
+  public async getVehicles(): Promise<Array<Vehicle>> {
     if (this.session.accessToken === undefined) {
       return Promise.reject('Token not set');
     }
@@ -193,10 +188,9 @@ export class EuropeanController extends SessionController {
       } as RegisterVehicleConfig;
 
       this.vehicles.push(new EuropeanVehicle(vehicleConfig, this));
-      logger.info(`Added vehicle ${vehicleConfig.id}`);
+      logger.debug(`Added vehicle ${vehicleConfig.id}`);
     });
 
-    logger.debug(`Success! Got ${this.vehicles.length} vehicles`);
     return Promise.resolve(this.vehicles);
   }
 

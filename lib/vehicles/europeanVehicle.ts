@@ -15,13 +15,10 @@ import { getTempCode } from '../util';
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
-  private _status: VehicleStatus | null = null;
-  private _location: VehicleLocation | null = null;
-  private _odometer: Odometer | null = null;
 
   constructor(public vehicleConfig: RegisterVehicleConfig, public controller: EuropeanController) {
     super(vehicleConfig, controller);
-    logger.info(`EU Vehicle ${this.vehicleConfig.id} created`);
+    logger.debug(`EU Vehicle ${this.vehicleConfig.id} created`);
   }
 
   private async checkControlToken(): Promise<void> {
@@ -33,14 +30,6 @@ export default class EuropeanVehicle extends Vehicle {
         await this.controller.enterPin();
       }
     }
-  }
-
-  public odometer(): Promise<Odometer | null> {
-    throw new Error('Method not implemented.');
-  }
-
-  public location(): Promise<VehicleLocation> {
-    throw new Error('Method not implemented.');
   }
 
   public async start(config: ClimateConfig): Promise<string> {
@@ -172,12 +161,93 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    this._status = response.body.resMsg.vehicleStatusInfo.vehicleStatus as VehicleStatus;
-    this._location = response.body.resMsg.vehicleStatusInfo.vehicleLocation as VehicleLocation;
-    this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as Odometer;
-
-    logger.info(`Got new status for vehicle ${this.vehicleConfig.id}`);
+    const vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+    this._status = {
+      chassis: {
+        hoodOpen: vehicleStatus.hoodOpen,
+        trunkOpen: vehicleStatus.trunkOpen,
+        doors: {
+          frontRight: !!vehicleStatus.doorOpen.frontRight,
+          frontLeft: !!vehicleStatus.doorOpen.frontLeft,
+          backLeft: !!vehicleStatus.doorOpen.backLeft,
+          backRight: !!vehicleStatus.doorOpen.backRight,
+        },
+        tirePressureWarningLamp: {
+          rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureLampRL,
+          frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureLampFL,
+          frontRight: !!vehicleStatus.tirePressureLamp.tirePressureLampFR,
+          rearRight: !!vehicleStatus.tirePressureLamp.tirePressureLampRR,
+          all: !!vehicleStatus.tirePressureLamp.tirePressureLampAll,
+        },
+      },
+      climate: {
+        active: vehicleStatus.airCtrlOn,
+        steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+        sideMirrorHeat: false,
+        rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
+        defrost: vehicleStatus.defrost,
+        temperatureSetpoint: vehicleStatus.airTemp.value,
+        temperatureUnit: vehicleStatus.airTemp.unit,
+      },
+      engine: {
+        ignition: vehicleStatus.engine,
+        adaptiveCruiseControl: vehicleStatus.acc,
+        range: vehicleStatus.dte.value,
+        charging: vehicleStatus?.evStatus?.batteryCharge,
+        batteryCharge: vehicleStatus?.battery?.batSoc,
+      },
+      raw: vehicleStatus,
+    };
 
     return Promise.resolve(this._status);
+  }
+
+  public async odometer(): Promise<Odometer | null> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        json: true,
+      }
+    );
+
+    this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as Odometer;
+    return Promise.resolve(this._odometer);
+  }
+
+  public async location(): Promise<VehicleLocation> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        json: true,
+      }
+    );
+
+    const data = response.body.resMsg.vehicleStatusInfo.vehicleLocation;
+    this._location = {
+      latitude: data.coord.lat,
+      longitude: data.coord.lon,
+      altitude: data.coord.alt,
+      speed: {
+        unit: data.speed.unit,
+        value: data.speed.value,
+      },
+      heading: data.head,
+    };
+
+    return Promise.resolve(this._location);
   }
 }

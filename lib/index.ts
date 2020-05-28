@@ -54,21 +54,25 @@ class BlueLinky extends EventEmitter {
 
   private onInit(): void {
     if (this.config.autoLogin) {
-      logger.debug('Bluelinky is loging in automatically, to disable use autoLogin: false');
+      logger.debug('Bluelinky is logging in automatically, to disable use autoLogin: false');
       this.login();
     }
   }
 
   public async login(): Promise<string> {
-    const response = await this.controller.login();
+    try {
+      const response = await this.controller.login();
 
-    // get all cars from the controller
-    this.vehicles = await this.controller.getVehicles();
+      // get all cars from the controller
+      this.vehicles = await this.controller.getVehicles();
 
-    logger.debug(`Found ${this.vehicles.length} on the account`);
+      logger.debug(`Found ${this.vehicles.length} on the account`);
 
-    this.emit('ready', this.vehicles);
-    return response;
+      this.emit('ready', this.vehicles);
+      return response;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {

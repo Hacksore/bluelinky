@@ -60,10 +60,12 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
+
+  raw: RawVehicleStatus;
 }
 
 // TODO: remove
-export interface LegacyVehicleStatus {
+export interface RawVehicleStatus {
   lastStatusDate: string;
   dateTime: string;
   acc: boolean;

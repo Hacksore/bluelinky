@@ -12,18 +12,17 @@ import {
   RegisterVehicleConfig,
   Odometer,
 } from '../interfaces/common.interfaces';
-import { RequestHeaders, VehicleConfig } from '../interfaces/american.interfaces';
+import { RequestHeaders } from '../interfaces/american.interfaces';
 
 import { Vehicle } from './vehicle';
 import { URLSearchParams } from 'url';
 
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
-  private _stats: VehicleConfig | null = null;
 
   constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
     super(vehicleConfig, controller);
-    logger.info(`US Vehicle ${this.vehicleConfig.id} created`);
+    logger.debug(`US Vehicle ${this.vehicleConfig.id} created`);
   }
 
   private getDefaultHeaders(): RequestHeaders {
@@ -57,14 +56,16 @@ export default class AmericanVehicle extends Vehicle {
       return Promise.reject('Failed to get odometer reading!');
     }
     const data = JSON.parse(response.body);
-    const foundVehicle = data.enrolledVehicleDetails.find((item) => {
+    const foundVehicle = data.enrolledVehicleDetails.find(item => {
       return item.vehicleDetails.vin === this.vin();
     });
 
-    return Promise.resolve({
+    this._odometer = {
       value: foundVehicle.vehicleDetails.odometer,
       unit: 0, // unsure what this is :P
-    });
+    };
+
+    return Promise.resolve(this._odometer);
   }
 
   /**
@@ -163,7 +164,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     const { vehicleStatus } = JSON.parse(response.body);
-    this._stats = vehicleStatus;
+    this._status = vehicleStatus;
 
     return Promise.resolve({
       chassis: {
@@ -196,7 +197,10 @@ export default class AmericanVehicle extends Vehicle {
         ignition: vehicleStatus.engine,
         adaptiveCruiseControl: vehicleStatus.acc,
         range: vehicleStatus.dte.value,
+        charging: vehicleStatus?.evStatus?.batteryCharge,
+        batteryCharge: vehicleStatus?.battery?.batSoc,
       },
+      raw: vehicleStatus,
     });
   }
 

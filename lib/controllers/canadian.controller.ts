@@ -1,17 +1,11 @@
 import got from 'got';
-import {
-  AccountInfo,
-  BlueLinkyConfig,
-  Session,
-  PreferedDealer,
-} from '../interfaces/common.interfaces';
+import { AccountInfo, BlueLinkyConfig, PreferedDealer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
-import { REGIONS } from '../constants';
 import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 
 export class CanadianController extends SessionController {
@@ -23,26 +17,7 @@ export class CanadianController extends SessionController {
     logger.debug('CA Controller created');
   }
 
-  session: Session = {
-    accessToken: '',
-    refreshToken: '',
-    controlToken: '',
-    deviceId: '',
-    tokenExpiresAt: 0,
-  };
-
   private vehicles: Array<CanadianVehicle> = [];
-
-  public config: BlueLinkyConfig = {
-    username: undefined,
-    password: undefined,
-    region: REGIONS.CA,
-    autoLogin: true,
-    pin: undefined,
-    vin: undefined,
-    vehicleId: undefined,
-  };
-
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
   public async refreshAccessToken(): Promise<string> {
@@ -66,8 +41,8 @@ export class CanadianController extends SessionController {
     logger.info('Begin login request');
     try {
       const response = await this.request(CA_ENDPOINTS.login, {
-        loginId: this.config.username,
-        password: this.config.password,
+        loginId: this.userConfig.username,
+        password: this.userConfig.password,
       });
 
       this.session.accessToken = response.result.accessToken;
@@ -183,7 +158,7 @@ export class CanadianController extends SessionController {
 
       return Promise.resolve(response.body);
     } catch (err) {
-      console.error(err);
+      logger.error(err.message);
       return Promise.reject('error: ' + err);
     }
   }

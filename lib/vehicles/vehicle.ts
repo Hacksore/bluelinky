@@ -20,6 +20,10 @@ export abstract class Vehicle {
   abstract async location(): Promise<VehicleLocation | null>;
   abstract async odometer(): Promise<Odometer | null>;
 
+  public _status: VehicleStatus | null = null;
+  public _location: VehicleLocation | null = null;
+  public _odometer: Odometer | null = null;
+
   public userConfig: BlueLinkyConfig = {
     username: undefined,
     password: undefined,
