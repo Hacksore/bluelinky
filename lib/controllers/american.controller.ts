@@ -1,40 +1,21 @@
-import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
+import { BlueLinkyConfig } from './../interfaces/common.interfaces';
 import got from 'got';
 
 import { Vehicle } from '../vehicles/vehicle';
 import AmericanVehicle from '../vehicles/americanVehicle';
-import SessionController from './controller';
+import { SessionController } from './controller';
 
 import logger from '../logger';
 import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
-import { REGIONS } from '../constants';
 
-// const got = _got;
-export class AmericanController implements SessionController {
-  constructor(config: BlueLinkyConfig) {
-    this.config = config;
-    logger.info(`${this.config.region} Controller created`);
+import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
+export class AmericanController extends SessionController {
+  constructor(userConfig: BlueLinkyConfig) {
+    super(userConfig);
+    logger.debug(`US Controller created`);
   }
 
   private vehicles: Array<AmericanVehicle> = [];
-
-  public session: Session = {
-    accessToken: '',
-    refreshToken: '',
-    controlToken: '',
-    deviceId: '',
-    tokenExpiresAt: 0,
-  };
-
-  public config: BlueLinkyConfig = {
-    username: undefined,
-    password: undefined,
-    region: REGIONS.US,
-    autoLogin: true,
-    pin: undefined,
-    vin: undefined,
-    vehicleId: undefined,
-  };
 
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
@@ -67,11 +48,13 @@ export class AmericanController implements SessionController {
 
   public async login(): Promise<string> {
     try {
+      logger.debug('Logging in to API');
+
       const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
         method: 'POST',
         body: {
-          username: this.config.username,
-          password: this.config.password,
+          username: this.userConfig.username,
+          password: this.userConfig.password,
         },
         headers: {
           'client_secret': CLIENT_SECRET,
@@ -88,18 +71,19 @@ export class AmericanController implements SessionController {
 
       return Promise.resolve('login good');
     } catch (err) {
+      logger.debug(JSON.stringify(err.body));
       Promise.reject(err);
     }
 
     return Promise.reject('login bad');
   }
 
-  logout(): Promise<string> {
+  public async logout(): Promise<string> {
     return Promise.resolve('OK');
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
-    const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.config.username}`, {
+    const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.userConfig.username}`, {
       method: 'GET',
       headers: {
         'access_token': this.session.accessToken,
@@ -118,20 +102,20 @@ export class AmericanController implements SessionController {
       return Promise.resolve(this.vehicles);
     }
 
-    data.enrolledVehicleDetails.forEach((vehicle) => {
+    data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
 
-      const config = {
+      const vehicleConfig = {
         nickname: vehicleInfo.nickName,
+        name: vehicleInfo.nickName,
         vin: vehicleInfo.vin,
         regDate: vehicleInfo.enrollmentDate,
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
-        // unsure if this is right but the new endpoint does not seem to have gen
-        gen: vehicleInfo.modelYear > 2016 ? '2' : '1',
-        name: vehicleInfo.nickName,
-      };
-      this.vehicles.push(new AmericanVehicle(config, this));
+        generation: vehicleInfo.modelYear > 2016 ? '2' : '1',
+      } as RegisterVehicleConfig;
+
+      this.vehicles.push(new AmericanVehicle(vehicleConfig, this));
     });
 
     return Promise.resolve(this.vehicles);

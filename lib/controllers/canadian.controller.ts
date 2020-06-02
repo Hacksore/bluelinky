@@ -1,43 +1,23 @@
 import got from 'got';
-import { AccountInfo, BlueLinkyConfig, Session, PreferedDealer } from '../interfaces/common.interfaces';
+import { AccountInfo, BlueLinkyConfig, PreferedDealer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadianVehicle';
-import SessionController from './controller';
+import { SessionController } from './controller';
 
 import logger from '../logger';
-import { REGIONS } from '../constants';
+import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
 
-export class CanadianController implements SessionController {
+export class CanadianController extends SessionController {
+  private _preferredDealer: PreferedDealer | null = null;
+  private _accountInfo: AccountInfo | null = null;
 
-  private _preferredDealer: PreferedDealer | null = null
-  private _accountInfo: AccountInfo | null = null
-
-  constructor(config: BlueLinkyConfig) {
-    this.config = config;
-    logger.info(`${this.config.region} Controller created`);
+  constructor(userConfig: BlueLinkyConfig) {
+    super(userConfig);
+    logger.debug('CA Controller created');
   }
 
-  session: Session = {
-    accessToken: '',
-    refreshToken: '',
-    controlToken: '',
-    deviceId: '',
-    tokenExpiresAt: 0,
-  };
-
   private vehicles: Array<CanadianVehicle> = [];
-
-  public config: BlueLinkyConfig = {
-    username: undefined,
-    password: undefined,
-    region: REGIONS.CA,
-    autoLogin: true,
-    pin: undefined,
-    vin: undefined,
-    vehicleId: undefined
-  };
-
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
   public async refreshAccessToken(): Promise<string> {
@@ -61,8 +41,8 @@ export class CanadianController implements SessionController {
     logger.info('Begin login request');
     try {
       const response = await this.request(CA_ENDPOINTS.login, {
-        loginId: this.config.username,
-        password: this.config.password,
+        loginId: this.userConfig.username,
+        password: this.userConfig.password,
       });
 
       this.session.accessToken = response.result.accessToken;
@@ -91,21 +71,29 @@ export class CanadianController implements SessionController {
       }
 
       data.vehicles.forEach(vehicle => {
-        const config = {
-          pin: this.config.pin,
-          vehicleId: vehicle.vehicleId,
-          vin: vehicle.vin,
+        const vehicleConfig = {
           nickname: vehicle.nickName,
-          defaultVehicle: vehicle.defaultVehicle,
-          modelName: vehicle.modelName,
-          modelYear: vehicle.modelYear,
-          fuelKindCode: vehicle.fuelKindCode,
-          genType: vehicle.genType,
-          subscriptionEndDate: vehicle.subscriptionEndDate,
-          mileageForNextService: vehicle.mileageForNextService,
-          daysForNextService: vehicle.daysForNextService,
-        };
-        this.vehicles.push(new CanadianVehicle(config, this));
+          name: vehicle.nickName,
+          vin: vehicle.vin,
+          regDate: vehicle.enrollmentDate,
+          brandIndicator: vehicle.brandIndicator,
+          regId: vehicle.regid,
+          generation: vehicle.genType,
+          // pin: this.config.pin,
+          // vehicleId: vehicle.vehicleId,
+          // vin: vehicle.vin,
+          // nickname: vehicle.nickName,
+          // defaultVehicle: vehicle.defaultVehicle,
+          // modelName: vehicle.modelName,
+          // modelYear: vehicle.modelYear,
+          // fuelKindCode: vehicle.fuelKindCode,
+          // genType: vehicle.genType,
+          // subscriptionEndDate: vehicle.subscriptionEndDate,
+          // mileageForNextService: vehicle.mileageForNextService,
+          // daysForNextService: vehicle.daysForNextService,
+        } as RegisterVehicleConfig;
+
+        this.vehicles.push(new CanadianVehicle(vehicleConfig, this));
       });
 
       return Promise.resolve(this.vehicles);
@@ -122,7 +110,7 @@ export class CanadianController implements SessionController {
     logger.info('Begin myAccount request');
     try {
       const response = await this.request(CA_ENDPOINTS.myAccount, {});
-      this._accountInfo = response.result as AccountInfo
+      this._accountInfo = response.result as AccountInfo;
       return Promise.resolve(this._accountInfo);
     } catch (err) {
       return Promise.reject('error: ' + err);
@@ -133,7 +121,7 @@ export class CanadianController implements SessionController {
     logger.info('Begin preferedDealer request');
     try {
       const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
-      this._preferredDealer = response.result as PreferedDealer
+      this._preferredDealer = response.result as PreferedDealer;
       return Promise.resolve(this._preferredDealer);
     } catch (err) {
       return Promise.reject('error: ' + err);
@@ -170,7 +158,7 @@ export class CanadianController implements SessionController {
 
       return Promise.resolve(response.body);
     } catch (err) {
-      console.error(err);
+      logger.error(err.message);
       return Promise.reject('error: ' + err);
     }
   }

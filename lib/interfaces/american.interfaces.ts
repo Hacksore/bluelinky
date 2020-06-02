@@ -16,16 +16,10 @@ export interface TokenResponse {
 }
 
 export interface VehicleConfig {
-  vin: string|null;
-  pin: string|null;
-  token: string|null;
+  vin: string | null;
+  pin: string | null;
+  token: string | null;
   bluelinky: BlueLinky;
-}
-
-export interface RegisterVehicleConfig {
-  vin: string;
-  pin: string;
-  region: string|null;
 }
 
 export interface AmericanEndpoints {
@@ -43,13 +37,13 @@ export interface AmericanEndpoints {
 }
 
 export interface RequestHeaders {
-  'access_token': string;
+  'access_token': string|undefined;
   'client_id': string;
   'Host': string;
   'User-Agent': string;
   'registrationId': string;
   'gen': string;
-  'username': string;
+  'username': string|undefined;
   'vin': string;
   'APPCLOUD-VIN': string;
   'Language': string;
@@ -57,6 +51,6 @@ export interface RequestHeaders {
   'encryptFlag': string;
   'from': string;
   'brandIndicator': string;
-  'bluelinkservicepin': string;
+  'bluelinkservicepin': string|undefined;
   'offset': string;
 }
