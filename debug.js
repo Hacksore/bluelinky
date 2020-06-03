@@ -20,7 +20,7 @@ const apiCalls = [
 let vehicle;
 const { username, password, vin, pin, deviceUuid } = config;
 
-const onReadyHandler = (vehicles) => {
+const onReadyHandler = vehicles => {
   vehicle = vehicles[0];
 };
 
@@ -34,7 +34,7 @@ const askForRegionInput = () => {
         choices: ['US', 'EU', 'CA'],
       },
     ])
-    .then((answers) => {
+    .then(answers => {
       if (answers.command == 'exit') {
         return;
       } else {
@@ -44,7 +44,7 @@ const askForRegionInput = () => {
     });
 };
 
-const createInstance = (region) => {
+const createInstance = region => {
   const client = new BlueLinky({
     username,
     password,
@@ -66,7 +66,7 @@ function askForCommandInput() {
         choices: apiCalls,
       },
     ])
-    .then((answers) => {
+    .then(answers => {
       if (answers.command == 'exit') {
         return;
       } else {
@@ -89,11 +89,13 @@ async function performCommand(command) {
         console.log('odometer', JSON.stringify(odometer, null, 2));
         break;
       case 'status':
-        const status = await vehicle.status(false);
+        const status = await vehicle.status({
+          parsed: true,
+        });
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
       case 'statusR':
-        const statusR = await vehicle.status(true);
+        const statusR = await vehicle.status({ refresh: true });
         console.log('status remote : ' + JSON.stringify(statusR, null, 2));
         break;
       case 'start':

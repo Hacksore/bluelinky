@@ -227,16 +227,14 @@ export interface LegacyVehicleLocation {
   time: string;
 }
 
-export interface Odometer {
+export interface VehicleOdometer {
   unit: number;
   value: number;
 }
 
-// not used: ?
-export interface VehicleStatusReponse {
-  vehicleStatus: VehicleStatus;
-  vehicleLocation: VehicleLocation;
-  odometer: Odometer;
+export interface VehicleStatusOptions {
+  refresh: boolean;
+  parsed: boolean;
 }
 
 // Vehicle Next Service
@@ -261,7 +259,7 @@ export interface VehicleCommandResponse {
   responseDesc: string;
 }
 
-export interface StartConfig {
+export interface VehicleStartOptions {
   airCtrl?: boolean | string;
   igniOnDuration: number;
   airTempvalue?: number;
@@ -269,14 +267,14 @@ export interface StartConfig {
   heating1?: boolean | string;
 }
 
-export interface ClimateConfig {
+export interface VehicleClimateOptions {
   defrost: boolean;
   windscreenHeating: boolean;
   temperature: number;
   unit: string;
 }
 
-export interface RegisterVehicleConfig {
+export interface VehicleRegisterOptions {
   nickname: string;
   name: string;
   vin: string;

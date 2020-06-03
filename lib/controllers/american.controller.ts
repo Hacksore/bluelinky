@@ -8,7 +8,7 @@ import { SessionController } from './controller';
 import logger from '../logger';
 import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
 
-import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
+import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 export class AmericanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
@@ -113,7 +113,7 @@ export class AmericanController extends SessionController {
         brandIndicator: vehicleInfo.brandIndicator,
         regId: vehicleInfo.regid,
         generation: vehicleInfo.modelYear > 2016 ? '2' : '1',
-      } as RegisterVehicleConfig;
+      } as VehicleRegisterOptions;
 
       this.vehicles.push(new AmericanVehicle(vehicleConfig, this));
     });

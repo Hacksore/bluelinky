@@ -1,16 +1,18 @@
 import got from 'got';
 import logger from '../logger';
 
-import { REGIONS } from '../constants';
+import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
 import { SessionController } from '../controllers/controller';
 
 import {
-  StartConfig,
+  VehicleStartOptions,
   VehicleStatus,
   VehicleLocation,
-  RegisterVehicleConfig,
-  Odometer,
+  VehicleRegisterOptions,
+  VehicleOdometer,
+  RawVehicleStatus,
+  VehicleStatusOptions,
 } from '../interfaces/common.interfaces';
 import { RequestHeaders } from '../interfaces/american.interfaces';
 
@@ -20,7 +22,7 @@ import { URLSearchParams } from 'url';
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
 
-  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
     super(vehicleConfig, controller);
     logger.debug(`US Vehicle ${this.vehicleConfig.id} created`);
   }
@@ -46,7 +48,7 @@ export default class AmericanVehicle extends Vehicle {
     };
   }
 
-  public async odometer(): Promise<Odometer | null> {
+  public async odometer(): Promise<VehicleOdometer | null> {
     const response = await this._request(`/ac/v2/enrollment/details/${this.userConfig.username}`, {
       method: 'GET',
       headers: { ...this.getDefaultHeaders() },
@@ -94,7 +96,7 @@ export default class AmericanVehicle extends Vehicle {
     });
   }
 
-  public async start(startConfig: StartConfig): Promise<string> {
+  public async start(startConfig: VehicleStartOptions): Promise<string> {
     const mergedConfig = {
       ...{
         airCtrl: false,
@@ -154,19 +156,25 @@ export default class AmericanVehicle extends Vehicle {
     return Promise.reject('Failed to stop vehicle!');
   }
 
-  public async status(refresh = false): Promise<VehicleStatus> {
+  public async status(
+    input: VehicleStatusOptions
+  ): Promise<VehicleStatus | RawVehicleStatus | null> {
+    const statusConfig = {
+      ...DEFAULT_VEHICLE_STATUS_OPTIONS,
+      ...input,
+    };
+
+    logger.debug('in status method: ' + JSON.stringify(statusConfig));
     const response = await this._request('/ac/v2/rcs/rvs/vehicleStatus', {
       method: 'GET',
       headers: {
-        'REFRESH': refresh.toString(),
+        'REFRESH': statusConfig.refresh.toString(),
         ...this.getDefaultHeaders(),
       },
     });
 
     const { vehicleStatus } = JSON.parse(response.body);
-    this._status = vehicleStatus;
-
-    return Promise.resolve({
+    const parsedStatus = {
       chassis: {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
@@ -200,8 +208,12 @@ export default class AmericanVehicle extends Vehicle {
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
       },
-      raw: vehicleStatus,
-    });
+    };
+
+    this._status = input.parsed ? parsedStatus : vehicleStatus;
+    logger.debug('conf: ' + JSON.stringify(input));
+
+    return Promise.resolve(this._status);
   }
 
   public async unlock(): Promise<string> {

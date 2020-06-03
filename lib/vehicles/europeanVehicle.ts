@@ -1,10 +1,12 @@
-import { REGIONS, EU_BASE_URL } from '../constants';
+import { REGIONS, EU_BASE_URL, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import {
   VehicleStatus,
-  Odometer,
+  VehicleOdometer,
   VehicleLocation,
-  ClimateConfig,
-  RegisterVehicleConfig,
+  VehicleClimateOptions,
+  VehicleRegisterOptions,
+  VehicleStatusOptions,
+  RawVehicleStatus,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -16,7 +18,7 @@ import { getTempCode } from '../util';
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
 
-  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: EuropeanController) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: EuropeanController) {
     super(vehicleConfig, controller);
     logger.debug(`EU Vehicle ${this.vehicleConfig.id} created`);
   }
@@ -32,7 +34,7 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
-  public async start(config: ClimateConfig): Promise<string> {
+  public async start(config: VehicleClimateOptions): Promise<string> {
     await this.checkControlToken();
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
@@ -146,8 +148,16 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.reject('Something went wrong!');
   }
 
-  public async status(): Promise<VehicleStatus> {
+  public async status(
+    input: VehicleStatusOptions
+  ): Promise<VehicleStatus | RawVehicleStatus | null> {
+    const statusConfig = {
+      ...DEFAULT_VEHICLE_STATUS_OPTIONS,
+      ...input,
+    };
+
     await this.checkControlToken();
+
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
       {
@@ -162,7 +172,7 @@ export default class EuropeanVehicle extends Vehicle {
     );
 
     const vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
-    this._status = {
+    const parsedStatus = {
       chassis: {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
@@ -199,10 +209,12 @@ export default class EuropeanVehicle extends Vehicle {
       raw: vehicleStatus,
     };
 
+    this._status = input.parsed ? parsedStatus : vehicleStatus;
+
     return Promise.resolve(this._status);
   }
 
-  public async odometer(): Promise<Odometer | null> {
+  public async odometer(): Promise<VehicleOdometer | null> {
     await this.checkControlToken();
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
@@ -217,7 +229,7 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as Odometer;
+    this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
     return Promise.resolve(this._odometer);
   }
 

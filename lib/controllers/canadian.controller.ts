@@ -6,7 +6,7 @@ import CanadianVehicle from '../vehicles/canadianVehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
-import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
+import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 
 export class CanadianController extends SessionController {
   private _preferredDealer: PreferedDealer | null = null;
@@ -91,7 +91,7 @@ export class CanadianController extends SessionController {
           // subscriptionEndDate: vehicle.subscriptionEndDate,
           // mileageForNextService: vehicle.mileageForNextService,
           // daysForNextService: vehicle.daysForNextService,
-        } as RegisterVehicleConfig;
+        } as VehicleRegisterOptions;
 
         this.vehicles.push(new CanadianVehicle(vehicleConfig, this));
       });

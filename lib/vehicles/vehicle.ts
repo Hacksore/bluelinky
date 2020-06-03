@@ -1,28 +1,35 @@
 import {
   VehicleStatus,
   VehicleLocation,
-  Odometer,
-  ClimateConfig,
-  RegisterVehicleConfig,
+  VehicleOdometer,
+  VehicleClimateOptions,
+  VehicleRegisterOptions,
 } from '../interfaces/common.interfaces';
 
-import { StartConfig, BlueLinkyConfig } from '../interfaces/common.interfaces';
+import {
+  VehicleStartOptions,
+  BlueLinkyConfig,
+  RawVehicleStatus,
+  VehicleStatusOptions,
+} from '../interfaces/common.interfaces';
 import { SessionController } from '../controllers/controller';
 import { REGIONS } from '../constants';
 
 export abstract class Vehicle {
   // methods to override in each region vehicle
-  abstract async status(refresh: boolean): Promise<VehicleStatus>;
+  abstract async status(
+    input: VehicleStatusOptions
+  ): Promise<VehicleStatus | RawVehicleStatus | null>;
   abstract async unlock(): Promise<string>;
   abstract async lock(): Promise<string>;
-  abstract async start(config: ClimateConfig | StartConfig): Promise<string>;
+  abstract async start(config: VehicleClimateOptions | VehicleStartOptions): Promise<string>;
   abstract async stop(): Promise<string>;
   abstract async location(): Promise<VehicleLocation | null>;
-  abstract async odometer(): Promise<Odometer | null>;
+  abstract async odometer(): Promise<VehicleOdometer | null>;
 
-  public _status: VehicleStatus | null = null;
+  public _status: VehicleStatus | RawVehicleStatus | null = null;
   public _location: VehicleLocation | null = null;
-  public _odometer: Odometer | null = null;
+  public _odometer: VehicleOdometer | null = null;
 
   public userConfig: BlueLinkyConfig = {
     username: undefined,
@@ -34,7 +41,7 @@ export abstract class Vehicle {
     vehicleId: undefined,
   };
 
-  constructor(public vehicleConfig: RegisterVehicleConfig, public controller: SessionController) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
     this.userConfig = controller.userConfig;
   }
 

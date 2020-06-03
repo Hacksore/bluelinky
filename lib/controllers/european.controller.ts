@@ -11,7 +11,7 @@ import logger from '../logger';
 import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
-import { RegisterVehicleConfig } from '../interfaces/common.interfaces';
+import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
@@ -185,7 +185,7 @@ export class EuropeanController extends SessionController {
         // id: v.vehicleId,
         vin: vehicleProfile.vinInfo[0].basic.vin,
         generation: vehicleProfile.vinInfo[0].basic.modelYear,
-      } as RegisterVehicleConfig;
+      } as VehicleRegisterOptions;
 
       this.vehicles.push(new EuropeanVehicle(vehicleConfig, this));
       logger.debug(`Added vehicle ${vehicleConfig.id}`);

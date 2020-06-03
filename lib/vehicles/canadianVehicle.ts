@@ -1,11 +1,11 @@
 import got from 'got';
 import logger from '../logger';
 
-import { REGIONS } from '../constants';
+import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import {
-  StartConfig,
+  VehicleStartOptions,
   VehicleFeatures,
   VehicleFeaturesModel,
   VehicleInfo,
@@ -13,7 +13,9 @@ import {
   VehicleLocation,
   VehicleNextService,
   VehicleStatus,
-  Odometer,
+  VehicleOdometer,
+  VehicleStatusOptions,
+  RawVehicleStatus,
 } from '../interfaces/common.interfaces';
 
 import { Vehicle } from './vehicle';
@@ -52,13 +54,56 @@ export default class CanadianVehicle extends Vehicle {
       return Promise.reject('error: ' + err);
     }
   }
-
-  public async status(refresh = false): Promise<VehicleStatus> {
-    logger.debug('Begin status request, polling car: ' + refresh);
+  public async status(
+    input: VehicleStatusOptions
+  ): Promise<VehicleStatus | RawVehicleStatus | null> {
+    const statusConfig = {
+      ...DEFAULT_VEHICLE_STATUS_OPTIONS,
+      ...input,
+    };
+    logger.debug('Begin status request, polling car: ' + input.refresh);
     try {
-      const endpoint = refresh ? CA_ENDPOINTS.remoteStatus : CA_ENDPOINTS.status;
+      const endpoint = statusConfig.refresh ? CA_ENDPOINTS.remoteStatus : CA_ENDPOINTS.status;
       const response = await this.request(endpoint, {});
-      this._status = response.result as VehicleStatus;
+      const vehicleStatus = response.result;
+
+      const parsedStatus = {
+        chassis: {
+          hoodOpen: vehicleStatus.hoodOpen,
+          trunkOpen: vehicleStatus.trunkOpen,
+          doors: {
+            frontRight: !!vehicleStatus.doorOpen.frontRight,
+            frontLeft: !!vehicleStatus.doorOpen.frontLeft,
+            backLeft: !!vehicleStatus.doorOpen.backLeft,
+            backRight: !!vehicleStatus.doorOpen.backRight,
+          },
+          tirePressureWarningLamp: {
+            rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearLeft,
+            frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontLeft,
+            frontRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontRight,
+            rearRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearRight,
+            all: !!vehicleStatus.tirePressureLamp.trunkOpenStatus,
+          },
+        },
+        climate: {
+          active: vehicleStatus.airCtrlOn,
+          steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+          sideMirrorHeat: false,
+          rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
+          defrost: vehicleStatus.defrost,
+          temperatureSetpoint: vehicleStatus.airTemp.value,
+          temperatureUnit: vehicleStatus.airTemp.unit,
+        },
+        engine: {
+          ignition: vehicleStatus.engine,
+          adaptiveCruiseControl: vehicleStatus.acc,
+          range: vehicleStatus.dte.value,
+          charging: vehicleStatus?.evStatus?.batteryCharge,
+          batteryCharge: vehicleStatus?.battery?.batSoc,
+        },
+      };
+
+      this._status = input.parsed ? parsedStatus : vehicleStatus;
       return Promise.resolve(this._status);
     } catch (err) {
       return Promise.reject('error: ' + err);
@@ -109,7 +154,7 @@ export default class CanadianVehicle extends Vehicle {
   defrost: Boolean,  // side mirrors & rear defrost
   airTempvalue: number | null  // temp in degrees for clim and heating 17-27
   */
-  public async start(startConfig: StartConfig): Promise<string> {
+  public async start(startConfig: VehicleStartOptions): Promise<string> {
     logger.debug('Begin startClimate request');
     try {
       const body = {
@@ -175,7 +220,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: @Seb to take a look at doing this
-  public odometer(): Promise<Odometer | null> {
+  public odometer(): Promise<VehicleOdometer | null> {
     throw new Error('Method not implemented.');
   }
 
