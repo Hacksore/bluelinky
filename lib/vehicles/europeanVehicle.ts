@@ -158,6 +158,19 @@ export default class EuropeanVehicle extends Vehicle {
 
     await this.checkControlToken();
 
+    if(statusConfig.refresh){
+      await got(`${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        json: true,
+      })
+    }
+
     const response = await got(
       `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
       {
@@ -202,11 +215,10 @@ export default class EuropeanVehicle extends Vehicle {
       engine: {
         ignition: vehicleStatus.engine,
         adaptiveCruiseControl: vehicleStatus.acc,
-        range: vehicleStatus.dte.value,
+        range: vehicleStatus.evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
-      },
-      raw: vehicleStatus,
+      }
     };
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
