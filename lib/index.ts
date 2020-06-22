@@ -71,7 +71,7 @@ class BlueLinky extends EventEmitter {
       this.emit('ready', this.vehicles);
       return response;
     } catch (error) {
-      return error.message;
+      return error;
     }
   }
 

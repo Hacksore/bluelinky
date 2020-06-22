@@ -1,4 +1,4 @@
-import { REGIONS, EU_BASE_URL, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
+import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import {
   VehicleStatus,
   VehicleOdometer,
@@ -14,6 +14,7 @@ import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { getTempCode } from '../util';
+import { EU_BASE_URL } from '../constants/europe';
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
