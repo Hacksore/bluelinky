@@ -184,6 +184,7 @@ export default class EuropeanVehicle extends Vehicle {
       chassis: {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
+        locked: vehicleStatus.doorLock,
         doors: {
           frontRight: !!vehicleStatus.doorOpen.frontRight,
           frontLeft: !!vehicleStatus.doorOpen.frontLeft,
