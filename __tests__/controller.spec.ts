@@ -61,6 +61,7 @@ describe('EuropeanController', () => {
 
   it('call getVehicles and check length', async () => {
     const controller = getController('EU');
+    controller.session.accessToken = 'MockToken';
 
     (got as any).mockReturnValueOnce({
       body: {
@@ -73,7 +74,8 @@ describe('EuropeanController', () => {
               brandIndicator: 'H',
               regId: '123123',
               gen: '2',
-              name: 'Car',      
+              name: 'Car',
+              id: '12345', 
             },
           ],
         },
@@ -88,7 +90,8 @@ describe('EuropeanController', () => {
             { 
               basic: {
                 modelYear: '2019',
-                vin: '5555'
+                vin: '5555',
+                id: '123456'
               }
             }
           ],

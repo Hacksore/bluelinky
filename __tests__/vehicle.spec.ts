@@ -1,13 +1,13 @@
 /* eslint-disable */
 import got from 'got';
 
-import AmericanVehicle from '../lib/vehicles/americanVehicle';
+import AmericanVehicle from '../lib/vehicles/american.vehicle';
 import { AmericanController } from '../lib/controllers/american.controller';
 
-import EuropeanVehicle from '../lib/vehicles/europeanVehicle';
+import EuropeanVehicle from '../lib/vehicles/european.vehicle';
 import { EuropeanController } from '../lib/controllers/european.controller';
 
-import CanadianVehicle from '../lib/vehicles/canadianVehicle';
+import CanadianVehicle from '../lib/vehicles/canadian.vehicle';
 import { CanadianController } from '../lib/controllers/canadian.controller';
 
 jest.mock('got');
