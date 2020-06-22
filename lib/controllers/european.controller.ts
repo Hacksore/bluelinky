@@ -1,6 +1,5 @@
-import { Session } from './../../dist/interfaces/common.interfaces.d';
 import { EU_CONSTANTS, EU_BASE_URL } from './../constants/europe';
-import { BlueLinkyConfig } from './../interfaces/common.interfaces';
+import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
 import { ALL_ENDPOINTS } from '../constants';
