@@ -46,7 +46,8 @@ export interface VehicleStatus {
   chassis: {
     hoodOpen: boolean;
     trunkOpen: boolean;
-    doors: {
+    locked: boolean;
+    openDoors: {
       frontRight: boolean;
       frontLeft: boolean;
       backLeft: boolean;
@@ -60,8 +61,6 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
-
-  raw: RawVehicleStatus;
 }
 
 // TODO: remove

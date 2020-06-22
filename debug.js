@@ -22,6 +22,7 @@ const { username, password, vin, pin, deviceUuid } = config;
 
 const onReadyHandler = vehicles => {
   vehicle = vehicles[0];
+  askForCommandInput();
 };
 
 const askForRegionInput = () => {
@@ -38,8 +39,9 @@ const askForRegionInput = () => {
       if (answers.command == 'exit') {
         return;
       } else {
+        console.log(answers)
+        console.log('Logging in...');
         createInstance(answers.region);
-        askForCommandInput();
       }
     });
 };
@@ -90,12 +92,16 @@ async function performCommand(command) {
         break;
       case 'status':
         const status = await vehicle.status({
+          refresh: false,
           parsed: true,
         });
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
       case 'statusR':
-        const statusR = await vehicle.status({ refresh: true });
+        const statusR = await vehicle.status({
+          refresh: true,
+          parsed: true
+        });
         console.log('status remote : ' + JSON.stringify(statusR, null, 2));
         break;
       case 'start':
@@ -124,7 +130,7 @@ async function performCommand(command) {
 
     askForCommandInput();
   } catch (err) {
-    // console.log(err.body);
+    console.log(err);
   }
 }
 

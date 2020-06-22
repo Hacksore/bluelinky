@@ -1,10 +1,10 @@
-import { EU_CONSTANTS } from './../constants';
-import { BlueLinkyConfig } from './../interfaces/common.interfaces';
+import { EU_CONSTANTS, EU_BASE_URL } from './../constants/europe';
+import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
-import { ALL_ENDPOINTS, EU_BASE_URL } from '../constants';
+import { ALL_ENDPOINTS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
-import EuropeanVehicle from '../vehicles/europeanVehicle';
+import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
@@ -20,6 +20,15 @@ export class EuropeanController extends SessionController {
 
     this.session.deviceId = this.uuidv4();
   }
+
+  session: Session = {
+    accessToken: undefined,
+    refreshToken: undefined,
+    controlToken: undefined,
+    deviceId: this.uuidv4(),
+    tokenExpiresAt: 0,
+    controlTokenExpiresAt: 0
+  };
 
   private vehicles: Array<EuropeanVehicle> = [];
 
@@ -75,16 +84,18 @@ export class EuropeanController extends SessionController {
           password: this.userConfig.password,
         },
         cookieJar,
+      }).catch(err => {
+        logger.debug(`Login failed: ${err}`);
+        Promise.reject(`Login failed: ${err}`);
       });
 
-      const queryString = authCodeResponse.body.redirectUrl.split('?')[1];
-      const urlParams = new URLSearchParams(queryString);
-      const authToken = urlParams.get('code');
-
-      if (authToken !== null) {
-        this.session.refreshToken = authToken;
-      } else {
-        throw new Error('@EuropeControllerLogin: AuthCode was not found');
+      if(authCodeResponse){
+        const regexMatch = /.*code=(\w*)&.*/g.exec(authCodeResponse.body.redirectUrl);
+        if(regexMatch !== null){
+          this.session.refreshToken = regexMatch[1];
+        } else {
+          throw new Error('@EuropeControllerLogin: AuthCode was not found');
+        }
       }
 
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
@@ -105,14 +116,21 @@ export class EuropeanController extends SessionController {
           uuid: this.session.deviceId,
         },
         json: true,
+      }).catch(err => {
+        logger.debug(`GCM Registration failed: ${err}`);
+        Promise.reject(`GCM Registration failed: ${err}`);
       });
 
+      if(notificationReponse)
       this.session.deviceId = notificationReponse.body.resMsg.deviceId;
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
       formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
-      formData.append('code', this.session.refreshToken);
+
+      if(this.session.refreshToken){
+        formData.append('code', this.session.refreshToken);
+      }
 
       const response = await got(ALL_ENDPOINTS.EU.token, {
         method: 'POST',
@@ -128,10 +146,15 @@ export class EuropeanController extends SessionController {
         },
         body: formData.toString(),
         cookieJar,
+      }).catch(err => {
+        logger.debug(`Get token failed: ${err}`);
+        Promise.reject(`Get token failed: ${err}`);
       });
 
-      const responseBody = JSON.parse(response.body);
-      this.session.accessToken = 'Bearer ' + responseBody.access_token;
+      if(response){
+        const responseBody = JSON.parse(response.body);
+        this.session.accessToken = 'Bearer ' + responseBody.access_token;
+      }
 
       return Promise.resolve('Login success');
     } catch (err) {
@@ -182,7 +205,7 @@ export class EuropeanController extends SessionController {
         regDate: v.regDate,
         // type: v.type,
         brandIndicator: 'H',
-        // id: v.vehicleId,
+        id: v.vehicleId,
         vin: vehicleProfile.vinInfo[0].basic.vin,
         generation: vehicleProfile.vinInfo[0].basic.modelYear,
       } as VehicleRegisterOptions;

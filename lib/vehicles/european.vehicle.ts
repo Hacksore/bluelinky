@@ -1,4 +1,4 @@
-import { REGIONS, EU_BASE_URL, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
+import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import {
   VehicleStatus,
   VehicleOdometer,
@@ -14,6 +14,7 @@ import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { getTempCode } from '../util';
+import { EU_BASE_URL } from '../constants/europe';
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -158,8 +159,10 @@ export default class EuropeanVehicle extends Vehicle {
 
     await this.checkControlToken();
 
+    const cacheString = statusConfig.refresh ? '' : '/latest';
+
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`,
       {
         method: 'GET',
         headers: {
@@ -171,11 +174,18 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    const vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+    let vehicleStatus;
+
+    if(statusConfig.refresh)
+      vehicleStatus = response.body.resMsg;
+    else
+      vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+
     const parsedStatus = {
       chassis: {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
+        locked: vehicleStatus.doorLock,
         doors: {
           frontRight: !!vehicleStatus.doorOpen.frontRight,
           frontLeft: !!vehicleStatus.doorOpen.frontLeft,
@@ -202,11 +212,10 @@ export default class EuropeanVehicle extends Vehicle {
       engine: {
         ignition: vehicleStatus.engine,
         adaptiveCruiseControl: vehicleStatus.acc,
-        range: vehicleStatus.dte.value,
+        range: vehicleStatus.evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
-      },
-      raw: vehicleStatus,
+      }
     };
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
@@ -236,7 +245,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async location(): Promise<VehicleLocation> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
       {
         method: 'GET',
         headers: {
@@ -248,7 +257,7 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    const data = response.body.resMsg.vehicleStatusInfo.vehicleLocation;
+    const data = response.body.resMsg.gpsDetail;
     this._location = {
       latitude: data.coord.lat,
       longitude: data.coord.lon,

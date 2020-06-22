@@ -178,7 +178,8 @@ export default class AmericanVehicle extends Vehicle {
       chassis: {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
-        doors: {
+        locked: vehicleStatus.doorLock,
+        openDoors: {
           frontRight: !!vehicleStatus.doorOpen.frontRight,
           frontLeft: !!vehicleStatus.doorOpen.frontLeft,
           backLeft: !!vehicleStatus.doorOpen.backLeft,
@@ -208,7 +209,7 @@ export default class AmericanVehicle extends Vehicle {
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
       },
-    };
+    } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
     logger.debug('conf: ' + JSON.stringify(input));
