@@ -2,7 +2,7 @@ import { BlueLinkyConfig } from './../interfaces/common.interfaces';
 import got from 'got';
 
 import { Vehicle } from '../vehicles/vehicle';
-import AmericanVehicle from '../vehicles/americanVehicle';
+import AmericanVehicle from '../vehicles/american.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';

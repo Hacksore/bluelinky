@@ -5,7 +5,7 @@ import * as pr from 'push-receiver';
 import got from 'got';
 import { ALL_ENDPOINTS, EU_BASE_URL } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
-import EuropeanVehicle from '../vehicles/europeanVehicle';
+import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';

@@ -2,7 +2,7 @@ import got from 'got';
 import { AccountInfo, BlueLinkyConfig, PreferedDealer } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
-import CanadianVehicle from '../vehicles/canadianVehicle';
+import CanadianVehicle from '../vehicles/canadian.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
