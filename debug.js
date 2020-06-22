@@ -98,7 +98,10 @@ async function performCommand(command) {
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
       case 'statusR':
-        const statusR = await vehicle.status({ refresh: true, parsed: true });
+        const statusR = await vehicle.status({
+          refresh: true,
+          parsed: true
+        });
         console.log('status remote : ' + JSON.stringify(statusR, null, 2));
         break;
       case 'start':
