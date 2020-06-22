@@ -179,10 +179,10 @@ export default class EuropeanVehicle extends Vehicle {
     return Promise.reject('Something went wrong!');
   }
 
-  public async status(): Promise<VehicleStatus> {
+  public async status(refresh = false): Promise<VehicleStatus> {
     await this.checkControlToken();
     const response = await got(
-      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/status/latest`,
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.config.id}/status${refresh === false ? '/latest' : ''}`,
       {
         method: 'GET',
         headers: {
