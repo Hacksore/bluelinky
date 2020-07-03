@@ -219,7 +219,8 @@ export class EuropeanController extends SessionController {
 
   // TODO: type this or replace it with a normal loop
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  async asyncForEach(array, callback): Promise<any> {
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  async asyncForEach(array: any, callback: any): Promise<any> {
     for (let index = 0; index < array.length; index++) {
       await callback(array[index], index, array);
     }

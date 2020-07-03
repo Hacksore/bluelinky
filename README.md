@@ -1,6 +1,6 @@
 # bluelinky
 
-An unoffcial API wrapper for Hyundai BlueLink
+An unoffcial nodejs API wrapper for Hyundai BlueLink
 
 [![CI](https://img.shields.io/circleci/build/github/Hacksore/bluelinky.svg)](https://circleci.com/gh/Hacksore/bluelinky/tree/master)
 [![npm](https://img.shields.io/npm/v/bluelinky.svg)](https://www.npmjs.com/package/bluelinky)
@@ -31,7 +31,7 @@ client.on('ready', async () => {
 ```
 
 ## Documentation
-Checkout out the docs [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) for more info.
+Checkout out the [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) for more info.
 
 ## Supported Features
 - Lock
@@ -43,11 +43,11 @@ Checkout out the docs [bluelinky-docs](https://hacksore.github.io/bluelinky-docs
 ## Supported Regions
 | [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) | Current Status |
 |-----------|--------------|
-| USA       | Working      |
-| Canada    | Working      |
-| Europe    | Working      |
+| USA       | ✅      |
+| Canada    | ✅      |
+| Europe    | ✅      |
 | Korea     | ▯▯▯▯▯▯  |
-| Australia | sorry m8     |
+| Australia | [See #9](https://github.com/Hacksore/bluelinky/issues/9)  |
 
 ## Show your support
 

@@ -11,12 +11,15 @@ import {
   VehicleInfo,
   VehicleInfoResponse,
   VehicleLocation,
+  VehicleRegisterOptions,
   VehicleNextService,
   VehicleStatus,
   VehicleOdometer,
   VehicleStatusOptions,
   RawVehicleStatus,
 } from '../interfaces/common.interfaces';
+
+import { SessionController } from '../controllers/controller';
 
 import { Vehicle } from './vehicle';
 
@@ -31,7 +34,7 @@ export default class CanadianVehicle extends Vehicle {
 
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
-  constructor(public vehicleConfig, public controller) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
     super(vehicleConfig, controller);
     logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
@@ -253,7 +256,7 @@ export default class CanadianVehicle extends Vehicle {
 
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  private async request(endpoint, body: object, headers: object = {}): Promise<any | null> {
+  private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
     try {
@@ -269,7 +272,7 @@ export default class CanadianVehicle extends Vehicle {
           ...headers,
         },
         body: {
-          pin: this.controller.pin,
+          pin: this.userConfig.pin,
           ...body,
         },
       });

@@ -30,7 +30,7 @@ export interface VehicleStatus {
     ignition: boolean;
     batteryCharge?: number;
     charging?: boolean;
-    timeToFullCharge?: object;
+    timeToFullCharge?: unknown;
     range: number;
     adaptiveCruiseControl: boolean;
   };
@@ -78,7 +78,7 @@ export interface RawVehicleStatus {
   airTempUnit: string;
   airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
-    batSignalReferenceValue: {};
+    batSignalReferenceValue: unknown;
     batSoc: number;
     batState: number;
     sjbDeliveryMode: number;
@@ -123,15 +123,15 @@ export interface RawVehicleStatus {
     ];
   };
   remoteIgnition: boolean;
-  seatHeaterVentInfo: {};
+  seatHeaterVentInfo: unknown;
   sleepModeCheck: boolean;
   lampWireStatus: {
-    headLamp: {};
-    stopLamp: {};
-    turnSignalLamp: {};
+    headLamp: unknown;
+    stopLamp: unknown;
+    turnSignalLamp: unknown;
   };
-  windowOpen: {};
-  engineRuntime: {};
+  windowOpen: unknown;
+  engineRuntime: unknown;
 }
 
 // Vehicle Info
