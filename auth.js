@@ -15,7 +15,7 @@ const testRegionLogin = region => {
   });
 
   client.on('ready', () => {
-    console.log(`🦮 Connected to region ${region} successfuly 😎`);
+    console.log(`🦮 Connected to ${region} successfully 😎`);
   });
 };
 
@@ -23,4 +23,6 @@ try {
   testRegionLogin(REGION_TO_TEST);
 } catch (error) {
   console.log(error);
+  // exit with an error so the build job fails
+  process.exit(1);
 }
