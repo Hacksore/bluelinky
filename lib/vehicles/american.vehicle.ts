@@ -164,7 +164,6 @@ export default class AmericanVehicle extends Vehicle {
       ...input,
     };
 
-    logger.debug('in status method: ' + JSON.stringify(statusConfig));
     const response = await this._request('/ac/v2/rcs/rvs/vehicleStatus', {
       method: 'GET',
       headers: {
@@ -212,8 +211,7 @@ export default class AmericanVehicle extends Vehicle {
     } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
-    logger.debug('conf: ' + JSON.stringify(input));
-
+ 
     return Promise.resolve(this._status);
   }
 
@@ -268,7 +266,7 @@ export default class AmericanVehicle extends Vehicle {
     }
 
     const response = await got(`${BASE_URL}/${service}`, options);
-    logger.debug(JSON.stringify(response.body));
+    logger.debug(response.body);
 
     return Promise.resolve(response);
   }

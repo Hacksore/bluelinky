@@ -8,6 +8,7 @@ import { BlueLinkyConfig, Session } from './interfaces/common.interfaces';
 import { REGIONS } from './constants';
 import { Vehicle } from './vehicles/vehicle';
 
+logger.info({test: 1})
 class BlueLinky extends EventEmitter {
   private controller: SessionController;
   private vehicles: Array<Vehicle> = [];

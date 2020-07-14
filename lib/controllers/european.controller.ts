@@ -73,24 +73,21 @@ export class EuropeanController extends SessionController {
       const cookieJar = new CookieJar();
       await got(ALL_ENDPOINTS.EU.session, { cookieJar });
 
+      // required by the api to set lang
+      await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: '{"lang":"en"}', cookieJar });
+
       const authCodeResponse = await got(ALL_ENDPOINTS.EU.login, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         json: true,
         body: {
-          email: this.userConfig.username,
-          password: this.userConfig.password,
+          "email": this.userConfig.username,
+          "password": this.userConfig.password,
         },
         cookieJar,
-      }).catch(err => {
-        logger.debug(`Login failed: ${err}`);
-        Promise.reject(`Login failed: ${err}`);
       });
 
       if(authCodeResponse){
-        const regexMatch = /.*code=(\w*)&.*/g.exec(authCodeResponse.body.redirectUrl);
+        const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
         if(regexMatch !== null){
           this.session.refreshToken = regexMatch[1];
         } else {
@@ -116,13 +113,11 @@ export class EuropeanController extends SessionController {
           uuid: this.session.deviceId,
         },
         json: true,
-      }).catch(err => {
-        logger.debug(`GCM Registration failed: ${err}`);
-        Promise.reject(`GCM Registration failed: ${err}`);
       });
 
-      if(notificationReponse)
-      this.session.deviceId = notificationReponse.body.resMsg.deviceId;
+      if(notificationReponse) {
+        this.session.deviceId = notificationReponse.body.resMsg.deviceId;
+      }
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
@@ -158,7 +153,8 @@ export class EuropeanController extends SessionController {
 
       return Promise.resolve('Login success');
     } catch (err) {
-      logger.debug(JSON.stringify(err.message));
+      logger.debug(err.body);
+      logger.debug(err);
       return Promise.reject(err.message);
     }
   }
@@ -199,11 +195,9 @@ export class EuropeanController extends SessionController {
       const vehicleProfile = vehicleProfileReponse.body.resMsg;
 
       const vehicleConfig = {
-        // master: v.master,
         nickname: v.nickname,
         name: v.vehicleName,
         regDate: v.regDate,
-        // type: v.type,
         brandIndicator: 'H',
         id: v.vehicleId,
         vin: vehicleProfile.vinInfo[0].basic.vin,

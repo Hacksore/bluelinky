@@ -71,7 +71,7 @@ export class AmericanController extends SessionController {
 
       return Promise.resolve('login good');
     } catch (err) {
-      logger.debug(JSON.stringify(err.body));
+      logger.debug(err.body);
       Promise.reject(err);
     }
 

@@ -135,7 +135,7 @@ export class CanadianController extends SessionController {
   // TODO: not quite sure how to type this if it's dynamic?
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
-    logger.info(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
+    logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
     try {
       const response = await got(endpoint, {
         method: 'POST',

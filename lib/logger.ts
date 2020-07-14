@@ -3,8 +3,12 @@ import * as winston from 'winston';
 const defaultLevel = process.env.LOG_LEVEL || 'info';
 const { colorize, json, combine, timestamp, printf } = winston.format;
 
-// TODO: get json working without haveing to use splat
 const myFormat = printf(({ level, message, timestamp }) => {
+
+  // convert objects into strings
+  if (['array', 'object'].includes(typeof message)) {
+    message = JSON.stringify(message, null, 2);
+  }
   return `[${timestamp}] ${level}: ${message}`;
 });
 
