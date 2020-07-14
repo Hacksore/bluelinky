@@ -115,8 +115,8 @@ describe('BlueLinky', () => {
       const veh1 = client.getVehicle('JEST_TESTING_1');
       const veh2 = client.getVehicle('JEST_TESTING_2');
 
-      expect(veh1.vin).toEqual('JEST_TESTING_1');
-      expect(veh2.vin).toEqual('JEST_TESTING_2');
+      expect(veh1.vin()).toEqual('JEST_TESTING_1');
+      expect(veh2.vin()).toEqual('JEST_TESTING_2');
 
       done();
     });

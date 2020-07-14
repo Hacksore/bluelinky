@@ -24,8 +24,47 @@ export interface Session {
   controlTokenExpiresAt?: number;
 }
 
-// Status
+// Status remapped
 export interface VehicleStatus {
+  engine: {
+    ignition: boolean;
+    batteryCharge?: number;
+    charging?: boolean;
+    timeToFullCharge?: unknown;
+    range: number;
+    adaptiveCruiseControl: boolean;
+  };
+  climate: {
+    active: boolean;
+    steeringwheelHeat: boolean;
+    sideMirrorHeat: boolean;
+    rearWindowHeat: boolean;
+    temperatureSetpoint: number;
+    temperatureUnit: number;
+    defrost: boolean;
+  };
+  chassis: {
+    hoodOpen: boolean;
+    trunkOpen: boolean;
+    locked: boolean;
+    openDoors: {
+      frontRight: boolean;
+      frontLeft: boolean;
+      backLeft: boolean;
+      backRight: boolean;
+    };
+    tirePressureWarningLamp: {
+      rearLeft: boolean;
+      frontLeft: boolean;
+      frontRight: boolean;
+      rearRight: boolean;
+      all: boolean;
+    };
+  };
+}
+
+// TODO: remove
+export interface RawVehicleStatus {
   lastStatusDate: string;
   dateTime: string;
   acc: boolean;
@@ -39,7 +78,7 @@ export interface VehicleStatus {
   airTempUnit: string;
   airTemp: { unit: number; hvacTempType: number; value: string };
   battery: {
-    batSignalReferenceValue: {};
+    batSignalReferenceValue: unknown;
     batSoc: number;
     batState: number;
     sjbDeliveryMode: number;
@@ -84,15 +123,15 @@ export interface VehicleStatus {
     ];
   };
   remoteIgnition: boolean;
-  seatHeaterVentInfo: {};
+  seatHeaterVentInfo: unknown;
   sleepModeCheck: boolean;
   lampWireStatus: {
-    headLamp: {};
-    stopLamp: {};
-    turnSignalLamp: {};
+    headLamp: unknown;
+    stopLamp: unknown;
+    turnSignalLamp: unknown;
   };
-  windowOpen: {};
-  engineRuntime: {};
+  windowOpen: unknown;
+  engineRuntime: unknown;
 }
 
 // Vehicle Info
@@ -157,6 +196,18 @@ export interface VehicleInfoResponse {
 
 // Location
 export interface VehicleLocation {
+  latitude: number;
+  longitude: number;
+  altitude: number;
+  speed: {
+    unit: number;
+    value: number;
+  };
+  heading: number;
+}
+
+// TODO: remove
+export interface LegacyVehicleLocation {
   accuracy: {
     hdop: number;
     pdop: number;
@@ -175,16 +226,14 @@ export interface VehicleLocation {
   time: string;
 }
 
-export interface Odometer {
+export interface VehicleOdometer {
   unit: number;
   value: number;
 }
 
-// not used: ?
-export interface VehicleStatusReponse {
-  vehicleStatus: VehicleStatus;
-  vehicleLocation: VehicleLocation;
-  odometer: Odometer;
+export interface VehicleStatusOptions {
+  refresh: boolean;
+  parsed: boolean;
 }
 
 // Vehicle Next Service
@@ -209,7 +258,7 @@ export interface VehicleCommandResponse {
   responseDesc: string;
 }
 
-export interface StartConfig {
+export interface VehicleStartOptions {
   airCtrl?: boolean | string;
   igniOnDuration: number;
   airTempvalue?: number;
@@ -217,11 +266,22 @@ export interface StartConfig {
   heating1?: boolean | string;
 }
 
-export interface ClimateConfig {
+export interface VehicleClimateOptions {
   defrost: boolean;
   windscreenHeating: boolean;
   temperature: number;
   unit: string;
+}
+
+export interface VehicleRegisterOptions {
+  nickname: string;
+  name: string;
+  vin: string;
+  regDate: string;
+  brandIndicator: string;
+  regId: string;
+  id: string;
+  generation: string;
 }
 
 // ACCOUNT //////////////////////////////////////////////////////

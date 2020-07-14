@@ -9,29 +9,25 @@ import fs from 'fs';
 const licenseText = fs.readFileSync(__dirname + '/LICENSE');
 
 export default {
-	input: 'lib/index.ts',
-	output:	{
-		format: 'cjs',
-		name: 'index',
-		file: 'dist/index.js'
-	},
-  external: [
-		...Object.keys(pkg.dependencies || {}),
-		'events'
-  ],
-	plugins: [
-		builtins(),
-		resolve({ preferBuiltins: true }),
-		typescript({
-		}),
-		commonjs(),
-		license({
-			banner: `
+  input: 'lib/index.ts',
+  output: {
+    format: 'cjs',
+    name: 'index',
+    file: 'dist/index.js',
+  },
+  external: [...Object.keys(pkg.dependencies || {}), 'events'],
+  plugins: [
+    builtins(),
+    resolve({ preferBuiltins: true }),
+    typescript({}),
+    commonjs(),
+    license({
+      banner: `
 				bluelinky (https://github.com/hacksore/bluelinky)
 
 				${licenseText}
-				`
-		}),
-		uglify()
-	]
+				`,
+    }),
+    uglify(),
+  ],
 };
