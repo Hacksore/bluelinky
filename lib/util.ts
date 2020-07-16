@@ -66,3 +66,72 @@ export const getTempCode = (temperature: number): string => {
       throw new Error('temperature out of bounds! min: 15.0* max: 30*, max step: 0.5');
   }
 };
+
+export const getTempFromCode = (code: string): number => {
+  switch (code) {
+    case '02H':
+      return 15.0;
+    case '03H':
+      return 15.5;
+    case '04H':
+      return 16.0;
+    case '05H':
+      return 16.5;
+    case '06H':
+      return 17.0;
+    case '07H':
+      return 17.5;
+    case '08H':
+      return 18.0;
+    case '09H':
+      return 18.5;
+    case '0AH':
+      return 19.0;
+    case '0BH':
+      return 19.5;
+    case '0CH':
+      return 20.0;
+    case '0DH':
+      return 20.5;
+    case '0EH':
+      return 21.0;
+    case '0FH':
+      return 21.5;
+    case '10H':
+      return 22.0;
+    case '11H':
+      return 22.0;
+    case '12H':
+      return 23.0;
+    case '13H':
+      return 23.5;
+    case '14H':
+      return 24.0;
+    case '15H':
+      return 24.5;
+    case '16H':
+      return 25.0;
+    case '17H':
+      return 25.5;
+    case '18H':
+      return 26.0;
+    case '19H':
+      return 26.5;
+    case '1AH':
+      return 27.0;
+    case '1BH':
+      return 27.5;
+    case '1CH':
+      return 28.0;
+    case '1DH':
+      return 28.5;
+    case '1EH':
+      return 29.0;
+    case '1FH':
+      return 29.5;
+    case '20H':
+      return 30.0;
+    default:
+      throw new Error('temperature out of bounds! min: 15.0* max: 30*, max step: 0.5');
+  }
+};
