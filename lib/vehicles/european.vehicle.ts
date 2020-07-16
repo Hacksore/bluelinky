@@ -13,7 +13,7 @@ import got from 'got';
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { getTempCode } from '../util';
+import { getTempCode, getTempFromCode } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 
 export default class EuropeanVehicle extends Vehicle {
@@ -176,10 +176,8 @@ export default class EuropeanVehicle extends Vehicle {
 
     let vehicleStatus;
 
-    if(statusConfig.refresh)
-      vehicleStatus = response.body.resMsg;
-    else
-      vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+    if (statusConfig.refresh) vehicleStatus = response.body.resMsg;
+    else vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
 
     const parsedStatus = {
       chassis: {
@@ -206,7 +204,7 @@ export default class EuropeanVehicle extends Vehicle {
         sideMirrorHeat: false,
         rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
         defrost: vehicleStatus.defrost,
-        temperatureSetpoint: vehicleStatus.airTemp.value,
+        temperatureSetpoint: getTempFromCode(vehicleStatus.airTemp.value),
         temperatureUnit: vehicleStatus.airTemp.unit,
       },
       engine: {
@@ -215,7 +213,7 @@ export default class EuropeanVehicle extends Vehicle {
         range: vehicleStatus.evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
-      }
+      },
     };
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
