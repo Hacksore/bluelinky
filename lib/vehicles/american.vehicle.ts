@@ -211,7 +211,7 @@ export default class AmericanVehicle extends Vehicle {
     } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
- 
+
     return Promise.resolve(this._status);
   }
 

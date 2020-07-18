@@ -10,6 +10,9 @@ import { EuropeanController } from '../lib/controllers/european.controller';
 import CanadianVehicle from '../lib/vehicles/canadian.vehicle';
 import { CanadianController } from '../lib/controllers/canadian.controller';
 
+import AMERICAN_STATUS_MOCK from './mock/americanStatus.json';
+import EUROPE_STATUS_MOCK from './mock/europeStatus.json';
+
 jest.mock('got');
 
 const referenceMap = {
@@ -73,6 +76,16 @@ describe('AmericanVehicle', () => {
     const response = await vehicle.lock();
     expect(response).toEqual('Lock successful');
   });
+
+  it('call status commmand', async () => {
+    (got as any).mockReturnValueOnce({
+      body: JSON.stringify(AMERICAN_STATUS_MOCK),
+      statusCode: 200,
+    });
+
+    const response = await vehicle.status({ parsed: true });
+    expect(response.engine.range).toEqual(AMERICAN_STATUS_MOCK.vehicleStatus.dte.value);
+  });
 });
 
 describe('CanadianVehicle', () => {
@@ -116,24 +129,23 @@ describe('EuropeanVehicle', () => {
     expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
-  // TODO: EU lead gets to write these :)
-  // it('call lock commmand', async () => {
-  //   (got as any).mockReturnValueOnce({
-  //     body: {},
-  //     statusCode: 200
-  //   });
+  it('call status commmand', async () => {
+    // mocks the pin code request
+    (got as any).mockReturnValueOnce({
+      body: {},
+      statusCode: 200,
+    });
 
-  //   const response = await vehicle.lock();
-  //   expect(response).toEqual('Lock successful');
-  // });
+    (got as any).mockReturnValueOnce({
+      body: EUROPE_STATUS_MOCK,
+      statusCode: 200,
+    });
 
-  // it('call unlock commmand', async () => {
-  //   (got as any).mockReturnValueOnce({
-  //     body: {},
-  //     statusCode: 200
-  //   });
+    const response = await vehicle.status({ parsed: true });
 
-  //   const response = await vehicle.unlock();
-  //   expect(response).toEqual('Unlock successful');
-  // });
+    const expected =
+      EUROPE_STATUS_MOCK.resMsg.vehicleStatusInfo.vehicleStatus.evStatus.drvDistance[0].rangeByFuel
+        .totalAvailableRange.value;
+    expect(response.engine.range).toEqual(expected);
+  });
 });

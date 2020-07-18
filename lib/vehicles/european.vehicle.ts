@@ -184,7 +184,7 @@ export default class EuropeanVehicle extends Vehicle {
         hoodOpen: vehicleStatus.hoodOpen,
         trunkOpen: vehicleStatus.trunkOpen,
         locked: vehicleStatus.doorLock,
-        doors: {
+        openDoors: {
           frontRight: !!vehicleStatus.doorOpen.frontRight,
           frontLeft: !!vehicleStatus.doorOpen.frontLeft,
           backLeft: !!vehicleStatus.doorOpen.backLeft,
@@ -214,7 +214,7 @@ export default class EuropeanVehicle extends Vehicle {
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge: vehicleStatus?.battery?.batSoc,
       },
-    };
+    } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
 

@@ -1,0 +1,50 @@
+{
+  "vehicleStatus": {
+    "dateTime": "2020-05-20T23:20:39Z",
+    "acc": false,
+    "trunkOpen": false,
+    "doorLock": false,
+    "defrostStatus": "false",
+    "transCond": true,
+    "doorLockStatus": "false",
+    "doorOpen": {
+      "frontRight": 1,
+      "frontLeft": 1,
+      "backLeft": 0,
+      "backRight": 0
+    },
+    "airCtrlOn": false,
+    "airTemp": {
+      "unit": 1,
+      "hvacTempType": 1,
+      "value": "LO"
+    },
+    "battery": {
+      "batSignalReferenceValue": {},
+      "batSoc": 67,
+      "batState": 0,
+      "sjbDeliveryMode": 1
+    },
+    "ign3": false,
+    "ignitionStatus": "false",
+    "lowFuelLight": false,
+    "sideBackWindowHeat": 0,
+    "dte": {
+      "unit": 3,
+      "value": 142
+    },
+    "engine": false,
+    "defrost": false,
+    "hoodOpen": false,
+    "airConditionStatus": "false",
+    "steerWheelHeat": 0,
+    "tirePressureLamp": {
+      "tirePressureWarningLampRearLeft": 0,
+      "tirePressureWarningLampFrontLeft": 0,
+      "tirePressureWarningLampFrontRight": 0,
+      "tirePressureWarningLampAll": 0,
+      "tirePressureWarningLampRearRight": 0
+    },
+    "trunkOpenStatus": "false"
+  }
+}
