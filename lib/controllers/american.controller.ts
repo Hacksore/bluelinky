@@ -46,6 +46,7 @@ export class AmericanController extends SessionController {
     return Promise.resolve('Token not expired, no need to refresh');
   }
 
+  // TODO: come up with a better return value?
   public async login(): Promise<string> {
     try {
       logger.debug('Logging in to API');
@@ -62,6 +63,10 @@ export class AmericanController extends SessionController {
         },
         json: true,
       });
+
+      if (response.statusCode !== 200) {
+        return Promise.resolve('login bad');
+      }
 
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;

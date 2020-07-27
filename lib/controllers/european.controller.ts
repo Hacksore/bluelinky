@@ -1,4 +1,4 @@
-import { EU_CONSTANTS, EU_BASE_URL } from './../constants/europe';
+import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
@@ -27,7 +27,7 @@ export class EuropeanController extends SessionController {
     controlToken: undefined,
     deviceId: this.uuidv4(),
     tokenExpiresAt: 0,
-    controlTokenExpiresAt: 0
+    controlTokenExpiresAt: 0,
   };
 
   private vehicles: Array<EuropeanVehicle> = [];
@@ -80,15 +80,15 @@ export class EuropeanController extends SessionController {
         method: 'POST',
         json: true,
         body: {
-          "email": this.userConfig.username,
-          "password": this.userConfig.password,
+          'email': this.userConfig.username,
+          'password': this.userConfig.password,
         },
         cookieJar,
       });
 
-      if(authCodeResponse){
+      if (authCodeResponse) {
         const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
-        if(regexMatch !== null){
+        if (regexMatch !== null) {
           this.session.refreshToken = regexMatch[1];
         } else {
           throw new Error('@EuropeControllerLogin: AuthCode was not found');
@@ -99,10 +99,9 @@ export class EuropeanController extends SessionController {
       const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
         method: 'POST',
         headers: {
-          'ccsp-service-id': '6d477c38-3ca4-4cf3-9557-2a1929a94654',
+          'ccsp-service-id': EU_CLIENT_ID,
           'Content-Type': 'application/json;charset=UTF-8',
-          'Content-Length': '231',
-          'Host': 'prd.eu-ccapi.hyundai.com:8080',
+          'Host': EU_API_HOST,
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
@@ -115,7 +114,7 @@ export class EuropeanController extends SessionController {
         json: true,
       });
 
-      if(notificationReponse) {
+      if (notificationReponse) {
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
       }
 
@@ -123,7 +122,7 @@ export class EuropeanController extends SessionController {
       formData.append('grant_type', 'authorization_code');
       formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
 
-      if(this.session.refreshToken){
+      if (this.session.refreshToken) {
         formData.append('code', this.session.refreshToken);
       }
 
@@ -132,8 +131,7 @@ export class EuropeanController extends SessionController {
         headers: {
           'Authorization': EU_CONSTANTS.basicToken,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': '154',
-          'Host': 'prd.eu-ccapi.hyundai.com:8080',
+          'Host': EU_API_HOST,
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
@@ -146,7 +144,7 @@ export class EuropeanController extends SessionController {
         Promise.reject(`Get token failed: ${err}`);
       });
 
-      if(response){
+      if (response) {
         const responseBody = JSON.parse(response.body);
         this.session.accessToken = 'Bearer ' + responseBody.access_token;
       }

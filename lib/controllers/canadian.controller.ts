@@ -79,18 +79,6 @@ export class CanadianController extends SessionController {
           brandIndicator: vehicle.brandIndicator,
           regId: vehicle.regid,
           generation: vehicle.genType,
-          // pin: this.config.pin,
-          // vehicleId: vehicle.vehicleId,
-          // vin: vehicle.vin,
-          // nickname: vehicle.nickName,
-          // defaultVehicle: vehicle.defaultVehicle,
-          // modelName: vehicle.modelName,
-          // modelYear: vehicle.modelYear,
-          // fuelKindCode: vehicle.fuelKindCode,
-          // genType: vehicle.genType,
-          // subscriptionEndDate: vehicle.subscriptionEndDate,
-          // mileageForNextService: vehicle.mileageForNextService,
-          // daysForNextService: vehicle.daysForNextService,
         } as VehicleRegisterOptions;
 
         this.vehicles.push(new CanadianVehicle(vehicleConfig, this));
@@ -105,7 +93,7 @@ export class CanadianController extends SessionController {
   //////////////////////////////////////////////////////////////////////////////
   // Account
   //////////////////////////////////////////////////////////////////////////////
-
+  // TODO: deprecated account specific data
   public async myAccount(): Promise<AccountInfo> {
     logger.info('Begin myAccount request');
     try {

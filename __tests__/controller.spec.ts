@@ -29,9 +29,21 @@ const getController = region => {
 };
 
 describe('AmericanController', () => {
-  it('call getVehicles and check length', async () => {
-    const controller = getController('US');
+  const controller = getController('US');
 
+  it('call login and get valid response', async () => {
+    (got as any).mockReturnValueOnce({
+      body: {
+        access_token: 'jest',
+        refresh_token: 'test',
+      },
+      statusCode: 200,
+    });
+
+    expect(await controller.login()).toEqual('login good');
+  });
+
+  it('call getVehicles and check length', async () => {
     (got as any).mockReturnValueOnce({
       body: JSON.stringify({
         enrolledVehicleDetails: [
@@ -58,7 +70,6 @@ describe('AmericanController', () => {
 });
 
 describe('EuropeanController', () => {
-
   it('call getVehicles and check length', async () => {
     const controller = getController('EU');
     controller.session.accessToken = 'MockToken';
@@ -75,25 +86,25 @@ describe('EuropeanController', () => {
               regId: '123123',
               gen: '2',
               name: 'Car',
-              id: '12345', 
+              id: '12345',
             },
           ],
         },
       },
       statusCode: 200,
     });
-    
+
     (got as any).mockReturnValueOnce({
       body: {
         resMsg: {
           vinInfo: [
-            { 
+            {
               basic: {
                 modelYear: '2019',
                 vin: '5555',
-                id: '123456'
-              }
-            }
+                id: '123456',
+              },
+            },
           ],
         },
       },
@@ -106,8 +117,7 @@ describe('EuropeanController', () => {
 });
 
 describe('CanadianController', () => {
-
-  it('call getVehicles and check length', async () => {    
+  it('call getVehicles and check length', async () => {
     const controller = getController('CA');
 
     (got as any).mockReturnValueOnce({

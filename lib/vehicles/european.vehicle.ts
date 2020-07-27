@@ -195,7 +195,7 @@ export default class EuropeanVehicle extends Vehicle {
           frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureLampFL,
           frontRight: !!vehicleStatus.tirePressureLamp.tirePressureLampFR,
           rearRight: !!vehicleStatus.tirePressureLamp.tirePressureLampRR,
-          all: !!vehicleStatus.tirePressureLamp.tirePressureLampAll,
+          all: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampAll,
         },
       },
       climate: {
