@@ -189,7 +189,7 @@ export default class AmericanVehicle extends Vehicle {
           frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontLeft,
           frontRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontRight,
           rearRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearRight,
-          all: !!vehicleStatus.tirePressureLamp.trunkOpenStatus,
+          all: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampAll,
         },
       },
       climate: {
