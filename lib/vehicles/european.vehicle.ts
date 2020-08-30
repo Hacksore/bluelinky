@@ -269,4 +269,58 @@ export default class EuropeanVehicle extends Vehicle {
 
     return Promise.resolve(this._location);
   }
+
+  public async startCharge(): Promise<string> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'start',
+          deviceId: this.controller.session.deviceId,
+        },
+        json: true,
+      }
+    );
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send start charge command to Vehicle ${this.vehicleConfig.id}`);
+      return 'Start charge successful';
+    }
+
+    return Promise.reject('Something went wrong!');
+  }
+
+  public async stopCharge(): Promise<string> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'stop',
+          deviceId: this.controller.session.deviceId,
+        },
+        json: true,
+      }
+    );
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send stop charge command to Vehicle ${this.vehicleConfig.id}`);
+      return 'Stop charge successful';
+    }
+
+    return Promise.reject('Something went wrong!');
+  }
 }
