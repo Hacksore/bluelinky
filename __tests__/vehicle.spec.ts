@@ -79,12 +79,12 @@ describe('AmericanVehicle', () => {
 
   it('call status commmand', async () => {
     (got as any).mockReturnValueOnce({
-      body: JSON.stringify(AMERICAN_STATUS_MOCK),
+      body: JSON.stringify({ vehicleStatus: AMERICAN_STATUS_MOCK }),
       statusCode: 200,
     });
 
     const response = await vehicle.status({ parsed: true });
-    expect(response.engine.range).toEqual(AMERICAN_STATUS_MOCK.vehicleStatus.dte.value);
+    expect(response.engine.range).toEqual(AMERICAN_STATUS_MOCK.dte.value);
   });
 });
 

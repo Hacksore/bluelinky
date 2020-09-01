@@ -48,39 +48,32 @@ export class AmericanController extends SessionController {
 
   // TODO: come up with a better return value?
   public async login(): Promise<string> {
-    try {
-      logger.debug('Logging in to API');
+    logger.debug('Logging in to API');
 
-      const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
-        method: 'POST',
-        body: {
-          username: this.userConfig.username,
-          password: this.userConfig.password,
-        },
-        headers: {
-          'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID,
-        },
-        json: true,
-      });
+    const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
+      method: 'POST',
+      body: {
+        username: this.userConfig.username,
+        password: this.userConfig.password,
+      },
+      headers: {
+        'client_secret': CLIENT_SECRET,
+        'client_id': CLIENT_ID,
+      },
+      json: true,
+    });
 
-      if (response.statusCode !== 200) {
-        return Promise.resolve('login bad');
-      }
-
-      this.session.accessToken = response.body.access_token;
-      this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor(
-        +new Date() / 1000 + parseInt(response.body.expires_in)
-      );
-
-      return Promise.resolve('login good');
-    } catch (err) {
-      logger.debug(err.body);
-      Promise.reject(err);
+    if (response.statusCode !== 200) {
+      return Promise.reject('login bad');
     }
 
-    return Promise.reject('login bad');
+    this.session.accessToken = response.body.access_token;
+    this.session.refreshToken = response.body.refresh_token;
+    this.session.tokenExpiresAt = Math.floor(
+      +new Date() / 1000 + parseInt(response.body.expires_in)
+    );
+
+    return Promise.resolve('login good');
   }
 
   public async logout(): Promise<string> {

@@ -139,10 +139,12 @@ export class EuropeanController extends SessionController {
         },
         body: formData.toString(),
         cookieJar,
-      }).catch(err => {
-        logger.debug(`Get token failed: ${err}`);
-        Promise.reject(`Get token failed: ${err}`);
-      });
+      })
+
+      if (response.statusCode !== 200) {
+        logger.debug(`Get token failed: ${response.body}`);
+        Promise.reject(`Get token failed: ${response.body}`);
+      }
 
       if (response) {
         const responseBody = JSON.parse(response.body);

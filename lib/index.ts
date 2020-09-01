@@ -8,7 +8,6 @@ import { BlueLinkyConfig, Session } from './interfaces/common.interfaces';
 import { REGIONS } from './constants';
 import { Vehicle } from './vehicles/vehicle';
 
-logger.info({test: 1})
 class BlueLinky extends EventEmitter {
   private controller: SessionController;
   private vehicles: Array<Vehicle> = [];
@@ -61,6 +60,8 @@ class BlueLinky extends EventEmitter {
   }
 
   public async login(): Promise<string> {
+    logger.debug('loggin into to API');
+
     try {
       const response = await this.controller.login();
 
@@ -71,7 +72,8 @@ class BlueLinky extends EventEmitter {
 
       this.emit('ready', this.vehicles);
       return response;
-    } catch (error) {
+    } catch (error) {      
+      this.emit('error', error);
       return error;
     }
   }
