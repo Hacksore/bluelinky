@@ -25,6 +25,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   private async checkControlToken(): Promise<void> {
+    await this.controller.refreshAccessToken();
     if (this.controller.session?.controlTokenExpiresAt !== undefined) {
       if (
         this.controller.session.controlToken === '' ||
