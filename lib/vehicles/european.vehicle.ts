@@ -28,8 +28,8 @@ export default class EuropeanVehicle extends Vehicle {
     await this.controller.refreshAccessToken();
     if (this.controller.session?.controlTokenExpiresAt !== undefined) {
       if (
-        this.controller.session.controlToken === '' ||
-        new Date().getTime() > this.controller.session.controlTokenExpiresAt
+        !this.controller.session.controlToken ||
+        Date.now() / 1000 > this.controller.session.controlTokenExpiresAt
       ) {
         await this.controller.enterPin();
       }

@@ -100,7 +100,7 @@ export class EuropeanController extends SessionController {
     });
 
     this.session.controlToken = 'Bearer ' + response.body.controlToken;
-    this.session.controlTokenExpiresAt = new Date().getTime() + 1000 * 60 * 10;
+    this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
     return Promise.resolve('PIN entered OK, The pin is valid for 10 minutes');
   }
 
