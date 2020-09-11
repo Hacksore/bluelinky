@@ -64,7 +64,7 @@ export class AmericanController extends SessionController {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('login bad');
+      return 'login bad';
     }
 
     this.session.accessToken = response.body.access_token;

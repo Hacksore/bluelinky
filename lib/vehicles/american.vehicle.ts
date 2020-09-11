@@ -55,7 +55,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get odometer reading!');
+      throw 'Failed to get odometer reading!';
     }
     const data = JSON.parse(response.body);
     const foundVehicle = data.enrolledVehicleDetails.find(item => {
@@ -80,7 +80,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get location!');
+      throw 'Failed to get location!';
     }
 
     const data = JSON.parse(response.body);
@@ -137,7 +137,7 @@ export default class AmericanVehicle extends Vehicle {
       return 'Vehicle started!';
     }
 
-    return Promise.reject('Failed to start vehicle');
+    return 'Failed to start vehicle';
   }
 
   public async stop(): Promise<string> {
@@ -153,7 +153,7 @@ export default class AmericanVehicle extends Vehicle {
       return 'Vehicle stopped';
     }
 
-    return Promise.reject('Failed to stop vehicle!');
+    throw 'Failed to stop vehicle!';
   }
 
   public async status(

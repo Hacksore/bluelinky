@@ -107,14 +107,14 @@ export class CanadianController extends SessionController {
   }
 
   // TODO: deprecated account specific data
-  public async preferedDealer(): Promise<PreferedDealer|null> {
+  public async preferedDealer(): Promise<PreferedDealer | null> {
     logger.info('Begin preferedDealer request');
     try {
       const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
       this._preferredDealer = response.result as PreferedDealer;
       return this._preferredDealer;
     } catch (err) {
-      throw err.message;      
+      throw err.message;
     }
   }
 
@@ -143,7 +143,7 @@ export class CanadianController extends SessionController {
       });
 
       if (response.body.responseHeader.responseCode != 0) {
-        return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc);
+        throw response.body.responseHeader.responseDesc;
       }
 
       return response.body;

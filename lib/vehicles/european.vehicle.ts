@@ -176,7 +176,9 @@ export default class EuropeanVehicle extends Vehicle {
     );
 
     // handles refreshing data
-    const vehicleStatus = statusConfig.refresh ? response.body.resMsg : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+    const vehicleStatus = statusConfig.refresh
+      ? response.body.resMsg
+      : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
 
     const parsedStatus = {
       chassis: {
@@ -294,7 +296,7 @@ export default class EuropeanVehicle extends Vehicle {
       return 'Start charge successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    throw 'Something went wrong!';
   }
 
   public async stopCharge(): Promise<string> {
@@ -321,6 +323,6 @@ export default class EuropeanVehicle extends Vehicle {
       return 'Stop charge successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    throw 'Something went wrong!';
   }
 }

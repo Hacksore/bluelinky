@@ -44,7 +44,7 @@ export class EuropeanController extends SessionController {
     const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
 
     if (!this.session.refreshToken) {
-      return Promise.reject('Need refresh token to refresh access token. Use login()');
+      return 'Need refresh token to refresh access token. Use login()';
     }
 
     if (!shouldRefreshToken) {
@@ -53,25 +53,25 @@ export class EuropeanController extends SessionController {
 
     const formData = new URLSearchParams();
     formData.append('grant_type', 'refresh_token');
-    formData.append('redirect_uri', "https://www.getpostman.com/oauth2/callback"); // Oversight from Hyundai developers
+    formData.append('redirect_uri', 'https://www.getpostman.com/oauth2/callback'); // Oversight from Hyundai developers
     formData.append('refresh_token', this.session.refreshToken);
 
     const response = await got(ALL_ENDPOINTS.EU.token, {
-        method: 'POST',
-        headers: {
-          'Authorization': EU_CONSTANTS.basicToken,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Host': EU_API_HOST,
-          'Connection': 'Keep-Alive',
-          'Accept-Encoding': 'gzip',
-          'User-Agent': 'okhttp/3.10.0',
-        },
-        body: formData.toString(),
-        throwHttpErrors: false,
-      });
+      method: 'POST',
+      headers: {
+        'Authorization': EU_CONSTANTS.basicToken,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Host': EU_API_HOST,
+        'Connection': 'Keep-Alive',
+        'Accept-Encoding': 'gzip',
+        'User-Agent': 'okhttp/3.10.0',
+      },
+      body: formData.toString(),
+      throwHttpErrors: false,
+    });
 
     if (response.statusCode !== 200) {
-      return Promise.reject(`Refresh token failed: ${response.body}`);
+      return `Refresh token failed: ${response.body}`;
     }
 
     const responseBody = JSON.parse(response.body);
@@ -83,7 +83,7 @@ export class EuropeanController extends SessionController {
 
   public async enterPin(): Promise<string> {
     if (this.session.accessToken === '') {
-      Promise.reject('Token not set');
+      throw 'Token not set';
     }
 
     const response = await got(`${EU_BASE_URL}/api/v1/user/pin`, {
@@ -174,11 +174,10 @@ export class EuropeanController extends SessionController {
         },
         body: formData.toString(),
         cookieJar,
-      })
+      });
 
       if (response.statusCode !== 200) {
-        logger.debug(`Get token failed: ${response.body}`);
-        Promise.reject(`Get token failed: ${response.body}`);
+        throw `Get token failed: ${response.body}`;
       }
 
       if (response) {
@@ -190,9 +189,7 @@ export class EuropeanController extends SessionController {
 
       return 'Login success';
     } catch (err) {
-      logger.debug(err.body);
-      logger.debug(err);
-      return Promise.reject(err.message);
+      throw err.message;
     }
   }
 
@@ -202,7 +199,7 @@ export class EuropeanController extends SessionController {
 
   public async getVehicles(): Promise<Array<Vehicle>> {
     if (this.session.accessToken === undefined) {
-      return Promise.reject('Token not set');
+      throw 'Token not set';
     }
 
     const response = await got(`${EU_BASE_URL}/api/v1/spa/vehicles`, {

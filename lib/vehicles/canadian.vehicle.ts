@@ -43,7 +43,7 @@ export default class CanadianVehicle extends Vehicle {
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
   // TODO: remove any non standardized methods :)
-  public async vehicleInfo(): Promise<VehicleInfoResponse|null> {
+  public async vehicleInfo(): Promise<VehicleInfoResponse | null> {
     logger.debug('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
@@ -116,7 +116,7 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: remove any non standardized methods :)
-  public async nextService(): Promise<VehicleNextService|null> {
+  public async nextService(): Promise<VehicleNextService | null> {
     logger.debug('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
@@ -184,7 +184,7 @@ export default class CanadianVehicle extends Vehicle {
         }
         body.hvacInfo['airTemp'] = { value: airTempValue, unit: 0, hvacTempType: 1 };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
-        return Promise.reject('air temperature should be specified');
+        throw 'air temperature should be specified';
       }
 
       const preAuth = await this.getPreAuth();
@@ -192,7 +192,7 @@ export default class CanadianVehicle extends Vehicle {
 
       return response;
     } catch (err) {
-      throw 'error: ' + err;
+      throw err.message;
     }
   }
 
@@ -280,7 +280,7 @@ export default class CanadianVehicle extends Vehicle {
       });
 
       if (response.body.responseHeader.responseCode != 0) {
-        return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc);
+        return response.body.responseHeader.responseDesc;
       }
 
       return response.body;
