@@ -41,7 +41,44 @@ export class EuropeanController extends SessionController {
   }
 
   public async refreshAccessToken(): Promise<string> {
-    return this.login();
+    const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
+
+    if (!this.session.refreshToken) {
+      return Promise.reject('Need refresh token to refresh access token. Use login()');
+    }
+
+    if (!shouldRefreshToken) {
+      return 'Token not expired, no need to refresh';
+    }
+
+    const formData = new URLSearchParams();
+    formData.append('grant_type', 'refresh_token');
+    formData.append('redirect_uri', "https://www.getpostman.com/oauth2/callback"); // Oversight from Hyundai developers
+    formData.append('refresh_token', this.session.refreshToken);
+
+    const response = await got(ALL_ENDPOINTS.EU.token, {
+        method: 'POST',
+        headers: {
+          'Authorization': EU_CONSTANTS.basicToken,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Host': EU_API_HOST,
+          'Connection': 'Keep-Alive',
+          'Accept-Encoding': 'gzip',
+          'User-Agent': 'okhttp/3.10.0',
+        },
+        body: formData.toString(),
+        throwHttpErrors: false,
+      });
+
+    if (response.statusCode !== 200) {
+      return Promise.reject(`Refresh token failed: ${response.body}`);
+    }
+
+    const responseBody = JSON.parse(response.body);
+    this.session.accessToken = 'Bearer ' + responseBody.access_token;
+    this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
+
+    return 'Token refreshed';
   }
 
   public async enterPin(): Promise<string> {
@@ -63,7 +100,7 @@ export class EuropeanController extends SessionController {
     });
 
     this.session.controlToken = 'Bearer ' + response.body.controlToken;
-    this.session.controlTokenExpiresAt = new Date().getTime() + 1000 * 60 * 10;
+    this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
     return Promise.resolve('PIN entered OK, The pin is valid for 10 minutes');
   }
 
@@ -86,10 +123,11 @@ export class EuropeanController extends SessionController {
         cookieJar,
       });
 
+      let authorizationCode;
       if (authCodeResponse) {
         const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
         if (regexMatch !== null) {
-          this.session.refreshToken = regexMatch[1];
+          authorizationCode = regexMatch[1];
         } else {
           throw new Error('@EuropeControllerLogin: AuthCode was not found');
         }
@@ -121,10 +159,7 @@ export class EuropeanController extends SessionController {
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
       formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
-
-      if (this.session.refreshToken) {
-        formData.append('code', this.session.refreshToken);
-      }
+      formData.append('code', authorizationCode);
 
       const response = await got(ALL_ENDPOINTS.EU.token, {
         method: 'POST',
@@ -149,6 +184,8 @@ export class EuropeanController extends SessionController {
       if (response) {
         const responseBody = JSON.parse(response.body);
         this.session.accessToken = 'Bearer ' + responseBody.access_token;
+        this.session.refreshToken = responseBody.refresh_token;
+        this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
 
       return Promise.resolve('Login success');
