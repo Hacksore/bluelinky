@@ -130,12 +130,13 @@ describe('EuropeanVehicle', () => {
   });
 
   it('call status commmand', async () => {
-    // mocks the pin code request
+    // mock the enterPin request
     (got as any).mockReturnValueOnce({
-      body: {},
+      body: { controlToken: 'fake', controlTokenExpiresAt: 10000000 },
       statusCode: 200,
     });
 
+    // mock the status request
     (got as any).mockReturnValueOnce({
       body: EUROPE_STATUS_MOCK,
       statusCode: 200,

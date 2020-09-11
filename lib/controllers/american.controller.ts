@@ -40,10 +40,10 @@ export class AmericanController extends SessionController {
         +new Date() / 1000 + parseInt(response.body.expires_in)
       );
 
-      return Promise.resolve('Token refreshed');
+      return 'Token refreshed';
     }
 
-    return Promise.resolve('Token not expired, no need to refresh');
+    return 'Token not expired, no need to refresh';
   }
 
   // TODO: come up with a better return value?
@@ -64,7 +64,7 @@ export class AmericanController extends SessionController {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('login bad');
+      return 'login bad';
     }
 
     this.session.accessToken = response.body.access_token;
@@ -73,11 +73,11 @@ export class AmericanController extends SessionController {
       +new Date() / 1000 + parseInt(response.body.expires_in)
     );
 
-    return Promise.resolve('login good');
+    return 'login good';
   }
 
   public async logout(): Promise<string> {
-    return Promise.resolve('OK');
+    return 'OK';
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
@@ -97,7 +97,7 @@ export class AmericanController extends SessionController {
 
     if (data.enrolledVehicleDetails === undefined) {
       this.vehicles = [];
-      return Promise.resolve(this.vehicles);
+      return this.vehicles;
     }
 
     data.enrolledVehicleDetails.forEach(vehicle => {
@@ -116,6 +116,6 @@ export class AmericanController extends SessionController {
       this.vehicles.push(new AmericanVehicle(vehicleConfig, this));
     });
 
-    return Promise.resolve(this.vehicles);
+    return this.vehicles;
   }
 }

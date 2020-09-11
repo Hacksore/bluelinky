@@ -55,7 +55,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get odometer reading!');
+      throw 'Failed to get odometer reading!';
     }
     const data = JSON.parse(response.body);
     const foundVehicle = data.enrolledVehicleDetails.find(item => {
@@ -67,7 +67,7 @@ export default class AmericanVehicle extends Vehicle {
       unit: 0, // unsure what this is :P
     };
 
-    return Promise.resolve(this._odometer);
+    return this._odometer;
   }
 
   /**
@@ -80,11 +80,11 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get location!');
+      throw 'Failed to get location!';
     }
 
     const data = JSON.parse(response.body);
-    return Promise.resolve({
+    return {
       latitude: data.coord.lat,
       longitude: data.coord.lon,
       altitude: data.coord.alt,
@@ -93,7 +93,7 @@ export default class AmericanVehicle extends Vehicle {
         value: data.speed.value,
       },
       heading: data.head,
-    });
+    };
   }
 
   public async start(startConfig: VehicleStartOptions): Promise<string> {
@@ -134,10 +134,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Vehicle started!');
+      return 'Vehicle started!';
     }
 
-    return Promise.reject('Failed to start vehicle');
+    return 'Failed to start vehicle';
   }
 
   public async stop(): Promise<string> {
@@ -150,10 +150,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Vehicle stopped');
+      return 'Vehicle stopped';
     }
 
-    return Promise.reject('Failed to stop vehicle!');
+    throw 'Failed to stop vehicle!';
   }
 
   public async status(
@@ -213,7 +213,7 @@ export default class AmericanVehicle extends Vehicle {
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
 
-    return Promise.resolve(this._status);
+    return this._status;
   }
 
   public async unlock(): Promise<string> {
@@ -228,10 +228,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Unlock successful');
+      return 'Unlock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   public async lock(): Promise<string> {
@@ -246,10 +246,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Lock successful');
+      return 'Lock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   // TODO: not sure how to type a dynamic response
@@ -269,6 +269,6 @@ export default class AmericanVehicle extends Vehicle {
     const response = await got(`${BASE_URL}/${service}`, options);
     logger.debug(response.body);
 
-    return Promise.resolve(response);
+    return response;
   }
 }
