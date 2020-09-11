@@ -4,6 +4,8 @@ import got from 'got';
 import BlueLinky from '../lib/index';
 jest.mock('got');
 
+const gotMock = got as any;
+
 const VEHICLE_MOCK_DATA = {
   enrolledVehicleDetails: [
     {
@@ -30,6 +32,30 @@ const VEHICLE_MOCK_DATA = {
     },
   ],
 };
+
+describe('BlueLinky', () => {
+  it('calls error even when bad creds', done => {
+    gotMock.mockReturnValueOnce({
+      body: {
+        error: {
+          message: 'you did something wrong!',
+        },
+      },
+      statusCode: 401,
+    });
+
+    const client = new BlueLinky({
+      username: 'someone@gmai.com',
+      password: '123',
+      pin: '1234',
+      region: 'US',
+    });
+
+    client.on('error', error => {
+      done();
+    });
+  });
+});
 
 describe('BlueLinky', () => {
   beforeEach(() => {
@@ -75,9 +101,9 @@ describe('BlueLinky', () => {
     }).toThrowError('Your region is not supported yet.');
   });
 
-  it('ready event is called after login', (done) => {
+  it('ready event is called after login', done => {
     const client = new BlueLinky({
-      username: 'someone@gmai.com',
+      username: 'someone@gmail.com',
       password: 'hunter1',
       pin: '1234',
       region: 'US',
@@ -88,9 +114,9 @@ describe('BlueLinky', () => {
     });
   });
 
-  it('getVehicle throws error on bad input', (done) => {
+  it('getVehicle throws error on bad input', done => {
     const client = new BlueLinky({
-      username: 'someone@gmai.com',
+      username: 'someone@gmail.com',
       password: 'hunter1',
       pin: '1234',
       region: 'US',
@@ -98,12 +124,11 @@ describe('BlueLinky', () => {
 
     client.on('ready', () => {
       expect(() => client.getVehicle('test')).toThrowError();
-
       done();
     });
   });
 
-  it('getVehicle returns correct vehicle', (done) => {
+  it('getVehicle returns correct vehicle', done => {
     const client = new BlueLinky({
       username: 'someone@gmai.com',
       password: 'hunter1',
@@ -111,7 +136,7 @@ describe('BlueLinky', () => {
       region: 'US',
     });
 
-    client.on('ready', (vehicles) => {
+    client.on('ready', vehicles => {
       const veh1 = client.getVehicle('JEST_TESTING_1');
       const veh2 = client.getVehicle('JEST_TESTING_2');
 

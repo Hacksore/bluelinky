@@ -55,7 +55,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get odometer reading!');
+      throw 'Failed to get odometer reading!';
     }
     const data = JSON.parse(response.body);
     const foundVehicle = data.enrolledVehicleDetails.find(item => {
@@ -67,7 +67,7 @@ export default class AmericanVehicle extends Vehicle {
       unit: 0, // unsure what this is :P
     };
 
-    return Promise.resolve(this._odometer);
+    return this._odometer;
   }
 
   /**
@@ -80,11 +80,11 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode !== 200) {
-      return Promise.reject('Failed to get location!');
+      throw 'Failed to get location!';
     }
 
     const data = JSON.parse(response.body);
-    return Promise.resolve({
+    return {
       latitude: data.coord.lat,
       longitude: data.coord.lon,
       altitude: data.coord.alt,
@@ -93,7 +93,7 @@ export default class AmericanVehicle extends Vehicle {
         value: data.speed.value,
       },
       heading: data.head,
-    });
+    };
   }
 
   public async start(startConfig: VehicleStartOptions): Promise<string> {
@@ -134,10 +134,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Vehicle started!');
+      return 'Vehicle started!';
     }
 
-    return Promise.reject('Failed to start vehicle');
+    return 'Failed to start vehicle';
   }
 
   public async stop(): Promise<string> {
@@ -150,10 +150,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Vehicle stopped');
+      return 'Vehicle stopped';
     }
 
-    return Promise.reject('Failed to stop vehicle!');
+    throw 'Failed to stop vehicle!';
   }
 
   public async status(
@@ -175,44 +175,45 @@ export default class AmericanVehicle extends Vehicle {
     const { vehicleStatus } = JSON.parse(response.body);
     const parsedStatus = {
       chassis: {
-        hoodOpen: vehicleStatus.hoodOpen,
-        trunkOpen: vehicleStatus.trunkOpen,
-        locked: vehicleStatus.doorLock,
+        hoodOpen: vehicleStatus?.hoodOpen,
+        trunkOpen: vehicleStatus?.trunkOpen,
+        locked: vehicleStatus?.doorLock,
         openDoors: {
-          frontRight: !!vehicleStatus.doorOpen.frontRight,
-          frontLeft: !!vehicleStatus.doorOpen.frontLeft,
-          backLeft: !!vehicleStatus.doorOpen.backLeft,
-          backRight: !!vehicleStatus.doorOpen.backRight,
+          frontRight: !!vehicleStatus?.doorOpen?.frontRight,
+          frontLeft: !!vehicleStatus?.doorOpen?.frontLeft,
+          backLeft: !!vehicleStatus?.doorOpen?.backLeft,
+          backRight: !!vehicleStatus?.doorOpen?.backRight,
         },
         tirePressureWarningLamp: {
-          rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearLeft,
-          frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontLeft,
-          frontRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontRight,
-          rearRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearRight,
-          all: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampAll,
+          rearLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearLeft,
+          frontLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontLeft,
+          frontRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontRight,
+          rearRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearRight,
+          all: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampAll,
         },
       },
       climate: {
-        active: vehicleStatus.airCtrlOn,
-        steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+        active: vehicleStatus?.airCtrlOn,
+        steeringwheelHeat: !!vehicleStatus?.steerWheelHeat,
         sideMirrorHeat: false,
-        rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
-        defrost: vehicleStatus.defrost,
-        temperatureSetpoint: vehicleStatus.airTemp.value,
-        temperatureUnit: vehicleStatus.airTemp.unit,
+        rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
+        defrost: vehicleStatus?.defrost,
+        temperatureSetpoint: vehicleStatus?.airTemp?.value,
+        temperatureUnit: vehicleStatus?.airTemp?.unit,
       },
       engine: {
-        ignition: vehicleStatus.engine,
-        adaptiveCruiseControl: vehicleStatus.acc,
-        range: vehicleStatus.dte.value,
+        ignition: vehicleStatus?.engine,
+        adaptiveCruiseControl: vehicleStatus?.acc,
+        range: vehicleStatus?.dte?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
-        batteryCharge: vehicleStatus?.battery?.batSoc,
+        batteryCharge12v: vehicleStatus?.battery?.batSoc,
+        batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
       },
     } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
 
-    return Promise.resolve(this._status);
+    return this._status;
   }
 
   public async unlock(): Promise<string> {
@@ -227,10 +228,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Unlock successful');
+      return 'Unlock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   public async lock(): Promise<string> {
@@ -245,10 +246,10 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
-      return Promise.resolve('Lock successful');
+      return 'Lock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   // TODO: not sure how to type a dynamic response
@@ -268,6 +269,6 @@ export default class AmericanVehicle extends Vehicle {
     const response = await got(`${BASE_URL}/${service}`, options);
     logger.debug(response.body);
 
-    return Promise.resolve(response);
+    return response;
   }
 }

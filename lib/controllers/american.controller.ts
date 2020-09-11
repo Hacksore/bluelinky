@@ -40,51 +40,44 @@ export class AmericanController extends SessionController {
         +new Date() / 1000 + parseInt(response.body.expires_in)
       );
 
-      return Promise.resolve('Token refreshed');
+      return 'Token refreshed';
     }
 
-    return Promise.resolve('Token not expired, no need to refresh');
+    return 'Token not expired, no need to refresh';
   }
 
   // TODO: come up with a better return value?
   public async login(): Promise<string> {
-    try {
-      logger.debug('Logging in to API');
+    logger.debug('Logging in to API');
 
-      const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
-        method: 'POST',
-        body: {
-          username: this.userConfig.username,
-          password: this.userConfig.password,
-        },
-        headers: {
-          'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID,
-        },
-        json: true,
-      });
+    const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
+      method: 'POST',
+      body: {
+        username: this.userConfig.username,
+        password: this.userConfig.password,
+      },
+      headers: {
+        'client_secret': CLIENT_SECRET,
+        'client_id': CLIENT_ID,
+      },
+      json: true,
+    });
 
-      if (response.statusCode !== 200) {
-        return Promise.resolve('login bad');
-      }
-
-      this.session.accessToken = response.body.access_token;
-      this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor(
-        +new Date() / 1000 + parseInt(response.body.expires_in)
-      );
-
-      return Promise.resolve('login good');
-    } catch (err) {
-      logger.debug(err.body);
-      Promise.reject(err);
+    if (response.statusCode !== 200) {
+      return 'login bad';
     }
 
-    return Promise.reject('login bad');
+    this.session.accessToken = response.body.access_token;
+    this.session.refreshToken = response.body.refresh_token;
+    this.session.tokenExpiresAt = Math.floor(
+      +new Date() / 1000 + parseInt(response.body.expires_in)
+    );
+
+    return 'login good';
   }
 
   public async logout(): Promise<string> {
-    return Promise.resolve('OK');
+    return 'OK';
   }
 
   async getVehicles(): Promise<Array<Vehicle>> {
@@ -104,7 +97,7 @@ export class AmericanController extends SessionController {
 
     if (data.enrolledVehicleDetails === undefined) {
       this.vehicles = [];
-      return Promise.resolve(this.vehicles);
+      return this.vehicles;
     }
 
     data.enrolledVehicleDetails.forEach(vehicle => {
@@ -123,6 +116,6 @@ export class AmericanController extends SessionController {
       this.vehicles.push(new AmericanVehicle(vehicleConfig, this));
     });
 
-    return Promise.resolve(this.vehicles);
+    return this.vehicles;
   }
 }

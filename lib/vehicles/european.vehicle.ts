@@ -25,10 +25,11 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   private async checkControlToken(): Promise<void> {
+    await this.controller.refreshAccessToken();
     if (this.controller.session?.controlTokenExpiresAt !== undefined) {
       if (
-        this.controller.session.controlToken === '' ||
-        new Date().getTime() > this.controller.session.controlTokenExpiresAt
+        !this.controller.session.controlToken ||
+        Date.now() / 1000 > this.controller.session.controlTokenExpiresAt
       ) {
         await this.controller.enterPin();
       }
@@ -62,7 +63,7 @@ export default class EuropeanVehicle extends Vehicle {
 
     logger.info(`Climate started for vehicle ${this.vehicleConfig.id}`);
 
-    return Promise.resolve(response.body);
+    return response.body;
   }
 
   public async stop(): Promise<string> {
@@ -92,7 +93,7 @@ export default class EuropeanVehicle extends Vehicle {
 
     logger.info(`Climate stopped for vehicle ${this.vehicleConfig.id}`);
 
-    return Promise.resolve(response.body);
+    return response.body;
   }
 
   public async lock(): Promise<string> {
@@ -116,10 +117,10 @@ export default class EuropeanVehicle extends Vehicle {
 
     if (response.statusCode === 200) {
       logger.debug(`Vehicle ${this.vehicleConfig.id} locked`);
-      return Promise.resolve('Lock successful');
+      return 'Lock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   public async unlock(): Promise<string> {
@@ -143,10 +144,10 @@ export default class EuropeanVehicle extends Vehicle {
 
     if (response.statusCode === 200) {
       logger.debug(`Vehicle ${this.vehicleConfig.id} unlocked`);
-      return Promise.resolve('Unlock successful');
+      return 'Unlock successful';
     }
 
-    return Promise.reject('Something went wrong!');
+    return 'Something went wrong!';
   }
 
   public async status(
@@ -174,51 +175,52 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    let vehicleStatus;
-
-    if (statusConfig.refresh) vehicleStatus = response.body.resMsg;
-    else vehicleStatus = response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+    // handles refreshing data
+    const vehicleStatus = statusConfig.refresh
+      ? response.body.resMsg
+      : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
 
     const parsedStatus = {
       chassis: {
-        hoodOpen: vehicleStatus.hoodOpen,
-        trunkOpen: vehicleStatus.trunkOpen,
+        hoodOpen: vehicleStatus?.hoodOpen,
+        trunkOpen: vehicleStatus?.trunkOpen,
         locked: vehicleStatus.doorLock,
         openDoors: {
-          frontRight: !!vehicleStatus.doorOpen.frontRight,
-          frontLeft: !!vehicleStatus.doorOpen.frontLeft,
-          backLeft: !!vehicleStatus.doorOpen.backLeft,
-          backRight: !!vehicleStatus.doorOpen.backRight,
+          frontRight: !!vehicleStatus?.doorOpen?.frontRight,
+          frontLeft: !!vehicleStatus?.doorOpen?.frontLeft,
+          backLeft: !!vehicleStatus?.doorOpen?.backLeft,
+          backRight: !!vehicleStatus?.doorOpen?.backRight,
         },
         tirePressureWarningLamp: {
-          rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureLampRL,
-          frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureLampFL,
-          frontRight: !!vehicleStatus.tirePressureLamp.tirePressureLampFR,
-          rearRight: !!vehicleStatus.tirePressureLamp.tirePressureLampRR,
-          all: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampAll,
+          rearLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureLampRL,
+          frontLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureLampFL,
+          frontRight: !!vehicleStatus?.tirePressureLamp?.tirePressureLampFR,
+          rearRight: !!vehicleStatus?.tirePressureLamp?.tirePressureLampRR,
+          all: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampAll,
         },
       },
       climate: {
-        active: vehicleStatus.airCtrlOn,
-        steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+        active: vehicleStatus?.airCtrlOn,
+        steeringwheelHeat: !!vehicleStatus?.steerWheelHeat,
         sideMirrorHeat: false,
-        rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
-        defrost: vehicleStatus.defrost,
-        temperatureSetpoint: getTempFromCode(vehicleStatus.airTemp.value),
-        temperatureUnit: vehicleStatus.airTemp.unit,
+        rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
+        defrost: vehicleStatus?.defrost,
+        temperatureSetpoint: getTempFromCode(vehicleStatus?.airTemp?.value),
+        temperatureUnit: vehicleStatus?.airTemp?.unit,
       },
       engine: {
         ignition: vehicleStatus.engine,
-        adaptiveCruiseControl: vehicleStatus.acc,
-        range: vehicleStatus.evStatus.drvDistance[0].rangeByFuel.totalAvailableRange.value,
+        adaptiveCruiseControl: vehicleStatus?.acc,
+        range: vehicleStatus?.evStatus?.drvDistance[0].rangeByFuel?.totalAvailableRange?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
-        batteryCharge: vehicleStatus?.battery?.batSoc,
+        batteryCharge12v: vehicleStatus?.battery?.batSoc,
+        batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
       },
     } as VehicleStatus;
 
     this._status = input.parsed ? parsedStatus : vehicleStatus;
 
-    return Promise.resolve(this._status);
+    return this._status;
   }
 
   public async odometer(): Promise<VehicleOdometer | null> {
@@ -237,7 +239,7 @@ export default class EuropeanVehicle extends Vehicle {
     );
 
     this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
-    return Promise.resolve(this._odometer);
+    return this._odometer;
   }
 
   public async location(): Promise<VehicleLocation> {
@@ -267,6 +269,60 @@ export default class EuropeanVehicle extends Vehicle {
       heading: data.head,
     };
 
-    return Promise.resolve(this._location);
+    return this._location;
+  }
+
+  public async startCharge(): Promise<string> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'start',
+          deviceId: this.controller.session.deviceId,
+        },
+        json: true,
+      }
+    );
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send start charge command to Vehicle ${this.vehicleConfig.id}`);
+      return 'Start charge successful';
+    }
+
+    throw 'Something went wrong!';
+  }
+
+  public async stopCharge(): Promise<string> {
+    await this.checkControlToken();
+    const response = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          action: 'stop',
+          deviceId: this.controller.session.deviceId,
+        },
+        json: true,
+      }
+    );
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send stop charge command to Vehicle ${this.vehicleConfig.id}`);
+      return 'Stop charge successful';
+    }
+
+    throw 'Something went wrong!';
   }
 }

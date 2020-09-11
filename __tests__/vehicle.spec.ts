@@ -79,12 +79,12 @@ describe('AmericanVehicle', () => {
 
   it('call status commmand', async () => {
     (got as any).mockReturnValueOnce({
-      body: JSON.stringify(AMERICAN_STATUS_MOCK),
+      body: JSON.stringify({ vehicleStatus: AMERICAN_STATUS_MOCK }),
       statusCode: 200,
     });
 
     const response = await vehicle.status({ parsed: true });
-    expect(response.engine.range).toEqual(AMERICAN_STATUS_MOCK.vehicleStatus.dte.value);
+    expect(response.engine.range).toEqual(AMERICAN_STATUS_MOCK.dte.value);
   });
 });
 
@@ -130,12 +130,13 @@ describe('EuropeanVehicle', () => {
   });
 
   it('call status commmand', async () => {
-    // mocks the pin code request
+    // mock the enterPin request
     (got as any).mockReturnValueOnce({
-      body: {},
+      body: { controlToken: 'fake', controlTokenExpiresAt: 10000000 },
       statusCode: 200,
     });
 
+    // mock the status request
     (got as any).mockReturnValueOnce({
       body: EUROPE_STATUS_MOCK,
       statusCode: 200,

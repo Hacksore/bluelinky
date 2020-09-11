@@ -42,8 +42,8 @@ export default class CanadianVehicle extends Vehicle {
   //////////////////////////////////////////////////////////////////////////////
   // Vehicle
   //////////////////////////////////////////////////////////////////////////////
-
-  public async vehicleInfo(): Promise<VehicleInfoResponse> {
+  // TODO: remove any non standardized methods :)
+  public async vehicleInfo(): Promise<VehicleInfoResponse | null> {
     logger.debug('Begin vehicleInfo request');
     try {
       const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
@@ -52,9 +52,9 @@ export default class CanadianVehicle extends Vehicle {
       this._status = vehicleInfoResponse.status;
       this._features = vehicleInfoResponse.features;
       this._featuresModel = vehicleInfoResponse.featuresModel;
-      return Promise.resolve(vehicleInfoResponse);
+      return vehicleInfoResponse;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
   public async status(
@@ -72,56 +72,58 @@ export default class CanadianVehicle extends Vehicle {
 
       const parsedStatus = {
         chassis: {
-          hoodOpen: vehicleStatus.hoodOpen,
-          trunkOpen: vehicleStatus.trunkOpen,
-          locked: vehicleStatus.doorLock,
+          hoodOpen: vehicleStatus?.hoodOpen,
+          trunkOpen: vehicleStatus?.trunkOpen,
+          locked: vehicleStatus?.doorLock,
           openDoors: {
-            frontRight: !!vehicleStatus.doorOpen.frontRight,
-            frontLeft: !!vehicleStatus.doorOpen.frontLeft,
-            backLeft: !!vehicleStatus.doorOpen.backLeft,
-            backRight: !!vehicleStatus.doorOpen.backRight,
+            frontRight: !!vehicleStatus?.doorOpen?.frontRight,
+            frontLeft: !!vehicleStatus?.doorOpen?.frontLeft,
+            backLeft: !!vehicleStatus?.doorOpen?.backLeft,
+            backRight: !!vehicleStatus?.doorOpen?.backRight,
           },
           tirePressureWarningLamp: {
-            rearLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearLeft,
-            frontLeft: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontLeft,
-            frontRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampFrontRight,
-            rearRight: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampRearRight,
-            all: !!vehicleStatus.tirePressureLamp.tirePressureWarningLampAll,
+            rearLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearLeft,
+            frontLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontLeft,
+            frontRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontRight,
+            rearRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearRight,
+            all: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampAll,
           },
         },
         climate: {
-          active: vehicleStatus.airCtrlOn,
-          steeringwheelHeat: !!vehicleStatus.steerWheelHeat,
+          active: vehicleStatus?.airCtrlOn,
+          steeringwheelHeat: !!vehicleStatus?.steerWheelHeat,
           sideMirrorHeat: false,
-          rearWindowHeat: !!vehicleStatus.sideBackWindowHeat,
-          defrost: vehicleStatus.defrost,
-          temperatureSetpoint: vehicleStatus.airTemp.value,
-          temperatureUnit: vehicleStatus.airTemp.unit,
+          rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
+          defrost: vehicleStatus?.defrost,
+          temperatureSetpoint: vehicleStatus?.airTemp.value,
+          temperatureUnit: vehicleStatus?.airTemp.unit,
         },
         engine: {
-          ignition: vehicleStatus.engine,
-          adaptiveCruiseControl: vehicleStatus.acc,
-          range: vehicleStatus.dte.value,
+          ignition: vehicleStatus?.engine,
+          adaptiveCruiseControl: vehicleStatus?.acc,
+          range: vehicleStatus?.dte?.value,
           charging: vehicleStatus?.evStatus?.batteryCharge,
-          batteryCharge: vehicleStatus?.battery?.batSoc,
+          batteryCharge12v: vehicleStatus?.battery?.batSoc,
+          batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
       } as VehicleStatus;
 
       this._status = input.parsed ? parsedStatus : vehicleStatus;
-      return Promise.resolve(this._status);
+      return this._status;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
 
-  public async nextService(): Promise<VehicleNextService> {
+  // TODO: remove any non standardized methods :)
+  public async nextService(): Promise<VehicleNextService | null> {
     logger.debug('Begin nextService request');
     try {
       const response = await this.request(CA_ENDPOINTS.nextService, {});
       this._nextService = response.result as VehicleNextService;
-      return Promise.resolve(this._nextService);
+      return this._nextService;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
 
@@ -135,9 +137,9 @@ export default class CanadianVehicle extends Vehicle {
       const preAuth = await this.getPreAuth();
       // assuming the API returns a bad status code for failed attempts
       await this.request(CA_ENDPOINTS.lock, {}, { pAuth: preAuth });
-      return Promise.resolve('Lock successful');
+      return 'Lock successful';
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
 
@@ -146,9 +148,9 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const preAuth = await this.getPreAuth();
       await this.request(CA_ENDPOINTS.unlock, {}, { pAuth: preAuth });
-      return Promise.resolve('Unlock successful');
+      return 'Unlock successful';
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
 
@@ -174,7 +176,7 @@ export default class CanadianVehicle extends Vehicle {
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
         if (airTemp > 27 || airTemp < 17) {
-          return Promise.reject('air temperature should be between 17 and 27 degrees');
+          return 'air temperature should be between 17 and 27 degrees';
         }
         let airTempValue: string = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
         if (airTempValue.length == 2) {
@@ -182,15 +184,15 @@ export default class CanadianVehicle extends Vehicle {
         }
         body.hvacInfo['airTemp'] = { value: airTempValue, unit: 0, hvacTempType: 1 };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
-        return Promise.reject('air temperature should be specified');
+        throw 'air temperature should be specified';
       }
 
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.start, body, { pAuth: preAuth });
 
-      return Promise.resolve(response);
+      return response;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw err.message;
     }
   }
 
@@ -201,9 +203,9 @@ export default class CanadianVehicle extends Vehicle {
       const response = await this.request(CA_ENDPOINTS.stop, {
         pAuth: preAuth,
       });
-      return Promise.resolve(response);
+      return response;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw 'error: ' + err;
     }
   }
 
@@ -217,9 +219,9 @@ export default class CanadianVehicle extends Vehicle {
         { horn: withHorn },
         { pAuth: preAuth }
       );
-      return Promise.resolve(response);
+      return response;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw 'error: ' + err;
     }
   }
 
@@ -234,9 +236,9 @@ export default class CanadianVehicle extends Vehicle {
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.locate, {}, { pAuth: preAuth });
       this._location = response.result as VehicleLocation;
-      return Promise.resolve(this._location);
+      return this._location;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw 'error: ' + err;
     }
   }
 
@@ -248,9 +250,9 @@ export default class CanadianVehicle extends Vehicle {
     logger.info('Begin pre-authentication');
     try {
       const response = await this.request(CA_ENDPOINTS.verifyPin, {});
-      return Promise.resolve(response.result.pAuth);
+      return response.result.pAuth;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw 'error: ' + err;
     }
   }
 
@@ -278,12 +280,12 @@ export default class CanadianVehicle extends Vehicle {
       });
 
       if (response.body.responseHeader.responseCode != 0) {
-        return Promise.reject('bad request: ' + response.body.responseHeader.responseDesc);
+        return response.body.responseHeader.responseDesc;
       }
 
-      return Promise.resolve(response.body);
+      return response.body;
     } catch (err) {
-      return Promise.reject('error: ' + err);
+      throw 'error: ' + err;
     }
   }
 }
