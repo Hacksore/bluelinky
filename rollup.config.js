@@ -1,12 +1,8 @@
 import typescript from 'rollup-plugin-typescript2';
 import resolve from 'rollup-plugin-node-resolve';
-import license from 'rollup-plugin-license';
-import builtins from 'rollup-plugin-node-builtins';
 import commonjs from 'rollup-plugin-commonjs';
-import { uglify } from 'rollup-plugin-uglify';
+import { terser } from "rollup-plugin-terser";
 import pkg from './package.json';
-import fs from 'fs';
-const licenseText = fs.readFileSync(__dirname + '/LICENSE');
 
 export default {
   input: 'lib/index.ts',
@@ -14,20 +10,13 @@ export default {
     format: 'cjs',
     name: 'index',
     file: 'dist/index.js',
+    banner: "/* @preserve skinview3d / MIT License / https://github.com/bs-community/skinview3d */",
   },
   external: [...Object.keys(pkg.dependencies || {}), 'events'],
   plugins: [
-    builtins(),
     resolve({ preferBuiltins: true }),
     typescript({}),
     commonjs(),
-    license({
-      banner: `
-				bluelinky (https://github.com/hacksore/bluelinky)
-
-				${licenseText}
-				`,
-    }),
-    uglify(),
+    terser(),
   ],
 };
