@@ -101,7 +101,7 @@ export class EuropeanController extends SessionController {
 
     this.session.controlToken = 'Bearer ' + response.body.controlToken;
     this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
-    return Promise.resolve('PIN entered OK, The pin is valid for 10 minutes');
+    return 'PIN entered OK, The pin is valid for 10 minutes';
   }
 
   public async login(): Promise<string> {
@@ -188,7 +188,7 @@ export class EuropeanController extends SessionController {
         this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
 
-      return Promise.resolve('Login success');
+      return 'Login success';
     } catch (err) {
       logger.debug(err.body);
       logger.debug(err);
@@ -196,8 +196,8 @@ export class EuropeanController extends SessionController {
     }
   }
 
-  public logout(): Promise<string> {
-    return Promise.resolve('OK');
+  public async logout(): Promise<string> {
+    return 'OK';
   }
 
   public async getVehicles(): Promise<Array<Vehicle>> {
@@ -245,7 +245,7 @@ export class EuropeanController extends SessionController {
       logger.debug(`Added vehicle ${vehicleConfig.id}`);
     });
 
-    return Promise.resolve(this.vehicles);
+    return this.vehicles;
   }
 
   // TODO: type this or replace it with a normal loop
