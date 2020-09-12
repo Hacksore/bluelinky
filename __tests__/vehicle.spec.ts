@@ -129,12 +129,117 @@ describe('EuropeanVehicle', () => {
     expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
-  it('call status commmand', async () => {
-    // mock the enterPin request
+  it('refresh expired access token', async () => {
+    // create session with expired access token
+    vehicle.controller.session = {
+      accessToken: 'Bearer eyASKLFABADFJ',
+      refreshToken: 'KASDLNWE0JKH5KHK1K5JKH',
+      controlToken: 'Bearer eyASWAWJPLZL',
+      deviceId: 'aaaa-bbbb-cccc-eeee',
+      tokenExpiresAt: Date.now() / 1000,
+      controlTokenExpiresAt: 0,
+    };
+
+    // mock token request
     (got as any).mockReturnValueOnce({
-      body: { controlToken: 'fake', controlTokenExpiresAt: 10000000 },
+      body: JSON.stringify({ access_token: 'AAAAAAAA', expires_in: 10 }),
       statusCode: 200,
     });
+
+    (got as any).mockClear();
+
+    const result = await vehicle.controller.refreshAccessToken();
+    expect(result).toEqual('Token refreshed');
+    // should update access token
+    expect(vehicle.controller.session.accessToken).toEqual('Bearer AAAAAAAA');
+    expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(Date.now() / 1000);
+    expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(Date.now() / 1000 + 20);
+
+    const gotArgs = (got as any).mock.calls[0];
+    expect(gotArgs[0]).toMatch(/token$/);
+    expect(gotArgs[1].body).toContain("grant_type=refresh_token");
+    expect(gotArgs[1].body).toContain("refresh_token=" + vehicle.controller.session.refreshToken);
+  });
+
+  it('not refresh active access token', async () => {
+    // create session with active access token
+    vehicle.controller.session = {
+      accessToken: 'Bearer eyASKLFABADFJ',
+      refreshToken: 'KASDLNWE0JKH5KHK1K5JKH',
+      controlToken: 'Bearer eyASWAWJPLZL',
+      deviceId: 'aaaa-bbbb-cccc-eeee',
+      tokenExpiresAt: Date.now() / 1000 + 20,
+      controlTokenExpiresAt: 0,
+    };
+
+    (got as any).mockClear();
+
+    const result = await vehicle.controller.refreshAccessToken();
+    expect(result).toEqual('Token not expired, no need to refresh');
+    // should not call got
+    expect((got as any).mock.calls).toHaveLength(0);
+  });
+
+  it('refresh expired control token', async () => {
+    // create session with active access token and expired control token
+    vehicle.controller.session = {
+      accessToken: 'Bearer eyASKLFABADFJ',
+      refreshToken: 'KASDLNWE0JKH5KHK1K5JKH',
+      controlToken: 'Bearer eyASWAWJPLZL',
+      deviceId: 'aaaa-bbbb-cccc-eeee',
+      tokenExpiresAt: Date.now() / 1000 + 20,
+      controlTokenExpiresAt: Date.now() / 1000 - 10,
+    };
+
+    // mock pin request
+    (got as any).mockReturnValueOnce({
+      body: { controlToken: 'BBBBBB', expiresTime: 10 },
+      statusCode: 200,
+    });
+
+    (got as any).mockClear();
+
+    await vehicle.checkControlToken();
+    // should update control token
+    expect(vehicle.controller.session.controlToken).toEqual('Bearer BBBBBB');
+    expect(vehicle.controller.session.controlTokenExpiresAt).toBeGreaterThan(Date.now() / 1000);
+    expect(vehicle.controller.session.controlTokenExpiresAt).toBeLessThan(Date.now() / 1000 + 20);
+
+    const gotArgs = (got as any).mock.calls[0];
+    expect(gotArgs[0]).toMatch(/pin$/);
+    expect(gotArgs[1].headers.Authorization).toEqual(vehicle.controller.session.accessToken);
+    expect(gotArgs[1].body.deviceId).toEqual("aaaa-bbbb-cccc-eeee");
+    expect(gotArgs[1].body.pin).toEqual("1234");
+  });
+
+  it('not refresh active control token', async () => {
+    // create session with active control and access token
+    vehicle.controller.session = {
+      accessToken: 'Bearer eyASKLFABADFJ',
+      refreshToken: 'KASDLNWE0JKH5KHK1K5JKH',
+      controlToken: 'Bearer eyASWAWJPLZL',
+      deviceId: 'aaaa-bbbb-cccc-eeee',
+      tokenExpiresAt: Date.now() / 1000 + 20,
+      controlTokenExpiresAt: Date.now() / 1000 + 10,
+    };
+
+    (got as any).mockClear();
+
+    await vehicle.checkControlToken();
+    // should not call got
+    expect((got as any).mock.calls).toHaveLength(0);
+  });
+
+  it('call status commmand', async () => {
+    // create session with active control and access token
+    vehicle.controller.session = {
+      accessToken: 'Bearer eyASKLFABADFJ',
+      refreshToken: 'KASDLNWE0JKH5KHK1K5JKH',
+      controlToken: 'Bearer eyASWAWJPLZL',
+      deviceId: 'aaaa-bbbb-cccc-eeee',
+      tokenExpiresAt: Date.now() / 1000 + 20,
+      controlTokenExpiresAt: Date.now() / 1000 + 10,
+    };
 
     // mock the status request
     (got as any).mockReturnValueOnce({
