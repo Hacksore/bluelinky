@@ -123,6 +123,7 @@ export class EuropeanController extends SessionController {
         cookieJar,
       });
 
+      logger.debug(authCodeResponse.body);
       let authorizationCode;
       if (authCodeResponse) {
         const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
