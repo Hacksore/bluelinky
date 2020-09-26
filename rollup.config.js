@@ -10,7 +10,7 @@ export default {
     format: 'cjs',
     name: 'index',
     file: 'dist/index.js',
-    banner: "/* @preserve skinview3d / MIT License / https://github.com/bs-community/skinview3d */",
+    banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
   },
   external: [...Object.keys(pkg.dependencies || {}), 'events'],
   plugins: [
