@@ -141,7 +141,7 @@ export default class AmericanVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    const response = await this._request(`${BASE_URL}/ac/v2/rcs/rsc/stop`, {
+    const response = await this._request(`/ac/v2/rcs/rsc/stop`, {
       method: 'POST',
       headers: {
         ...this.getDefaultHeaders(),
