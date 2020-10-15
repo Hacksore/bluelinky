@@ -141,7 +141,7 @@ export default class AmericanVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    const response = await this._request(`${BASE_URL}/ac/v2/rcs/rsc/stop`, {
+    const response = await this._request(`/ac/v2/rcs/rsc/stop`, {
       method: 'POST',
       headers: {
         ...this.getDefaultHeaders(),
@@ -252,6 +252,35 @@ export default class AmericanVehicle extends Vehicle {
     return 'Something went wrong!';
   }
 
+  public async startCharge(): Promise<string> {
+    const response = await this._request(
+      `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      {
+        method: 'POST',
+      }
+    );
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send start charge command to Vehicle ${this.vehicleConfig.id}`);
+      return 'Start charge successful';
+    }
+
+    throw 'Something went wrong!';
+  }
+
+  public async stopCharge(): Promise<string> {
+    const response = await got(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`, {
+      method: 'POST',
+    });
+
+    if (response.statusCode === 200) {
+      logger.debug(`Send stop charge command to vehicle ${this.vehicleConfig.id}`);
+      return 'Stop charge successful';
+    }
+
+    throw 'Something went wrong!';
+  }
+
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async _request(service: string, options): Promise<got.Response<any>> {
@@ -266,7 +295,7 @@ export default class AmericanVehicle extends Vehicle {
       logger.debug('Token is all good, moving on!');
     }
 
-    const response = await got(`${BASE_URL}/${service}`, options);
+    const response = await got(`${BASE_URL}/${service}`, { throwHttpErrors: false, ...options });
     logger.debug(response.body);
 
     return response;
