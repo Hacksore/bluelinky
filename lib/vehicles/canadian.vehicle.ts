@@ -108,7 +108,7 @@ export default class CanadianVehicle extends Vehicle {
         },
       } as VehicleStatus;
 
-      this._status = input.parsed ? parsedStatus : vehicleStatus;
+      this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
     } catch (err) {
       throw err.message;
