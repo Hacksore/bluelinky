@@ -95,8 +95,8 @@ export default class CanadianVehicle extends Vehicle {
           sideMirrorHeat: false,
           rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
           defrost: vehicleStatus?.defrost,
-          temperatureSetpoint: vehicleStatus?.airTemp.value,
-          temperatureUnit: vehicleStatus?.airTemp.unit,
+          temperatureSetpoint: vehicleStatus?.airTemp?.value,
+          temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
         engine: {
           ignition: vehicleStatus?.engine,
