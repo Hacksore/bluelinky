@@ -78,6 +78,7 @@ export class CanadianController extends SessionController {
           regDate: vehicle.enrollmentDate,
           brandIndicator: vehicle.brandIndicator,
           regId: vehicle.regid,
+          id: vehicle.vehicleId,
           generation: vehicle.genType,
         } as VehicleRegisterOptions;
 

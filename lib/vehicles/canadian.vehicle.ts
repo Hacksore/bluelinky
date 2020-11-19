@@ -95,8 +95,8 @@ export default class CanadianVehicle extends Vehicle {
           sideMirrorHeat: false,
           rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
           defrost: vehicleStatus?.defrost,
-          temperatureSetpoint: vehicleStatus?.airTemp.value,
-          temperatureUnit: vehicleStatus?.airTemp.unit,
+          temperatureSetpoint: vehicleStatus?.airTemp?.value,
+          temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
         engine: {
           ignition: vehicleStatus?.engine,
@@ -108,7 +108,7 @@ export default class CanadianVehicle extends Vehicle {
         },
       } as VehicleStatus;
 
-      this._status = input.parsed ? parsedStatus : vehicleStatus;
+      this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
     } catch (err) {
       throw err.message;
