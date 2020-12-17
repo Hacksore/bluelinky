@@ -6,13 +6,13 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import {
   VehicleStartOptions,
-  VehicleFeatures,
-  VehicleFeaturesModel,
-  VehicleInfo,
-  VehicleInfoResponse,
+  // VehicleFeatures,
+  // VehicleFeaturesModel,
+  // VehicleInfo,
+  // VehicleInfoResponse,
   VehicleLocation,
   VehicleRegisterOptions,
-  VehicleNextService,
+  // VehicleNextService,
   VehicleStatus,
   VehicleOdometer,
   VehicleStatusOptions,
@@ -20,18 +20,10 @@ import {
 } from '../interfaces/common.interfaces';
 
 import { SessionController } from '../controllers/controller';
-
 import { Vehicle } from './vehicle';
 
 export default class CanadianVehicle extends Vehicle {
-  private _nextService: VehicleNextService | null = null;
-
-  private _info: VehicleInfo | null = null;
-  private _features: VehicleFeatures | null = null;
-  private _featuresModel: VehicleFeaturesModel | null = null;
-
   public region = REGIONS.CA;
-
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
@@ -39,24 +31,6 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  // Vehicle
-  //////////////////////////////////////////////////////////////////////////////
-  // TODO: remove any non standardized methods :)
-  public async vehicleInfo(): Promise<VehicleInfoResponse | null> {
-    logger.debug('Begin vehicleInfo request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
-      const vehicleInfoResponse = response.result as VehicleInfoResponse;
-      this._info = vehicleInfoResponse.vehicleInfo;
-      this._status = vehicleInfoResponse.status;
-      this._features = vehicleInfoResponse.features;
-      this._featuresModel = vehicleInfoResponse.featuresModel;
-      return vehicleInfoResponse;
-    } catch (err) {
-      throw err.message;
-    }
-  }
   public async status(
     input: VehicleStatusOptions
   ): Promise<VehicleStatus | RawVehicleStatus | null> {
@@ -110,18 +84,6 @@ export default class CanadianVehicle extends Vehicle {
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
-    } catch (err) {
-      throw err.message;
-    }
-  }
-
-  // TODO: remove any non standardized methods :)
-  public async nextService(): Promise<VehicleNextService | null> {
-    logger.debug('Begin nextService request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.nextService, {});
-      this._nextService = response.result as VehicleNextService;
-      return this._nextService;
     } catch (err) {
       throw err.message;
     }
@@ -190,7 +152,13 @@ export default class CanadianVehicle extends Vehicle {
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.start, body, { pAuth: preAuth });
 
-      return response;
+      logger.debug(response);
+
+      if (response.statusCode === 200) {
+        return 'Vehicle started!';
+      }
+
+      return 'Failed to start vehicle';
     } catch (err) {
       throw err.message;
     }
@@ -265,6 +233,7 @@ export default class CanadianVehicle extends Vehicle {
       const response = await got(endpoint, {
         method: 'POST',
         json: true,
+        throwHttpErrors: false,
         headers: {
           from: CLIENT_ORIGIN,
           language: 1,
