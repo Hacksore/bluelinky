@@ -13,7 +13,7 @@ import got from 'got';
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { getTempCode, getTempFromCode } from '../util';
+import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 
 export default class EuropeanVehicle extends Vehicle {
@@ -49,7 +49,7 @@ export default class EuropeanVehicle extends Vehicle {
             defrost: config.defrost,
             heating1: config.windscreenHeating ? 1 : 0,
           },
-          tempCode: getTempCode(config.temperature),
+          tempCode: celciusToTempCode(config.temperature),
           unit: config.unit,
         },
         headers: {
@@ -205,7 +205,7 @@ export default class EuropeanVehicle extends Vehicle {
         sideMirrorHeat: false,
         rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
         defrost: vehicleStatus?.defrost,
-        temperatureSetpoint: getTempFromCode(vehicleStatus?.airTemp?.value),
+        temperatureSetpoint: tempCodeToCelsius(vehicleStatus?.airTemp?.value),
         temperatureUnit: vehicleStatus?.airTemp?.unit,
       },
       engine: {

@@ -1,5 +1,5 @@
 import got from 'got';
-import { AccountInfo, BlueLinkyConfig, PreferedDealer } from '../interfaces/common.interfaces';
+import { BlueLinkyConfig } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadian.vehicle';
@@ -9,8 +9,6 @@ import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 
 export class CanadianController extends SessionController {
-  private _preferredDealer: PreferedDealer | null = null;
-  private _accountInfo: AccountInfo | null = null;
 
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
@@ -89,33 +87,6 @@ export class CanadianController extends SessionController {
     } catch (err) {
       logger.debug(err);
       return this.vehicles;
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-  // Account
-  //////////////////////////////////////////////////////////////////////////////
-  // TODO: deprecated account specific data
-  public async myAccount(): Promise<AccountInfo> {
-    logger.info('Begin myAccount request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.myAccount, {});
-      this._accountInfo = response.result as AccountInfo;
-      return this._accountInfo;
-    } catch (err) {
-      throw err.message;
-    }
-  }
-
-  // TODO: deprecated account specific data
-  public async preferedDealer(): Promise<PreferedDealer | null> {
-    logger.info('Begin preferedDealer request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
-      this._preferredDealer = response.result as PreferedDealer;
-      return this._preferredDealer;
-    } catch (err) {
-      throw err.message;
     }
   }
 

@@ -101,7 +101,6 @@ export class AmericanController extends SessionController {
 
     data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
-
       const vehicleConfig = {
         nickname: vehicleInfo.nickName,
         name: vehicleInfo.nickName,

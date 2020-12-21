@@ -6,13 +6,8 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import {
   VehicleStartOptions,
-  // VehicleFeatures,
-  // VehicleFeaturesModel,
-  // VehicleInfo,
-  // VehicleInfoResponse,
   VehicleLocation,
   VehicleRegisterOptions,
-  // VehicleNextService,
   VehicleStatus,
   VehicleOdometer,
   VehicleStatusOptions,
@@ -21,6 +16,7 @@ import {
 
 import { SessionController } from '../controllers/controller';
 import { Vehicle } from './vehicle';
+import { celciusToTempCode } from '../util';
 
 export default class CanadianVehicle extends Vehicle {
   public region = REGIONS.CA;
@@ -137,14 +133,7 @@ export default class CanadianVehicle extends Vehicle {
       const airTemp = startConfig.airTempvalue;
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
-        if (airTemp > 27 || airTemp < 17) {
-          return 'air temperature should be between 17 and 27 degrees';
-        }
-        let airTempValue: string = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
-        if (airTempValue.length == 2) {
-          airTempValue = '0' + airTempValue;
-        }
-        body.hvacInfo['airTemp'] = { value: airTempValue, unit: 0, hvacTempType: 1 };
+        body.hvacInfo['airTemp'] = { value: celciusToTempCode(airTemp), unit: 0, hvacTempType: 1 };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
         throw 'air temperature should be specified';
       }
