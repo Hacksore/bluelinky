@@ -241,6 +241,9 @@ export interface FullVehicleStatus {
 }
 
 // TODO: remove
+// =======
+// Rough mapping of the raw status that might no be the same for all regions
+
 export interface RawVehicleStatus {
   lastStatusDate: string;
   dateTime: string;
@@ -335,17 +338,6 @@ export interface VehicleInfo {
   vin: string;
 }
 
-export interface VehicleFeatures {
-  seatHeatVent: {
-    drvSeatHeatOption: number;
-    astSeatHeatOption: number;
-    rlSeatHeatOption: number;
-    rrSeatHeatOption: number;
-  };
-  hvacTempType: number;
-  targetMinSoc: number;
-}
-
 export interface VehicleFeatureEntry {
   category: string;
   features: [
@@ -360,16 +352,6 @@ export interface VehicleFeatureEntry {
     }
   ];
 }
-export interface VehicleFeaturesModel {
-  features: [VehicleFeatureEntry];
-}
-
-export interface VehicleInfoResponse {
-  vehicleInfo: VehicleInfo;
-  features: VehicleFeatures;
-  featuresModel: VehicleFeaturesModel;
-  status: VehicleStatus;
-}
 
 // Location
 export interface VehicleLocation {
@@ -382,27 +364,6 @@ export interface VehicleLocation {
   };
   heading: number;
 }
-
-// TODO: remove
-export interface LegacyVehicleLocation {
-  accuracy: {
-    hdop: number;
-    pdop: number;
-  };
-  coord: {
-    alt: number;
-    lat: number;
-    lon: number;
-    type: number;
-  };
-  head: number;
-  speed: {
-    unit: number;
-    value: number;
-  };
-  time: string;
-}
-
 export interface VehicleOdometer {
   unit: number;
   value: number;
@@ -413,23 +374,8 @@ export interface VehicleStatusOptions {
   parsed: boolean;
 }
 
-// Vehicle Next Service
-export interface VehicleNextService {
-  msopServiceOdometer: number;
-  msopServiceOdometerUnit: number;
-  mtspServiceDate: string;
-  imatServiceOdometer: number;
-  imatServiceOdometerUnit: number;
-  mtitServiceDate: string;
-  currentOdometer: number;
-  currentOdometerUnit: number;
-  serviceOdometerDuration: number;
-  serviceDaysDuration: number;
-  serviceMonthsThreshold: number;
-}
 
 // VEHICLE COMMANDS /////////////////////////////////////////////
-
 export interface VehicleCommandResponse {
   responseCode: number; // 0 is success
   responseDesc: string;
@@ -459,63 +405,4 @@ export interface VehicleRegisterOptions {
   regId: string;
   id: string;
   generation: string;
-}
-
-// ACCOUNT //////////////////////////////////////////////////////
-
-// Account Info
-export interface Address {
-  street: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
-
-export interface AccountInfo {
-  firstName: string;
-  lastName: string;
-  notificationEmail: string;
-  phones: {
-    primary: string | null;
-    secondary: string | null;
-  };
-  addresses: {
-    primary: Address | null;
-    secondary: Address | null;
-  };
-  preference: {
-    odometerUnit: number;
-    climateUnit: string; // "C" / "F"
-    languageId: number;
-    maintenanceAlert: boolean;
-    preferredDealer: PreferedDealer | null;
-    promotionMessage: string | null;
-  };
-}
-
-// PreferedDealer
-export interface PreferedDealerHour {
-  dayCode: number;
-  startTime: string;
-  startTimeUnit: string;
-  endTime: string;
-  endTimeUnit: string;
-}
-
-export interface PreferedDealer {
-  dealerCode: string;
-  dealerName: string;
-  street: string;
-  province: string;
-  city: string;
-  postalCode: string;
-  tel: string;
-  fax: string;
-  fullAddress: string;
-  distance: string;
-  lat: string;
-  lng: string;
-  webSite: string;
-  salesHourList: [PreferedDealerHour];
-  serviceHourList: [PreferedDealerHour];
 }

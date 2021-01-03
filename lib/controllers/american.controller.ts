@@ -18,7 +18,7 @@ export class AmericanController extends SessionController {
   private vehicles: Array<AmericanVehicle> = [];
 
   public async refreshAccessToken(): Promise<string> {
-    const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
+    const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
 
     if (this.session.refreshToken && shouldRefreshToken) {
       logger.debug('refreshing token');
@@ -33,7 +33,6 @@ export class AmericanController extends SessionController {
         },
         json: true,
       });
-
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
       this.session.tokenExpiresAt = Math.floor(
@@ -102,7 +101,6 @@ export class AmericanController extends SessionController {
 
     data.enrolledVehicleDetails.forEach(vehicle => {
       const vehicleInfo = vehicle.vehicleDetails;
-
       const vehicleConfig = {
         nickname: vehicleInfo.nickName,
         name: vehicleInfo.nickName,

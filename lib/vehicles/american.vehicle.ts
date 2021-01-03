@@ -24,7 +24,7 @@ export default class AmericanVehicle extends Vehicle {
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
     super(vehicleConfig, controller);
-    logger.debug(`US Vehicle ${this.vehicleConfig.id} created`);
+    logger.debug(`US Vehicle ${this.vehicleConfig.regId} created`);
   }
 
   private getDefaultHeaders(): RequestHeaders {
@@ -291,6 +291,7 @@ export default class AmericanVehicle extends Vehicle {
     if (tokenDelta <= 60) {
       logger.debug("Token is expiring soon, let's get a new one");
       await this.controller.refreshAccessToken();
+      options.headers.access_token = this.controller.session.accessToken;
     } else {
       logger.debug('Token is all good, moving on!');
     }
