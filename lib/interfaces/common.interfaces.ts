@@ -63,7 +63,187 @@ export interface VehicleStatus {
   };
 }
 
+// TODO: fix/update
+export interface FullVehicleStatus {
+  vehicleLocation: {
+    coord: { lat: number; lon: number; alt: number; type: number };
+    head: number;
+    speed: { value: number; unit: number };
+    accuracy: { hdop: number; pdop: number };
+    time: string;
+  };
+  odometer: { value: number, unit: number };
+  vehicleStatus: {
+    time: string;
+    airCtrlOn: boolean;
+    engine: boolean;
+    doorLock: boolean;
+    doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
+    trunkOpen: boolean;
+    airTemp: { unit: number; hvacTempType: number; value: string };
+    defrost: boolean;
+    acc: boolean;
+    ign3: boolean;
+    hoodOpen: boolean;
+    transCond: boolean;
+    steerWheelHeat: number;
+    sideBackWindowHeat: number;
+    tirePressureLamp: {
+      tirePressureWarningLampAll: number;
+      tirePressureWarningLampFL: number;
+      tirePressureWarningLampFR: number;
+      tirePressureWarningLampRL: number;
+      tirePressureWarningLampRR: number;
+    };
+    battery: { batSoc: number; batState: number; };
+    evStatus: {
+      batteryCharge: boolean;
+      batteryStatus: number;
+      batteryPlugin: number;
+      remainTime2: { 
+        etc1: { value: number; unit: number; };
+        etc2: { value: number; unit: number; };
+        etc3: { value: number; unit: number; };
+        atc: { value: number; unit: number; };
+      };
+      drvDistance: [
+        {
+          rangeByFuel: {
+            gasModeRange: { value: number; unit: number };
+            evModeRange: { value: number; unit: number };
+            totalAvailableRange: { value: number; unit: number };
+          };
+          type: number;
+        }
+      ];
+      // "reservChargeInfos": {
+      //   "reservChargeInfo": {
+      //     "reservChargeInfoDetail": {
+      //       "reservInfo": {
+      //         "day": [
+      //           1,
+      //           2,
+      //           3,
+      //           4,
+      //           5
+      //         ],
+      //         "time": {
+      //           "time": "0800",
+      //           "timeSection": 0
+      //         }
+      //       },
+      //       "reservChargeSet": true,
+      //       "reservFatcSet": {
+      //         "defrost": false,
+      //         "airTemp": {
+      //           "value": "00H",
+      //           "unit": 0,
+      //           "hvacTempType": 1
+      //         },
+      //         "airCtrl": 0,
+      //         "heating1": 0
+      //       }
+      //     }
+      //   },
+      //   "offpeakPowerInfo": {
+      //     "offPeakPowerTime1": {
+      //       "starttime": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       },
+      //       "endtime": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     },
+      //     "offPeakPowerFlag": 1
+      //   },
+      //   "reserveChargeInfo2": {
+      //     "reservChargeInfoDetail": {
+      //       "reservInfo": {
+      //         "day": [
+      //           9
+      //         ],
+      //         "time": {
+      //           "time": "1200",
+      //           "timeSection": 0
+      //         }
+      //       },
+      //       "reservChargeSet": false,
+      //       "reservFatcSet": {
+      //         "defrost": false,
+      //         "airTemp": {
+      //           "value": "00H",
+      //           "unit": 0,
+      //           "hvacTempType": 1
+      //         },
+      //         "airCtrl": 0,
+      //         "heating1": 0
+      //       }
+      //     }
+      //   },
+      //   "reservFlag": 0,
+      //   "ect": {
+      //     "start": {
+      //       "day": 9,
+      //       "time": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     },
+      //     "end": {
+      //       "day": 9,
+      //       "time": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     }
+      //   },
+      //   "targetSOClist": [
+      //     {
+      //       "targetSOClevel": 90,
+      //       "dte": {
+      //         "rangeByFuel": {
+      //           "evModeRange": {
+      //             "value": 392,
+      //             "unit": 1
+      //           },
+      //           "totalAvailableRange": {
+      //             "value": 392,
+      //             "unit": 1
+      //           }
+      //         },
+      //         "type": 2
+      //       },
+      //       "plugType": 0
+      //     },
+      //     {
+      //       "targetSOClevel": 80,
+      //       "dte": {
+      //         "rangeByFuel": {
+      //           "evModeRange": {
+      //             "value": 345,
+      //             "unit": 1
+      //           },
+      //           "totalAvailableRange": {
+      //             "value": 345,
+      //             "unit": 1
+      //           }
+      //         },
+      //         "type": 2
+      //       },
+      //       "plugType": 1
+      //     }
+      //   ]
+      // }
+    };
+  }
+}
+
+// TODO: remove
+// =======
 // Rough mapping of the raw status that might no be the same for all regions
+
 export interface RawVehicleStatus {
   lastStatusDate: string;
   dateTime: string;

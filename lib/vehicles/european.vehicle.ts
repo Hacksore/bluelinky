@@ -1,6 +1,7 @@
 import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import {
   VehicleStatus,
+  FullVehicleStatus,
   VehicleOdometer,
   VehicleLocation,
   VehicleClimateOptions,
@@ -148,6 +149,65 @@ export default class EuropeanVehicle extends Vehicle {
     }
 
     return 'Something went wrong!';
+  }
+
+  public async fullStatus(
+    input: VehicleStatusOptions
+  ): Promise<FullVehicleStatus | null> {
+    const statusConfig = {
+      ...DEFAULT_VEHICLE_STATUS_OPTIONS,
+      ...input,
+    };
+
+    await this.checkControlToken();
+
+    const cachedResponse = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        json: true,
+      }
+    );
+
+    let fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo
+
+    if(statusConfig.refresh) {
+      const statusResponse = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+          },
+          json: true,
+        }
+      );
+      fullStatus.vehicleStatus = statusResponse.body.resMsg;
+
+      const locationResponse = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+          },
+          json: true,
+        }
+      );
+      fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
+    }
+
+    this._fullStatus = fullStatus;
+    return Promise.resolve(this._fullStatus);
   }
 
   public async status(
