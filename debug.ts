@@ -1,9 +1,9 @@
 /* eslint-disable */
 // TODO: add all calls from EU and CA
 
-const config = require('./config.json');
-const BlueLinky = require('./dist/index');
-const inquirer = require('inquirer');
+import config from './config.json';
+import BlueLinky from './lib';
+import inquirer from 'inquirer';
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -21,7 +21,7 @@ const apiCalls = [
 ];
 
 let vehicle;
-const { username, password, vin, pin, deviceUuid } = config;
+const { username, password, vin, pin } = config;
 
 const onReadyHandler = vehicles => {
   vehicle = vehicles[0];
@@ -54,8 +54,7 @@ const createInstance = region => {
     username,
     password,
     region: region,
-    pin,
-    deviceUuid,
+    pin
   });
   client.on('ready', onReadyHandler);
 };

@@ -174,7 +174,7 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    let fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo
+    const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
     if(statusConfig.refresh) {
       const statusResponse = await got(

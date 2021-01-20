@@ -1,4 +1,4 @@
-import { tempCodeToCelsius, celciusToTempCode } from '../lib/util';
+import { tempCodeToCelsius, celciusToTempCode } from '../util';
 
 describe('Utility', () => {
   it('converts temp code to celsius', () => {

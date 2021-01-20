@@ -13,6 +13,7 @@ import {
   VehicleOdometer,
   RawVehicleStatus,
   VehicleStatusOptions,
+  FullVehicleStatus,
 } from '../interfaces/common.interfaces';
 import { RequestHeaders } from '../interfaces/american.interfaces';
 
@@ -46,6 +47,10 @@ export default class AmericanVehicle extends Vehicle {
       'bluelinkservicepin': this.userConfig.pin,
       'offset': '-5',
     };
+  }
+
+  public fullStatus(): Promise<FullVehicleStatus | null> {
+    throw new Error('Method not implemented.');
   }
 
   public async odometer(): Promise<VehicleOdometer | null> {
@@ -141,7 +146,7 @@ export default class AmericanVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    const response = await this._request(`/ac/v2/rcs/rsc/stop`, {
+    const response = await this._request('/ac/v2/rcs/rsc/stop', {
       method: 'POST',
       headers: {
         ...this.getDefaultHeaders(),
@@ -284,17 +289,9 @@ export default class AmericanVehicle extends Vehicle {
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async _request(service: string, options): Promise<got.Response<any>> {
-    const currentTime = Math.floor(+new Date() / 1000);
-    const tokenDelta = -(currentTime - this.controller.session.tokenExpiresAt);
-
-    // token will epxire in 60 seconds, let's refresh it before that
-    if (tokenDelta <= 60) {
-      logger.debug("Token is expiring soon, let's get a new one");
-      await this.controller.refreshAccessToken();
-      options.headers.access_token = this.controller.session.accessToken;
-    } else {
-      logger.debug('Token is all good, moving on!');
-    }
+    
+    // add logic for token refresh if to ensure we don't use a stale token
+    await this.controller.refreshAccessToken();
 
     const response = await got(`${BASE_URL}/${service}`, { throwHttpErrors: false, ...options });
     logger.debug(response.body);

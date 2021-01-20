@@ -29,9 +29,11 @@ export class CanadianController extends SessionController {
       this.session.refreshToken = response.body.refresh_token;
       this.session.tokenExpiresAt = Math.floor(+new Date() / 1000 + response.body.expires_in);
 
+      logger.debug('Token refreshed');
       return 'Token refreshed';
     }
-
+    
+    logger.debug('Token not expired, no need to refresh');    
     return 'Token not expired, no need to refresh';
   }
 

@@ -12,6 +12,7 @@ import {
   VehicleOdometer,
   VehicleStatusOptions,
   RawVehicleStatus,
+  FullVehicleStatus,
 } from '../interfaces/common.interfaces';
 
 import { SessionController } from '../controllers/controller';
@@ -25,6 +26,10 @@ export default class CanadianVehicle extends Vehicle {
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
     super(vehicleConfig, controller);
     logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
+  }
+
+  public fullStatus(): Promise<FullVehicleStatus | null> {
+    throw new Error('Method not implemented.');
   }
 
   public async status(
@@ -218,24 +223,29 @@ export default class CanadianVehicle extends Vehicle {
   private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
+    // add logic for token refresh if to ensure we don't use a stale token
+    await this.controller.refreshAccessToken();
+
+    const options = {
+      method: 'POST',
+      json: true,
+      throwHttpErrors: false,
+      headers: {
+        from: CLIENT_ORIGIN,
+        language: 1,
+        offset: this.timeOffset,
+        accessToken: this.controller.session.accessToken,
+        vehicleId: this.vehicleConfig.id,
+        ...headers,
+      },
+      body: {
+        pin: this.userConfig.pin,
+        ...body,
+      },
+    };
+
     try {
-      const response = await got(endpoint, {
-        method: 'POST',
-        json: true,
-        throwHttpErrors: false,
-        headers: {
-          from: CLIENT_ORIGIN,
-          language: 1,
-          offset: this.timeOffset,
-          accessToken: this.controller.session.accessToken,
-          vehicleId: this.vehicleConfig.id,
-          ...headers,
-        },
-        body: {
-          pin: this.userConfig.pin,
-          ...body,
-        },
-      });
+      const response: any = await got(endpoint, options);
 
       if (response.body.responseHeader.responseCode != 0) {
         return response.body.responseHeader.responseDesc;

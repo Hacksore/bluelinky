@@ -1,9 +1,9 @@
 /* eslint-disable */
 import got from 'got';
 
-import { AmericanController } from '../lib/controllers/american.controller';
-import { EuropeanController } from '../lib/controllers/european.controller';
-import { CanadianController } from '../lib/controllers/canadian.controller';
+import { AmericanController } from '../controllers/american.controller';
+import { EuropeanController } from '../controllers/european.controller';
+import { CanadianController } from '../controllers/canadian.controller';
 
 jest.mock('got');
 
@@ -22,7 +22,6 @@ const getController = region => {
     pin: '1234',
     vin: '4444444444444',
     vehicleId: undefined,
-    deviceUuid: '',
   });
 
   return controller;

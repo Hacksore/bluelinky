@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "moduleResolution": "node",
-    "target": "es5",
-    "module":"es2015",
+    "target": "es6",
     "strict": true,
     "sourceMap": true,
     "noImplicitAny": false,
@@ -10,6 +9,7 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
     "declarationDir": "dist",
     "outDir": "dist",

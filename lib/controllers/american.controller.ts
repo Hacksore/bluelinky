@@ -12,7 +12,7 @@ import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 export class AmericanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.debug(`US Controller created`);
+    logger.debug('US Controller created');
   }
 
   private vehicles: Array<AmericanVehicle> = [];
@@ -39,15 +39,17 @@ export class AmericanController extends SessionController {
         +new Date() / 1000 + parseInt(response.body.expires_in)
       );
 
+      logger.debug('Token refreshed');
       return 'Token refreshed';
     }
 
+    logger.debug('Token not expired, no need to refresh');
     return 'Token not expired, no need to refresh';
   }
 
   // TODO: come up with a better return value?
   public async login(): Promise<string> {
-    logger.debug('Logging in to API');
+    logger.debug('Logging in to the API');
 
     const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
       method: 'POST',
