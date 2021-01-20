@@ -7,10 +7,6 @@ export const CLIENT_ORIGIN = 'SPA';
 export const CA_ENDPOINTS = {
   login: `${CA_BASE_URL}/tods/api/lgn`,
   logout: `${CA_BASE_URL}/tods/api/lgout`,
-  // Account
-  myAccount: `${CA_BASE_URL}/tods/api/acctinfo`,
-  nextService: `${CA_BASE_URL}/tods/api/nxtsvc`,
-  preferedDealer: `${CA_BASE_URL}/tods/api/gtprfrdlr`,
   // Vehicle
   vehicleList: `${CA_BASE_URL}/tods/api/vhcllst`,
   vehicleInfo: `${CA_BASE_URL}/tods/api/sltvhcl`,

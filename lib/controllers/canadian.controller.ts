@@ -18,17 +18,16 @@ export class CanadianController extends SessionController {
   private vehicles: Array<CanadianVehicle> = [];
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
-  public async refreshAccessToken(): Promise<string> {
-    const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
+  public async refreshAccessToken(): Promise<string> {    
+    const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
+    
+    logger.debug('shouldRefreshToken: ' + shouldRefreshToken.toString());
 
     if (this.session.refreshToken && shouldRefreshToken) {
-      // TODO , right call ?
-      const response = await this.request(CA_ENDPOINTS.verifyToken, {}, {});
 
-      this.session.accessToken = response.body.access_token;
-      this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor(+new Date() / 1000 + response.body.expires_in);
-
+      // TODO: someone should find the refresh token API url then we dont have to do this hack
+      // the previously used CA_ENDPOINTS.verifyToken did not refresh it only provided if the token was valid
+      await this.login();
       logger.debug('Token refreshed');
       return 'Token refreshed';
     }
@@ -44,6 +43,8 @@ export class CanadianController extends SessionController {
         loginId: this.userConfig.username,
         password: this.userConfig.password,
       });
+
+      logger.debug(response.result);
 
       this.session.accessToken = response.result.accessToken;
       this.session.refreshToken = response.result.refreshToken;

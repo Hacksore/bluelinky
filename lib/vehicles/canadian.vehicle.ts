@@ -45,6 +45,7 @@ export default class CanadianVehicle extends Vehicle {
       const response = await this.request(endpoint, {});
       const vehicleStatus = response.result;
 
+      logger.debug(vehicleStatus);
       const parsedStatus = {
         chassis: {
           hoodOpen: vehicleStatus?.hoodOpen,
@@ -73,6 +74,11 @@ export default class CanadianVehicle extends Vehicle {
           temperatureSetpoint: vehicleStatus?.airTemp?.value,
           temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
+
+        // TODO: fix props for parsed???
+        // Seems some of the translation would have to account for EV and ICE
+        // as they are often in different locations on the response
+        // example EV status is in lib/__mock__/canadianStatus.json
         engine: {
           ignition: vehicleStatus?.engine,
           adaptiveCruiseControl: vehicleStatus?.acc,
