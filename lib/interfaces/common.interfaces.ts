@@ -63,7 +63,187 @@ export interface VehicleStatus {
   };
 }
 
+// TODO: fix/update
+export interface FullVehicleStatus {
+  vehicleLocation: {
+    coord: { lat: number; lon: number; alt: number; type: number };
+    head: number;
+    speed: { value: number; unit: number };
+    accuracy: { hdop: number; pdop: number };
+    time: string;
+  };
+  odometer: { value: number, unit: number };
+  vehicleStatus: {
+    time: string;
+    airCtrlOn: boolean;
+    engine: boolean;
+    doorLock: boolean;
+    doorOpen: { frontRight: number; frontLeft: number; backLeft: number; backRight: number };
+    trunkOpen: boolean;
+    airTemp: { unit: number; hvacTempType: number; value: string };
+    defrost: boolean;
+    acc: boolean;
+    ign3: boolean;
+    hoodOpen: boolean;
+    transCond: boolean;
+    steerWheelHeat: number;
+    sideBackWindowHeat: number;
+    tirePressureLamp: {
+      tirePressureWarningLampAll: number;
+      tirePressureWarningLampFL: number;
+      tirePressureWarningLampFR: number;
+      tirePressureWarningLampRL: number;
+      tirePressureWarningLampRR: number;
+    };
+    battery: { batSoc: number; batState: number; };
+    evStatus: {
+      batteryCharge: boolean;
+      batteryStatus: number;
+      batteryPlugin: number;
+      remainTime2: { 
+        etc1: { value: number; unit: number; };
+        etc2: { value: number; unit: number; };
+        etc3: { value: number; unit: number; };
+        atc: { value: number; unit: number; };
+      };
+      drvDistance: [
+        {
+          rangeByFuel: {
+            gasModeRange: { value: number; unit: number };
+            evModeRange: { value: number; unit: number };
+            totalAvailableRange: { value: number; unit: number };
+          };
+          type: number;
+        }
+      ];
+      // "reservChargeInfos": {
+      //   "reservChargeInfo": {
+      //     "reservChargeInfoDetail": {
+      //       "reservInfo": {
+      //         "day": [
+      //           1,
+      //           2,
+      //           3,
+      //           4,
+      //           5
+      //         ],
+      //         "time": {
+      //           "time": "0800",
+      //           "timeSection": 0
+      //         }
+      //       },
+      //       "reservChargeSet": true,
+      //       "reservFatcSet": {
+      //         "defrost": false,
+      //         "airTemp": {
+      //           "value": "00H",
+      //           "unit": 0,
+      //           "hvacTempType": 1
+      //         },
+      //         "airCtrl": 0,
+      //         "heating1": 0
+      //       }
+      //     }
+      //   },
+      //   "offpeakPowerInfo": {
+      //     "offPeakPowerTime1": {
+      //       "starttime": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       },
+      //       "endtime": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     },
+      //     "offPeakPowerFlag": 1
+      //   },
+      //   "reserveChargeInfo2": {
+      //     "reservChargeInfoDetail": {
+      //       "reservInfo": {
+      //         "day": [
+      //           9
+      //         ],
+      //         "time": {
+      //           "time": "1200",
+      //           "timeSection": 0
+      //         }
+      //       },
+      //       "reservChargeSet": false,
+      //       "reservFatcSet": {
+      //         "defrost": false,
+      //         "airTemp": {
+      //           "value": "00H",
+      //           "unit": 0,
+      //           "hvacTempType": 1
+      //         },
+      //         "airCtrl": 0,
+      //         "heating1": 0
+      //       }
+      //     }
+      //   },
+      //   "reservFlag": 0,
+      //   "ect": {
+      //     "start": {
+      //       "day": 9,
+      //       "time": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     },
+      //     "end": {
+      //       "day": 9,
+      //       "time": {
+      //         "time": "1200",
+      //         "timeSection": 0
+      //       }
+      //     }
+      //   },
+      //   "targetSOClist": [
+      //     {
+      //       "targetSOClevel": 90,
+      //       "dte": {
+      //         "rangeByFuel": {
+      //           "evModeRange": {
+      //             "value": 392,
+      //             "unit": 1
+      //           },
+      //           "totalAvailableRange": {
+      //             "value": 392,
+      //             "unit": 1
+      //           }
+      //         },
+      //         "type": 2
+      //       },
+      //       "plugType": 0
+      //     },
+      //     {
+      //       "targetSOClevel": 80,
+      //       "dte": {
+      //         "rangeByFuel": {
+      //           "evModeRange": {
+      //             "value": 345,
+      //             "unit": 1
+      //           },
+      //           "totalAvailableRange": {
+      //             "value": 345,
+      //             "unit": 1
+      //           }
+      //         },
+      //         "type": 2
+      //       },
+      //       "plugType": 1
+      //     }
+      //   ]
+      // }
+    };
+  }
+}
+
 // TODO: remove
+// =======
+// Rough mapping of the raw status that might no be the same for all regions
+
 export interface RawVehicleStatus {
   lastStatusDate: string;
   dateTime: string;
@@ -158,17 +338,6 @@ export interface VehicleInfo {
   vin: string;
 }
 
-export interface VehicleFeatures {
-  seatHeatVent: {
-    drvSeatHeatOption: number;
-    astSeatHeatOption: number;
-    rlSeatHeatOption: number;
-    rrSeatHeatOption: number;
-  };
-  hvacTempType: number;
-  targetMinSoc: number;
-}
-
 export interface VehicleFeatureEntry {
   category: string;
   features: [
@@ -183,16 +352,6 @@ export interface VehicleFeatureEntry {
     }
   ];
 }
-export interface VehicleFeaturesModel {
-  features: [VehicleFeatureEntry];
-}
-
-export interface VehicleInfoResponse {
-  vehicleInfo: VehicleInfo;
-  features: VehicleFeatures;
-  featuresModel: VehicleFeaturesModel;
-  status: VehicleStatus;
-}
 
 // Location
 export interface VehicleLocation {
@@ -205,27 +364,6 @@ export interface VehicleLocation {
   };
   heading: number;
 }
-
-// TODO: remove
-export interface LegacyVehicleLocation {
-  accuracy: {
-    hdop: number;
-    pdop: number;
-  };
-  coord: {
-    alt: number;
-    lat: number;
-    lon: number;
-    type: number;
-  };
-  head: number;
-  speed: {
-    unit: number;
-    value: number;
-  };
-  time: string;
-}
-
 export interface VehicleOdometer {
   unit: number;
   value: number;
@@ -236,23 +374,8 @@ export interface VehicleStatusOptions {
   parsed: boolean;
 }
 
-// Vehicle Next Service
-export interface VehicleNextService {
-  msopServiceOdometer: number;
-  msopServiceOdometerUnit: number;
-  mtspServiceDate: string;
-  imatServiceOdometer: number;
-  imatServiceOdometerUnit: number;
-  mtitServiceDate: string;
-  currentOdometer: number;
-  currentOdometerUnit: number;
-  serviceOdometerDuration: number;
-  serviceDaysDuration: number;
-  serviceMonthsThreshold: number;
-}
 
 // VEHICLE COMMANDS /////////////////////////////////////////////
-
 export interface VehicleCommandResponse {
   responseCode: number; // 0 is success
   responseDesc: string;
@@ -282,63 +405,4 @@ export interface VehicleRegisterOptions {
   regId: string;
   id: string;
   generation: string;
-}
-
-// ACCOUNT //////////////////////////////////////////////////////
-
-// Account Info
-export interface Address {
-  street: string;
-  city: string;
-  province: string;
-  postalCode: string;
-}
-
-export interface AccountInfo {
-  firstName: string;
-  lastName: string;
-  notificationEmail: string;
-  phones: {
-    primary: string | null;
-    secondary: string | null;
-  };
-  addresses: {
-    primary: Address | null;
-    secondary: Address | null;
-  };
-  preference: {
-    odometerUnit: number;
-    climateUnit: string; // "C" / "F"
-    languageId: number;
-    maintenanceAlert: boolean;
-    preferredDealer: PreferedDealer | null;
-    promotionMessage: string | null;
-  };
-}
-
-// PreferedDealer
-export interface PreferedDealerHour {
-  dayCode: number;
-  startTime: string;
-  startTimeUnit: string;
-  endTime: string;
-  endTimeUnit: string;
-}
-
-export interface PreferedDealer {
-  dealerCode: string;
-  dealerName: string;
-  street: string;
-  province: string;
-  city: string;
-  postalCode: string;
-  tel: string;
-  fax: string;
-  fullAddress: string;
-  distance: string;
-  lat: string;
-  lng: string;
-  webSite: string;
-  salesHourList: [PreferedDealerHour];
-  serviceHourList: [PreferedDealerHour];
 }

@@ -1,5 +1,5 @@
 import got from 'got';
-import { AccountInfo, BlueLinkyConfig, PreferedDealer } from '../interfaces/common.interfaces';
+import { BlueLinkyConfig } from '../interfaces/common.interfaces';
 import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadian.vehicle';
@@ -9,8 +9,6 @@ import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 
 export class CanadianController extends SessionController {
-  private _preferredDealer: PreferedDealer | null = null;
-  private _accountInfo: AccountInfo | null = null;
 
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
@@ -20,20 +18,21 @@ export class CanadianController extends SessionController {
   private vehicles: Array<CanadianVehicle> = [];
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
-  public async refreshAccessToken(): Promise<string> {
-    const shouldRefreshToken = Math.floor(+new Date() / 1000 - this.session.tokenExpiresAt) <= 10;
+  public async refreshAccessToken(): Promise<string> {    
+    const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
+    
+    logger.debug('shouldRefreshToken: ' + shouldRefreshToken.toString());
 
     if (this.session.refreshToken && shouldRefreshToken) {
-      // TODO , right call ?
-      const response = await this.request(CA_ENDPOINTS.verifyToken, {}, {});
 
-      this.session.accessToken = response.body.access_token;
-      this.session.refreshToken = response.body.refresh_token;
-      this.session.tokenExpiresAt = Math.floor(+new Date() / 1000 + response.body.expires_in);
-
+      // TODO: someone should find the refresh token API url then we dont have to do this hack
+      // the previously used CA_ENDPOINTS.verifyToken did not refresh it only provided if the token was valid
+      await this.login();
+      logger.debug('Token refreshed');
       return 'Token refreshed';
     }
-
+    
+    logger.debug('Token not expired, no need to refresh');    
     return 'Token not expired, no need to refresh';
   }
 
@@ -44,6 +43,8 @@ export class CanadianController extends SessionController {
         loginId: this.userConfig.username,
         password: this.userConfig.password,
       });
+
+      logger.debug(response.result);
 
       this.session.accessToken = response.result.accessToken;
       this.session.refreshToken = response.result.refreshToken;
@@ -89,33 +90,6 @@ export class CanadianController extends SessionController {
     } catch (err) {
       logger.debug(err);
       return this.vehicles;
-    }
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-  // Account
-  //////////////////////////////////////////////////////////////////////////////
-  // TODO: deprecated account specific data
-  public async myAccount(): Promise<AccountInfo> {
-    logger.info('Begin myAccount request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.myAccount, {});
-      this._accountInfo = response.result as AccountInfo;
-      return this._accountInfo;
-    } catch (err) {
-      throw err.message;
-    }
-  }
-
-  // TODO: deprecated account specific data
-  public async preferedDealer(): Promise<PreferedDealer | null> {
-    logger.info('Begin preferedDealer request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.preferedDealer, {});
-      this._preferredDealer = response.result as PreferedDealer;
-      return this._preferredDealer;
-    } catch (err) {
-      throw err.message;
     }
   }
 

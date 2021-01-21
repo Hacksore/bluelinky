@@ -1,6 +1,7 @@
 import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
 import {
   VehicleStatus,
+  FullVehicleStatus,
   VehicleOdometer,
   VehicleLocation,
   VehicleClimateOptions,
@@ -13,7 +14,7 @@ import got from 'got';
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { getTempCode, getTempFromCode } from '../util';
+import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 
 export default class EuropeanVehicle extends Vehicle {
@@ -49,7 +50,7 @@ export default class EuropeanVehicle extends Vehicle {
             defrost: config.defrost,
             heating1: config.windscreenHeating ? 1 : 0,
           },
-          tempCode: getTempCode(config.temperature),
+          tempCode: celciusToTempCode(config.temperature),
           unit: config.unit,
         },
         headers: {
@@ -150,6 +151,65 @@ export default class EuropeanVehicle extends Vehicle {
     return 'Something went wrong!';
   }
 
+  public async fullStatus(
+    input: VehicleStatusOptions
+  ): Promise<FullVehicleStatus | null> {
+    const statusConfig = {
+      ...DEFAULT_VEHICLE_STATUS_OPTIONS,
+      ...input,
+    };
+
+    await this.checkControlToken();
+
+    const cachedResponse = await got(
+      `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': this.controller.session.controlToken,
+          'ccsp-device-id': this.controller.session.deviceId,
+          'Content-Type': 'application/json',
+        },
+        json: true,
+      }
+    );
+
+    const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
+
+    if(statusConfig.refresh) {
+      const statusResponse = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+          },
+          json: true,
+        }
+      );
+      fullStatus.vehicleStatus = statusResponse.body.resMsg;
+
+      const locationResponse = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+          },
+          json: true,
+        }
+      );
+      fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
+    }
+
+    this._fullStatus = fullStatus;
+    return Promise.resolve(this._fullStatus);
+  }
+
   public async status(
     input: VehicleStatusOptions
   ): Promise<VehicleStatus | RawVehicleStatus | null> {
@@ -205,7 +265,7 @@ export default class EuropeanVehicle extends Vehicle {
         sideMirrorHeat: false,
         rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
         defrost: vehicleStatus?.defrost,
-        temperatureSetpoint: getTempFromCode(vehicleStatus?.airTemp?.value),
+        temperatureSetpoint: tempCodeToCelsius(vehicleStatus?.airTemp?.value),
         temperatureUnit: vehicleStatus?.airTemp?.unit,
       },
       engine: {

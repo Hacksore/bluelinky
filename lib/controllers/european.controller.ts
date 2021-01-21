@@ -16,7 +16,7 @@ import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
     super(userConfig);
-    logger.debug(`EU Controller created`);
+    logger.debug('EU Controller created');
 
     this.session.deviceId = this.uuidv4();
   }
@@ -44,10 +44,12 @@ export class EuropeanController extends SessionController {
     const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
 
     if (!this.session.refreshToken) {
+      logger.debug('Need refresh token to refresh access token. Use login()');
       return 'Need refresh token to refresh access token. Use login()';
     }
 
     if (!shouldRefreshToken) {
+      logger.debug('Token not expired, no need to refresh');
       return 'Token not expired, no need to refresh';
     }
 
@@ -71,6 +73,7 @@ export class EuropeanController extends SessionController {
     });
 
     if (response.statusCode !== 200) {
+      logger.debug(`Refresh token failed: ${response.body}`);
       return `Refresh token failed: ${response.body}`;
     }
 
@@ -78,6 +81,7 @@ export class EuropeanController extends SessionController {
     this.session.accessToken = 'Bearer ' + responseBody.access_token;
     this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
 
+    logger.debug('Token refreshed');
     return 'Token refreshed';
   }
 

@@ -6,32 +6,21 @@ import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import {
   VehicleStartOptions,
-  VehicleFeatures,
-  VehicleFeaturesModel,
-  VehicleInfo,
-  VehicleInfoResponse,
   VehicleLocation,
   VehicleRegisterOptions,
-  VehicleNextService,
   VehicleStatus,
   VehicleOdometer,
   VehicleStatusOptions,
   RawVehicleStatus,
+  FullVehicleStatus,
 } from '../interfaces/common.interfaces';
 
 import { SessionController } from '../controllers/controller';
-
 import { Vehicle } from './vehicle';
+import { celciusToTempCode } from '../util';
 
 export default class CanadianVehicle extends Vehicle {
-  private _nextService: VehicleNextService | null = null;
-
-  private _info: VehicleInfo | null = null;
-  private _features: VehicleFeatures | null = null;
-  private _featuresModel: VehicleFeaturesModel | null = null;
-
   public region = REGIONS.CA;
-
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
@@ -39,24 +28,10 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  // Vehicle
-  //////////////////////////////////////////////////////////////////////////////
-  // TODO: remove any non standardized methods :)
-  public async vehicleInfo(): Promise<VehicleInfoResponse | null> {
-    logger.debug('Begin vehicleInfo request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.vehicleInfo, {});
-      const vehicleInfoResponse = response.result as VehicleInfoResponse;
-      this._info = vehicleInfoResponse.vehicleInfo;
-      this._status = vehicleInfoResponse.status;
-      this._features = vehicleInfoResponse.features;
-      this._featuresModel = vehicleInfoResponse.featuresModel;
-      return vehicleInfoResponse;
-    } catch (err) {
-      throw err.message;
-    }
+  public fullStatus(): Promise<FullVehicleStatus | null> {
+    throw new Error('Method not implemented.');
   }
+
   public async status(
     input: VehicleStatusOptions
   ): Promise<VehicleStatus | RawVehicleStatus | null> {
@@ -70,6 +45,7 @@ export default class CanadianVehicle extends Vehicle {
       const response = await this.request(endpoint, {});
       const vehicleStatus = response.result;
 
+      logger.debug(vehicleStatus);
       const parsedStatus = {
         chassis: {
           hoodOpen: vehicleStatus?.hoodOpen,
@@ -98,6 +74,11 @@ export default class CanadianVehicle extends Vehicle {
           temperatureSetpoint: vehicleStatus?.airTemp?.value,
           temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
+
+        // TODO: fix props for parsed???
+        // Seems some of the translation would have to account for EV and ICE
+        // as they are often in different locations on the response
+        // example EV status is in lib/__mock__/canadianStatus.json
         engine: {
           ignition: vehicleStatus?.engine,
           adaptiveCruiseControl: vehicleStatus?.acc,
@@ -110,18 +91,6 @@ export default class CanadianVehicle extends Vehicle {
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
-    } catch (err) {
-      throw err.message;
-    }
-  }
-
-  // TODO: remove any non standardized methods :)
-  public async nextService(): Promise<VehicleNextService | null> {
-    logger.debug('Begin nextService request');
-    try {
-      const response = await this.request(CA_ENDPOINTS.nextService, {});
-      this._nextService = response.result as VehicleNextService;
-      return this._nextService;
     } catch (err) {
       throw err.message;
     }
@@ -175,14 +144,7 @@ export default class CanadianVehicle extends Vehicle {
       const airTemp = startConfig.airTempvalue;
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
-        if (airTemp > 27 || airTemp < 17) {
-          return 'air temperature should be between 17 and 27 degrees';
-        }
-        let airTempValue: string = (6 + (airTemp - 17) * 2).toString(16).toUpperCase() + 'H';
-        if (airTempValue.length == 2) {
-          airTempValue = '0' + airTempValue;
-        }
-        body.hvacInfo['airTemp'] = { value: airTempValue, unit: 0, hvacTempType: 1 };
+        body.hvacInfo['airTemp'] = { value: celciusToTempCode(airTemp), unit: 0, hvacTempType: 1 };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
         throw 'air temperature should be specified';
       }
@@ -190,7 +152,13 @@ export default class CanadianVehicle extends Vehicle {
       const preAuth = await this.getPreAuth();
       const response = await this.request(CA_ENDPOINTS.start, body, { pAuth: preAuth });
 
-      return response;
+      logger.debug(response);
+
+      if (response.statusCode === 200) {
+        return 'Vehicle started!';
+      }
+
+      return 'Failed to start vehicle';
     } catch (err) {
       throw err.message;
     }
@@ -261,23 +229,29 @@ export default class CanadianVehicle extends Vehicle {
   private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
+    // add logic for token refresh if to ensure we don't use a stale token
+    await this.controller.refreshAccessToken();
+
+    const options = {
+      method: 'POST',
+      json: true,
+      throwHttpErrors: false,
+      headers: {
+        from: CLIENT_ORIGIN,
+        language: 1,
+        offset: this.timeOffset,
+        accessToken: this.controller.session.accessToken,
+        vehicleId: this.vehicleConfig.id,
+        ...headers,
+      },
+      body: {
+        pin: this.userConfig.pin,
+        ...body,
+      },
+    };
+
     try {
-      const response = await got(endpoint, {
-        method: 'POST',
-        json: true,
-        headers: {
-          from: CLIENT_ORIGIN,
-          language: 1,
-          offset: this.timeOffset,
-          accessToken: this.controller.session.accessToken,
-          vehicleId: this.vehicleConfig.id,
-          ...headers,
-        },
-        body: {
-          pin: this.userConfig.pin,
-          ...body,
-        },
-      });
+      const response: any = await got(endpoint, options);
 
       if (response.body.responseHeader.responseCode != 0) {
         return response.body.responseHeader.responseDesc;

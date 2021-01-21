@@ -1,24 +1,27 @@
 /* eslint-disable */
 // TODO: add all calls from EU and CA
 
-const config = require('./config.json');
-const BlueLinky = require('./dist/index');
-const inquirer = require('inquirer');
+import config from './config.json';
+import BlueLinky from './lib';
+import inquirer from 'inquirer';
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
   { name: 'start', value: 'start' },
   { name: 'odometer', value: 'odometer' },
   { name: 'stop', value: 'stop' },
-  { name: 'status (on bluelink cache)', value: 'status' },
-  { name: 'status refresh (fetch vehicle)', value: 'statusR' },
+  { name: 'status (on server cache)', value: 'status' },
+  { name: 'status (on server cache) unparsed', value: 'statusU' },
+  { name: 'status refresh (fetch from vehicle)', value: 'statusR' },
+  { name: 'full raw status (on server cache)', value: 'fullStatus' },
+  { name: 'full raw status refresh (fetch from vehicle)', value: 'fullStatusR' },
   { name: 'lock', value: 'lock' },
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
 ];
 
 let vehicle;
-const { username, password, vin, pin, deviceUuid } = config;
+const { username, password, vin, pin } = config;
 
 const onReadyHandler = vehicles => {
   vehicle = vehicles[0];
@@ -51,8 +54,7 @@ const createInstance = region => {
     username,
     password,
     region: region,
-    pin,
-    deviceUuid,
+    pin
   });
   client.on('ready', onReadyHandler);
 };
@@ -103,6 +105,20 @@ async function performCommand(command) {
           parsed: true
         });
         console.log('status remote : ' + JSON.stringify(statusR, null, 2));
+        break;
+      case 'fullStatus':
+        const fullStatus = await vehicle.fullStatus({
+          refresh: false,
+          parsed: false
+        });
+        console.log('full status cached : ' + JSON.stringify(fullStatus, null, 2));
+        break;
+      case 'fullStatusR':
+        const fullStatusR = await vehicle.fullStatus({
+          refresh: true,
+          parsed: false
+        });
+        console.log('full status remote : ' + JSON.stringify(fullStatusR, null, 2));
         break;
       case 'start':
         const startRes = await vehicle.start({

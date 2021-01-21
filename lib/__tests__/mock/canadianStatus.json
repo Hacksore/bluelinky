@@ -1,0 +1,87 @@
+{
+  "status": {
+    "lastStatusDate": "20210118153031",
+    "airCtrlOn": false,
+    "engine": false,
+    "doorLock": false,
+    "doorOpen": {
+      "frontLeft": 0,
+      "frontRight": 0,
+      "backLeft": 0,
+      "backRight": 0
+    },
+    "trunkOpen": false,
+    "airTempUnit": "C",
+    "airTemp": {
+      "value": "00H",
+      "unit": 0
+    },
+    "defrost": false,
+    "acc": false,
+    "evStatus": {
+      "batteryCharge": false,
+      "batteryStatus": 39,
+      "batteryPlugin": 0,
+      "remainTime2": {
+        "etc1": {
+          "value": 0,
+          "unit": 1
+        },
+        "etc2": {
+          "value": 0,
+          "unit": 1
+        },
+        "etc3": {
+          "value": 0,
+          "unit": 1
+        },
+        "atc": {
+          "value": 0,
+          "unit": 1
+        }
+      },
+      "drvDistance": [
+        {
+          "rangeByFuel": {
+            "gasModeRange": {
+              "value": 0,
+              "unit": 1
+            },
+            "evModeRange": {
+              "value": 141,
+              "unit": 1
+            },
+            "totalAvailableRange": {
+              "value": 141,
+              "unit": 1
+            }
+          },
+          "type": 2
+        }
+      ]
+    },
+    "hoodOpen": true,
+    "transCond": true,
+    "steerWheelHeat": 0,
+    "sideBackWindowHeat": 0,
+    "dte": {
+      "unit": 1
+    },
+    "tirePressureLamp": {
+      "tirePressureLampAll": 0
+    },
+    "battery": {
+      "batSignalReferenceValue": {}
+    },
+    "remoteIgnition": true,
+    "seatHeaterVentInfo": {},
+    "sleepModeCheck": false,
+    "lampWireStatus": {
+      "headLamp": {},
+      "stopLamp": {},
+      "turnSignalLamp": {}
+    },
+    "windowOpen": {},
+    "engineRuntime": {}
+  }
+}

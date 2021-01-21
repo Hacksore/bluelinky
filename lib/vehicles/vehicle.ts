@@ -1,5 +1,6 @@
 import {
   VehicleStatus,
+  FullVehicleStatus,
   VehicleLocation,
   VehicleOdometer,
   VehicleClimateOptions,
@@ -17,16 +18,20 @@ import { REGIONS } from '../constants';
 
 export abstract class Vehicle {
   // methods to override in each region vehicle
-  abstract async status(
+  abstract status(
     input: VehicleStatusOptions
   ): Promise<VehicleStatus | RawVehicleStatus | null>;
-  abstract async unlock(): Promise<string>;
-  abstract async lock(): Promise<string>;
-  abstract async start(config: VehicleClimateOptions | VehicleStartOptions): Promise<string>;
-  abstract async stop(): Promise<string>;
-  abstract async location(): Promise<VehicleLocation | null>;
-  abstract async odometer(): Promise<VehicleOdometer | null>;
+  abstract fullStatus(
+    input: VehicleStatusOptions
+  ): Promise<FullVehicleStatus | null>;
+  abstract unlock(): Promise<string>;
+  abstract lock(): Promise<string>;
+  abstract start(config: VehicleClimateOptions | VehicleStartOptions): Promise<string>;
+  abstract stop(): Promise<string>;
+  abstract location(): Promise<VehicleLocation | null>;
+  abstract odometer(): Promise<VehicleOdometer | null>;
 
+  public _fullStatus: FullVehicleStatus | null = null;
   public _status: VehicleStatus | RawVehicleStatus | null = null;
   public _location: VehicleLocation | null = null;
   public _odometer: VehicleOdometer | null = null;

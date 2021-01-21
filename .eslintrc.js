@@ -9,6 +9,8 @@ module.exports = {
   ],
   rules: {
     'no-console': 2,
+    'quotes': [1, 'single', { 'avoidEscape': true }],
+    'semi': [1, 'always'],
   },
   env: {
     browser: true,
