@@ -33,6 +33,8 @@ export class AmericanController extends SessionController {
         },
         json: true,
       });
+
+      logger.debug(response.body);
       this.session.accessToken = response.body.access_token;
       this.session.refreshToken = response.body.refresh_token;
       this.session.tokenExpiresAt = Math.floor(
@@ -64,6 +66,8 @@ export class AmericanController extends SessionController {
       json: true,
     });
 
+    logger.debug(response.body);
+    
     if (response.statusCode !== 200) {
       return 'login bad';
     }

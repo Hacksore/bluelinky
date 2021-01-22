@@ -229,7 +229,7 @@ export default class CanadianVehicle extends Vehicle {
   private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
-    // add logic for token refresh if to ensure we don't use a stale token
+    // add logic for token refresh to ensure we don't use a stale token
     await this.controller.refreshAccessToken();
 
     const options = {

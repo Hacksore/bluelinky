@@ -15,6 +15,8 @@ import EUROPE_STATUS_MOCK from './mock/europeStatus.json';
 
 jest.mock('got');
 
+const gotMock = got as any;
+
 const referenceMap = {
   US: {
     controller: AmericanController,
@@ -30,14 +32,14 @@ const referenceMap = {
   },
 };
 
-const getVehicle = region => {
+const getVehicle = (region: string) => {
   const Vehicle = referenceMap[region].vehicle;
   const Controller = referenceMap[region].controller;
 
   const controller = new Controller({
     username: 'testuser@gmail.com',
     password: 'test',
-    region: 'US',
+    region: region,
     autoLogin: true,
     pin: '1234',
     vin: '4444444444444',
@@ -67,9 +69,48 @@ describe('AmericanVehicle', () => {
     expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
+  it('refresh expired access token', async () => {
+    // create session with expired access token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Math.floor(Date.now() / 1000) - 100,
+    };
+
+    // mock token request
+    gotMock.mockReturnValueOnce({
+      body: {
+        access_token: 'JEST_TOKEN',
+        refresh_token: 'JEST_TOKEN',
+        expires_in: 10,
+      },
+      json: true,
+      statusCode: 200,
+    });
+
+    const result = await vehicle.controller.refreshAccessToken();
+    expect(result).toEqual('Token refreshed');
+
+    // should update access token
+    expect(vehicle.controller.session.accessToken).toEqual('JEST_TOKEN');
+    expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(
+      Math.floor(Date.now() / 1000)
+    );
+    expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(
+      Math.floor(Date.now() / 1000 + 20)
+    );
+  });
+
   it('call lock commmand', async () => {
-    (got as any).mockReturnValueOnce({
-      body: {},
+    // default session with a valid token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Date.now() / 1000 + 300,
+    };
+
+    gotMock.mockReturnValueOnce({
+      body: JSON.stringify({}),
       statusCode: 200,
     });
 
@@ -78,7 +119,7 @@ describe('AmericanVehicle', () => {
   });
 
   it('call status commmand', async () => {
-    (got as any).mockReturnValueOnce({
+    gotMock.mockReturnValueOnce({
       body: JSON.stringify({ vehicleStatus: AMERICAN_STATUS_MOCK }),
       statusCode: 200,
     });
@@ -89,14 +130,49 @@ describe('AmericanVehicle', () => {
 });
 
 describe('CanadianVehicle', () => {
-  const vehicle = getVehicle('CA');
+  const vehicle: CanadianVehicle = getVehicle('CA');
 
   it('define new vehicle', () => {
     expect(vehicle.nickname()).toEqual('Jest is best');
   });
 
+  it('refresh expired access token', async () => {
+    // create session with expired access token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Date.now() / 1000,
+      controlTokenExpiresAt: 0,
+    };
+
+    // mock token request
+    gotMock.mockReturnValueOnce({
+      body: JSON.stringify({
+        access_token: 'JEST_TOKEN',
+        refresh_token: 'JEST_TOKEN',
+        expires_in: 10,
+      }),
+      statusCode: 200,
+    });
+
+    const result = await vehicle.controller.refreshAccessToken();
+    expect(result).toEqual('Token refreshed');
+    // should update access token
+    expect(vehicle.controller.session.accessToken).toEqual('JEST_TOKEN');
+    expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(Math.floor(Date.now() / 1000));
+    expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(Math.floor(Date.now() / 1000 + 20));
+
+  });
+
   it('call lock commmand', async () => {
-    (got as any).mockReturnValueOnce({
+    // default session with a valid token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Date.now() / 1000 + 300,
+    };
+
+    gotMock.mockReturnValueOnce({
       body: {
         result: {
           pAuth: 'test',
@@ -106,15 +182,17 @@ describe('CanadianVehicle', () => {
         },
       },
       statusCode: 200,
+      json: true,
     });
 
-    (got as any).mockReturnValueOnce({
+    gotMock.mockReturnValueOnce({
       body: {
         responseHeader: {
           responseCode: 0,
         },
       },
       statusCode: 200,
+      json: true,
     });
 
     const response = await vehicle.lock();
@@ -141,24 +219,28 @@ describe('EuropeanVehicle', () => {
     };
 
     // mock token request
-    (got as any).mockReturnValueOnce({
+    gotMock.mockReturnValueOnce({
       body: JSON.stringify({ access_token: 'AAAAAAAA', expires_in: 10 }),
       statusCode: 200,
     });
 
-    (got as any).mockClear();
+    gotMock.mockClear();
 
     const result = await vehicle.controller.refreshAccessToken();
     expect(result).toEqual('Token refreshed');
     // should update access token
     expect(vehicle.controller.session.accessToken).toEqual('Bearer AAAAAAAA');
-    expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(Date.now() / 1000);
-    expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(Date.now() / 1000 + 20);
+    expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(
+      Math.floor(Date.now() / 1000)
+    );
+    expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(
+      Math.floor(Date.now() / 1000 + 20)
+    );
 
-    const gotArgs = (got as any).mock.calls[0];
+    const gotArgs = gotMock.mock.calls[0];
     expect(gotArgs[0]).toMatch(/token$/);
-    expect(gotArgs[1].body).toContain("grant_type=refresh_token");
-    expect(gotArgs[1].body).toContain("refresh_token=" + vehicle.controller.session.refreshToken);
+    expect(gotArgs[1].body).toContain('grant_type=refresh_token');
+    expect(gotArgs[1].body).toContain('refresh_token=' + vehicle.controller.session.refreshToken);
   });
 
   it('not refresh active access token', async () => {
@@ -172,12 +254,12 @@ describe('EuropeanVehicle', () => {
       controlTokenExpiresAt: 0,
     };
 
-    (got as any).mockClear();
+    gotMock.mockClear();
 
     const result = await vehicle.controller.refreshAccessToken();
     expect(result).toEqual('Token not expired, no need to refresh');
     // should not call got
-    expect((got as any).mock.calls).toHaveLength(0);
+    expect(gotMock.mock.calls).toHaveLength(0);
   });
 
   it('refresh expired control token', async () => {
@@ -192,12 +274,12 @@ describe('EuropeanVehicle', () => {
     };
 
     // mock pin request
-    (got as any).mockReturnValueOnce({
+    gotMock.mockReturnValueOnce({
       body: { controlToken: 'BBBBBB', expiresTime: 10 },
       statusCode: 200,
     });
 
-    (got as any).mockClear();
+    gotMock.mockClear();
 
     await vehicle.checkControlToken();
     // should update control token
@@ -205,11 +287,11 @@ describe('EuropeanVehicle', () => {
     expect(vehicle.controller.session.controlTokenExpiresAt).toBeGreaterThan(Date.now() / 1000);
     expect(vehicle.controller.session.controlTokenExpiresAt).toBeLessThan(Date.now() / 1000 + 20);
 
-    const gotArgs = (got as any).mock.calls[0];
+    const gotArgs = gotMock.mock.calls[0];
     expect(gotArgs[0]).toMatch(/pin$/);
     expect(gotArgs[1].headers.Authorization).toEqual(vehicle.controller.session.accessToken);
-    expect(gotArgs[1].body.deviceId).toEqual("aaaa-bbbb-cccc-eeee");
-    expect(gotArgs[1].body.pin).toEqual("1234");
+    expect(gotArgs[1].body.deviceId).toEqual('aaaa-bbbb-cccc-eeee');
+    expect(gotArgs[1].body.pin).toEqual('1234');
   });
 
   it('not refresh active control token', async () => {
@@ -223,11 +305,11 @@ describe('EuropeanVehicle', () => {
       controlTokenExpiresAt: Date.now() / 1000 + 10,
     };
 
-    (got as any).mockClear();
+    gotMock.mockClear();
 
     await vehicle.checkControlToken();
     // should not call got
-    expect((got as any).mock.calls).toHaveLength(0);
+    expect(gotMock.mock.calls).toHaveLength(0);
   });
 
   it('call status commmand', async () => {
@@ -242,7 +324,7 @@ describe('EuropeanVehicle', () => {
     };
 
     // mock the status request
-    (got as any).mockReturnValueOnce({
+    gotMock.mockReturnValueOnce({
       body: EUROPE_STATUS_MOCK,
       statusCode: 200,
     });

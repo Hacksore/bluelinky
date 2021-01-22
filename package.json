@@ -1,6 +1,6 @@
 {
   "name": "bluelinky",
-  "version": "6.0.0-alpha1",
+  "version": "6.0.0-alpha2",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,7 +43,7 @@
     "eslint": "^7.3.1",
     "husky": "^4.2.5",
     "inquirer": "^7.3.0",
-    "jest": "^26.1.0",
+    "jest": "^26.6.3",
     "rollup": "^2.18.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",

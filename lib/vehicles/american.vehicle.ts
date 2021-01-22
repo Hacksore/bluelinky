@@ -293,8 +293,14 @@ export default class AmericanVehicle extends Vehicle {
     // add logic for token refresh if to ensure we don't use a stale token
     await this.controller.refreshAccessToken();
 
+    // if we refreshed token make sure to apply it to the request
+    options.headers.access_token = this.controller.session.accessToken;
+
     const response = await got(`${BASE_URL}/${service}`, { throwHttpErrors: false, ...options });
-    logger.debug(response.body);
+
+    if (response?.body) {
+      logger.debug(response.body);
+    }
 
     return response;
   }
