@@ -19,7 +19,7 @@
     ]
   },
   "include": [
-    "lib"
+    "src"
   ],
   "exclude": [
     "node_modules"

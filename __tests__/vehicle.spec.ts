@@ -1,14 +1,14 @@
 /* eslint-disable */
 import got from 'got';
 
-import AmericanVehicle from '../vehicles/american.vehicle';
-import { AmericanController } from '../controllers/american.controller';
+import AmericanVehicle from '../src/vehicles/american.vehicle';
+import { AmericanController } from '../src/controllers/american.controller';
 
-import EuropeanVehicle from '../vehicles/european.vehicle';
-import { EuropeanController } from '../controllers/european.controller';
+import EuropeanVehicle from '../src/vehicles/european.vehicle';
+import { EuropeanController } from '../src/controllers/european.controller';
 
-import CanadianVehicle from '../vehicles/canadian.vehicle';
-import { CanadianController } from '../controllers/canadian.controller';
+import CanadianVehicle from '../src/vehicles/canadian.vehicle';
+import { CanadianController } from '../src/controllers/canadian.controller';
 
 import AMERICAN_STATUS_MOCK from './mock/americanStatus.json';
 import EUROPE_STATUS_MOCK from './mock/europeStatus.json';
