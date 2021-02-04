@@ -2,7 +2,7 @@
 // TODO: add all calls from EU and CA
 
 import config from './config.json';
-import BlueLinky from './lib';
+import BlueLinky from './src';
 import inquirer from 'inquirer';
 
 const apiCalls = [
