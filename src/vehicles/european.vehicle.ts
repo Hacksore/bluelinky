@@ -317,16 +317,16 @@ export default class EuropeanVehicle extends Vehicle {
       }
     );
 
-    const data = response.body.resMsg.gpsDetail;
+    const data = response.body.resMsg.gpsDetail ?? response.body.resMsg;
     this._location = {
-      latitude: data.coord.lat,
-      longitude: data.coord.lon,
-      altitude: data.coord.alt,
+      latitude: data?.coord?.lat,
+      longitude: data?.coord?.lon,
+      altitude: data?.coord?.alt,
       speed: {
-        unit: data.speed.unit,
-        value: data.speed.value,
+        unit: data?.speed?.unit,
+        value: data?.speed?.value,
       },
-      heading: data.head,
+      heading: data?.head,
     };
 
     return this._location;
