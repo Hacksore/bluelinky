@@ -24,6 +24,13 @@ export interface Session {
   controlTokenExpiresAt?: number;
 }
 
+export enum EVPlugTypes {
+  UNPLUGED = 0,
+  FAST = 1,
+  PORTABLE = 2,
+  STATION = 3
+}
+
 // Status remapped
 export interface VehicleStatus {
   engine: {
@@ -32,6 +39,15 @@ export interface VehicleStatus {
     charging?: boolean;
     timeToFullCharge?: unknown;
     range: number;
+    rangeGas?: number;
+    rangeEV?: number;
+    plugedTo? : EVPlugTypes;
+    estimatedCurrentChargeDuration?: number;
+    estimatedFastChargeDuration?: number;
+    estimatedPortableChargeDuration?: number;
+    estimatedStationChargeDuration?: number;
+    batteryCharge12v?: number;
+    batteryChargeHV?: number;
     adaptiveCruiseControl: boolean;
   };
   climate: {
