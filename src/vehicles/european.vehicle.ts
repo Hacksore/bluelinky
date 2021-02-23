@@ -8,6 +8,7 @@ import {
   VehicleRegisterOptions,
   VehicleStatusOptions,
   RawVehicleStatus,
+  EVPlugTypes,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -240,7 +241,7 @@ export default class EuropeanVehicle extends Vehicle {
       ? response.body.resMsg
       : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
 
-    const parsedStatus = {
+    const parsedStatus: VehicleStatus = {
       chassis: {
         hoodOpen: vehicleStatus?.hoodOpen,
         trunkOpen: vehicleStatus?.trunkOpen,
@@ -271,12 +272,26 @@ export default class EuropeanVehicle extends Vehicle {
       engine: {
         ignition: vehicleStatus.engine,
         adaptiveCruiseControl: vehicleStatus?.acc,
-        range: vehicleStatus?.evStatus?.drvDistance[0].rangeByFuel?.totalAvailableRange?.value,
+        rangeGas: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ?? vehicleStatus?.dte?.value,
+        // EV
+        range: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.totalAvailableRange?.value,
+        rangeEV: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.evModeRange?.value,
+        plugedTo: vehicleStatus?.evStatus?.batteryPlugin ?? EVPlugTypes.UNPLUGED,
         charging: vehicleStatus?.evStatus?.batteryCharge,
+        estimatedCurrentChargeDuration: vehicleStatus?.evStatus?.remainTime2?.atc?.value,
+        estimatedFastChargeDuration: vehicleStatus?.evStatus?.remainTime2?.etc1?.value,
+        estimatedPortableChargeDuration: vehicleStatus?.evStatus?.remainTime2?.etc2?.value,
+        estimatedStationChargeDuration: vehicleStatus?.evStatus?.remainTime2?.etc3?.value,
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
         batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
       },
-    } as VehicleStatus;
+    };
+
+    if(!parsedStatus.engine.range) {
+      if (parsedStatus.engine.rangeEV || parsedStatus.engine.rangeGas) {
+        parsedStatus.engine.range = (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
+      }
+  }
 
     this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
 
