@@ -1,4 +1,4 @@
-import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID } from './../constants/europe';
+import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID, EU_APP_ID } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
@@ -12,6 +12,7 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
+import { getStamp } from '../tools/european.tools';
 
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
@@ -148,6 +149,7 @@ export class EuropeanController extends SessionController {
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
+          'Stamp': await getStamp(`${EU_APP_ID}:${Date.now()}`),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -176,6 +178,7 @@ export class EuropeanController extends SessionController {
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
+          'Stamp': await getStamp(`${EU_APP_ID}:${Date.now()}`),
         },
         body: formData.toString(),
         cookieJar,
@@ -212,6 +215,7 @@ export class EuropeanController extends SessionController {
       headers: {
         'Authorization': this.session.accessToken,
         'ccsp-device-id': this.session.deviceId,
+        'Stamp': await getStamp(`${EU_APP_ID}:${Date.now()}`),
       },
       json: true,
     });
@@ -226,6 +230,7 @@ export class EuropeanController extends SessionController {
           headers: {
             'Authorization': this.session.accessToken,
             'ccsp-device-id': this.session.deviceId,
+            'Stamp': await getStamp(`${EU_APP_ID}:${Date.now()}`),
           },
           json: true,
         }
