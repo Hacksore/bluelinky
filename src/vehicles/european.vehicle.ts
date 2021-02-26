@@ -16,7 +16,7 @@ import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
-import { EU_APP_ID, EU_BASE_URL } from '../constants/europe';
+import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
 
 export default class EuropeanVehicle extends Vehicle {
