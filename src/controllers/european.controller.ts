@@ -1,4 +1,4 @@
-import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID, EU_APP_ID } from './../constants/europe';
+import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
