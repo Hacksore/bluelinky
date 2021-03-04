@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "got": "^9.6.0",
-    "push-receiver": "^2.1.0",
+    "push-receiver": "^2.1.1",
     "tough-cookie": "^4.0.0",
     "url": "^0.11.0",
     "winston": "^3.3.3"
