@@ -12,6 +12,7 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
+import { getStamp } from '../tools/european.tools';
 
 export class EuropeanController extends SessionController {
   constructor(userConfig: BlueLinkyConfig) {
@@ -148,6 +149,7 @@ export class EuropeanController extends SessionController {
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
+          'Stamp': await getStamp(),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -176,6 +178,7 @@ export class EuropeanController extends SessionController {
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
+          'Stamp': await getStamp(),
         },
         body: formData.toString(),
         cookieJar,
@@ -212,6 +215,7 @@ export class EuropeanController extends SessionController {
       headers: {
         'Authorization': this.session.accessToken,
         'ccsp-device-id': this.session.deviceId,
+        'Stamp': await getStamp(),
       },
       json: true,
     });
@@ -226,6 +230,7 @@ export class EuropeanController extends SessionController {
           headers: {
             'Authorization': this.session.accessToken,
             'ccsp-device-id': this.session.deviceId,
+            'Stamp': await getStamp(),
           },
           json: true,
         }

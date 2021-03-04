@@ -6,6 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.js",
+    "stamps": "node ./tools/generate.stamps.js",
     "dev": "rollup -w -c rollup.config.js",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",

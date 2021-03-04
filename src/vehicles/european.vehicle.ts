@@ -17,6 +17,7 @@ import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
+import { getStamp } from '../tools/european.tools';
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -58,6 +59,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -88,6 +90,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -108,6 +111,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         body: {
           action: 'close',
@@ -135,6 +139,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         body: {
           action: 'open',
@@ -170,6 +175,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -186,6 +192,7 @@ export default class EuropeanVehicle extends Vehicle {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
           },
           json: true,
         }
@@ -200,6 +207,7 @@ export default class EuropeanVehicle extends Vehicle {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
           },
           json: true,
         }
@@ -231,6 +239,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -308,6 +317,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -327,6 +337,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         json: true,
       }
@@ -357,6 +368,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         body: {
           action: 'start',
@@ -384,6 +396,7 @@ export default class EuropeanVehicle extends Vehicle {
           'Authorization': this.controller.session.controlToken,
           'ccsp-device-id': this.controller.session.deviceId,
           'Content-Type': 'application/json',
+          'Stamp': await getStamp(),
         },
         body: {
           action: 'stop',
