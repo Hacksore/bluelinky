@@ -10,7 +10,8 @@ const generateStampsForBrand = async (brand) => {
 
   writeFileSync(
     join(resolve('.'), 'src', 'tools', `european.${brand}.token.collection.ts`),
-    `export default ${JSON.stringify(array, undefined, 4)};`
+    `/* eslint-disable */
+    export default ${JSON.stringify(array, undefined, 4)};`
   );
 };
 
