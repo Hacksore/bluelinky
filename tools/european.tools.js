@@ -12,7 +12,7 @@ exports.getStamps = async (brand) => {
 
   return new Promise((resolve, reject) => {
     execSync('docker pull hacksore/hks');
-    const process = spawn('docker', ['run', 'hacksore/hks', brand,'list', APP_IDS[brand]]);
+    const process = spawn('docker', ['run', 'hacksore/hks', brand, 'list', APP_IDS[brand]]);
     const list = [];
     let errors = '';
     process.stdout.on('data', (data) => {
