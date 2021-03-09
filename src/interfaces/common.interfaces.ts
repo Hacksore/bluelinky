@@ -1,8 +1,10 @@
+import { REGIONS } from '../constants';
+
 // config
 export interface BlueLinkyConfig {
   username: string | undefined;
   password: string | undefined;
-  region: string | undefined;
+  region: REGIONS | undefined;
   autoLogin?: boolean;
   pin: string | undefined;
   vin?: string | undefined;

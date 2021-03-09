@@ -1,4 +1,4 @@
-import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID } from './../constants/europe';
+import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
@@ -14,12 +14,19 @@ import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { getStamp } from '../tools/european.tools';
 
-export class EuropeanController extends SessionController {
-  constructor(userConfig: BlueLinkyConfig) {
-    super(userConfig);
-    logger.debug('EU Controller created');
+export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
+  language?: EULanguages;
+}
 
+export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
+  constructor(userConfig: EuropeBlueLinkyConfig) {
+    super(userConfig);
+    this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
+    if (!EU_LANGUAGES.includes(this.userConfig.language)) {
+      throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
+    }
     this.session.deviceId = this.uuidv4();
+    logger.debug('EU Controller created');
   }
 
   session: Session = {
@@ -116,7 +123,7 @@ export class EuropeanController extends SessionController {
       await got(ALL_ENDPOINTS.EU.session, { cookieJar });
 
       // required by the api to set lang
-      await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: '{"lang":"en"}', cookieJar });
+      await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
 
       const authCodeResponse = await got(ALL_ENDPOINTS.EU.login, {
         method: 'POST',
