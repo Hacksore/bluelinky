@@ -7,6 +7,7 @@ import { SessionController } from './controller';
 
 import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
+import { manageBluelinkyError } from '../tools/common.tools';
 
 export class CanadianController extends SessionController {
 
@@ -123,7 +124,7 @@ export class CanadianController extends SessionController {
 
       return response.body;
     } catch (err) {
-      throw err.message;
+      throw manageBluelinkyError(err, 'CanadianController');
     }
   }
 }

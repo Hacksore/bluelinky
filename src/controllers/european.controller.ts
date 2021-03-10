@@ -13,9 +13,17 @@ import { URLSearchParams } from 'url';
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { getStamp } from '../tools/european.tools';
+import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
+}
+
+interface EuropeanVehicleDescription {
+  nickname: string;
+  vehicleName: string;
+  regDate: string;
+  vehicleId: string;
 }
 
 export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
@@ -25,7 +33,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     if (!EU_LANGUAGES.includes(this.userConfig.language)) {
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
-    this.session.deviceId = this.uuidv4();
+    this.session.deviceId = uuidV4();
     logger.debug('EU Controller created');
   }
 
@@ -33,20 +41,12 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     accessToken: undefined,
     refreshToken: undefined,
     controlToken: undefined,
-    deviceId: this.uuidv4(),
+    deviceId: uuidV4(),
     tokenExpiresAt: 0,
     controlTokenExpiresAt: 0,
   };
 
   private vehicles: Array<EuropeanVehicle> = [];
-
-  private uuidv4(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = (Math.random() * 16) | 0,
-        v = c == 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-  }
 
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
@@ -66,28 +66,32 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     formData.append('redirect_uri', 'https://www.getpostman.com/oauth2/callback'); // Oversight from Hyundai developers
     formData.append('refresh_token', this.session.refreshToken);
 
-    const response = await got(ALL_ENDPOINTS.EU.token, {
-      method: 'POST',
-      headers: {
-        'Authorization': EU_CONSTANTS.basicToken,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Host': EU_API_HOST,
-        'Connection': 'Keep-Alive',
-        'Accept-Encoding': 'gzip',
-        'User-Agent': 'okhttp/3.10.0',
-      },
-      body: formData.toString(),
-      throwHttpErrors: false,
-    });
+    try {
+      const response = await got(ALL_ENDPOINTS.EU.token, {
+        method: 'POST',
+        headers: {
+          'Authorization': EU_CONSTANTS.basicToken,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Host': EU_API_HOST,
+          'Connection': 'Keep-Alive',
+          'Accept-Encoding': 'gzip',
+          'User-Agent': 'okhttp/3.10.0',
+        },
+        body: formData.toString(),
+        throwHttpErrors: false,
+      });
 
-    if (response.statusCode !== 200) {
-      logger.debug(`Refresh token failed: ${response.body}`);
-      return `Refresh token failed: ${response.body}`;
+      if (response.statusCode !== 200) {
+        logger.debug(`Refresh token failed: ${response.body}`);
+        return `Refresh token failed: ${response.body}`;
+      }
+
+      const responseBody = JSON.parse(response.body);
+      this.session.accessToken = 'Bearer ' + responseBody.access_token;
+      this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeController.refreshAccessToken');
     }
-
-    const responseBody = JSON.parse(response.body);
-    this.session.accessToken = 'Bearer ' + responseBody.access_token;
-    this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
 
     logger.debug('Token refreshed');
     return 'Token refreshed';
@@ -98,22 +102,26 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw 'Token not set';
     }
 
-    const response = await got(`${EU_BASE_URL}/api/v1/user/pin`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': this.session.accessToken,
-        'Content-Type': 'application/json',
-      },
-      body: {
-        deviceId: this.session.deviceId,
-        pin: this.userConfig.pin,
-      },
-      json: true,
-    });
-
-    this.session.controlToken = 'Bearer ' + response.body.controlToken;
-    this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
-    return 'PIN entered OK, The pin is valid for 10 minutes';
+    try {
+      const response = await got(`${EU_BASE_URL}/api/v1/user/pin`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': this.session.accessToken,
+          'Content-Type': 'application/json',
+        },
+        body: {
+          deviceId: this.session.deviceId,
+          pin: this.userConfig.pin,
+        },
+        json: true,
+      });
+  
+      this.session.controlToken = 'Bearer ' + response.body.controlToken;
+      this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
+      return 'PIN entered OK, The pin is valid for 10 minutes';
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeController.pin');
+    }
   }
 
   public async login(): Promise<string> {
@@ -121,9 +129,11 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       // request cookie via got and store it to the cookieJar
       const cookieJar = new CookieJar();
       await got(ALL_ENDPOINTS.EU.session, { cookieJar });
+      logger.debug('@EuropeController.login: Initialized the auth session');
 
       // required by the api to set lang
       await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
+      logger.debug(`@EuropeController.login: defined the language to ${this.userConfig.language}`);
 
       const authCodeResponse = await got(ALL_ENDPOINTS.EU.login, {
         method: 'POST',
@@ -135,16 +145,16 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         cookieJar,
       });
 
-      logger.debug(authCodeResponse.body);
       let authorizationCode;
       if (authCodeResponse) {
         const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
         if (regexMatch !== null) {
           authorizationCode = regexMatch[1];
         } else {
-          throw new Error('@EuropeControllerLogin: AuthCode was not found');
+          throw new Error('@EuropeController.login: AuthCode was not found, you probably need to migrate your account.');
         }
       }
+      logger.debug('@EuropeController.login: Authenticated properly with user and password');
 
       const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
       const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
@@ -169,6 +179,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       if (notificationReponse) {
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
       }
+      logger.debug('@EuropeController.login: Device registered');
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
@@ -192,19 +203,20 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       });
 
       if (response.statusCode !== 200) {
-        throw `Get token failed: ${response.body}`;
+        throw new Error(`@EuropeController.login: Could not manage to get token: ${response.body}`);
       }
 
       if (response) {
         const responseBody = JSON.parse(response.body);
-        this.session.accessToken = 'Bearer ' + responseBody.access_token;
+        this.session.accessToken = `Bearer ${responseBody.access_token}`;
         this.session.refreshToken = responseBody.refresh_token;
         this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
+      logger.debug('@EuropeController.login: Session defined properly');
 
       return 'Login success';
     } catch (err) {
-      throw err.message;
+      throw manageBluelinkyError(err, 'EuropeController.login');
     }
   }
 
@@ -217,57 +229,50 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw 'Token not set';
     }
 
-    const response = await got(`${EU_BASE_URL}/api/v1/spa/vehicles`, {
-      method: 'GET',
-      headers: {
-        'Authorization': this.session.accessToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Stamp': await getStamp(),
-      },
-      json: true,
-    });
-
-    this.vehicles = [];
-
-    await this.asyncForEach(response.body.resMsg.vehicles, async v => {
-      const vehicleProfileReponse = await got(
-        `${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.session.accessToken,
-            'ccsp-device-id': this.session.deviceId,
-            'Stamp': await getStamp(),
-          },
-          json: true,
-        }
-      );
-
-      const vehicleProfile = vehicleProfileReponse.body.resMsg;
-
-      const vehicleConfig = {
-        nickname: v.nickname,
-        name: v.vehicleName,
-        regDate: v.regDate,
-        brandIndicator: 'H',
-        id: v.vehicleId,
-        vin: vehicleProfile.vinInfo[0].basic.vin,
-        generation: vehicleProfile.vinInfo[0].basic.modelYear,
-      } as VehicleRegisterOptions;
-
-      this.vehicles.push(new EuropeanVehicle(vehicleConfig, this));
-      logger.debug(`Added vehicle ${vehicleConfig.id}`);
-    });
+    try {
+      const response = await got(`${EU_BASE_URL}/api/v1/spa/vehicles`, {
+        method: 'GET',
+        headers: {
+          'Authorization': this.session.accessToken,
+          'ccsp-device-id': this.session.deviceId,
+          'Stamp': await getStamp(),
+        },
+        json: true,
+      });
+  
+      this.vehicles = await asyncMap<EuropeanVehicleDescription, EuropeanVehicle>(response.body.resMsg.vehicles, async v => {
+        const vehicleProfileReponse = await got(
+          `${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': this.session.accessToken,
+              'ccsp-device-id': this.session.deviceId,
+              'Stamp': await getStamp(),
+            },
+            json: true,
+          }
+        );
+  
+        const vehicleProfile = vehicleProfileReponse.body.resMsg;
+  
+        const vehicleConfig = {
+          nickname: v.nickname,
+          name: v.vehicleName,
+          regDate: v.regDate,
+          brandIndicator: 'H',
+          id: v.vehicleId,
+          vin: vehicleProfile.vinInfo[0].basic.vin,
+          generation: vehicleProfile.vinInfo[0].basic.modelYear,
+        } as VehicleRegisterOptions;
+  
+        logger.debug(`@EuropeController.getVehicles: Added vehicle ${vehicleConfig.id}`);
+        return new EuropeanVehicle(vehicleConfig, this);
+      });
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeController.getVehicles');
+    }
 
     return this.vehicles;
-  }
-
-  // TODO: type this or replace it with a normal loop
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async asyncForEach(array: any, callback: any): Promise<any> {
-    for (let index = 0; index < array.length; index++) {
-      await callback(array[index], index, array);
-    }
   }
 }

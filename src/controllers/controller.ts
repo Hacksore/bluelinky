@@ -14,9 +14,6 @@ export abstract class SessionController<T extends BlueLinkyConfig = BlueLinkyCon
     deviceId: '',
     tokenExpiresAt: 0,
   };
-  public readonly userConfig: T;
 
-  constructor(userConfig: T) {
-    this.userConfig = userConfig;
-  }
+  constructor(public readonly userConfig: T) { }
 }
