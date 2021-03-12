@@ -424,3 +424,26 @@ export interface VehicleRegisterOptions {
   id: string;
   generation: string;
 }
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+export interface VehicleMonthlyReport {
+  start: string; // format YYYYMMDD, eg: 20210210
+  end: string; // format YYYYMMDD, eg: 20210312
+  driving: {
+    distance: number;
+    startCount: number;
+    durations: {
+      on: number;
+      idle: number;
+    }
+  },
+  vehicleStatus: {
+    tpms: boolean;
+    tirePressure: {
+      tirePressureLampAll: boolean;
+    }
+  }
+}

@@ -9,6 +9,8 @@ import {
   VehicleStatusOptions,
   RawVehicleStatus,
   EVPlugTypes,
+  VehicleMonthlyReport,
+  DeepPartial,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -445,6 +447,54 @@ export default class EuropeanVehicle extends Vehicle {
       throw 'Something went wrong!';
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.startCharge');
+    }
+  }
+
+  public async monthlyReport(): Promise<DeepPartial<VehicleMonthlyReport>|undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            setRptMonth: '202006'
+          },
+          json: true,
+        }
+      );
+
+      // console.log(response.body);
+      const rawData = response.body.resMsg?.monthlyReport;
+      if(rawData) {
+        return {
+          start: rawData.ifo?.mvrMonthStart,
+          end: rawData.ifo?.mvrMonthEnd,
+          driving: rawData.driving ? {
+            distance: rawData.driving?.runDistance,
+            startCount: rawData.driving?.engineStartCount,
+            durations: {
+              idle: rawData.driving?.engineIdleTime,
+              on: rawData.driving?.engineOnTime,
+            }
+          } : undefined,
+          vehicleStatus: rawData.vehicleStatus ? {
+            tpms: rawData.vehicleStatus?.tpmsSupport ? Boolean(rawData.vehicleStatus?.tpmsSupport) : undefined,
+            tirePressure: {
+              tirePressureLampAll: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll ? Boolean(rawData.vehicleStatus?.tirePressure?.tirePressureLampAll): undefined
+            }
+          } : undefined,
+        };
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.monthyReports');
     }
   }
 }

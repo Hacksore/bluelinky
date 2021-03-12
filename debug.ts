@@ -18,6 +18,7 @@ const apiCalls = [
   { name: 'lock', value: 'lock' },
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
+  { name: 'monthly report', value: 'monthlyReport' },
 ];
 
 let vehicle;
@@ -137,6 +138,10 @@ async function performCommand(command) {
       case 'lock':
         const lockRes = await vehicle.lock();
         console.log('lock : ' + JSON.stringify(lockRes, null, 2));
+        break;
+      case 'monthlyReport':
+        const report = await vehicle.monthlyReport();
+        console.log('monthyReport : ' + JSON.stringify(report, null, 2));
         break;
       case 'unlock':
         const unlockRes = await vehicle.unlock();
