@@ -33,6 +33,11 @@ export enum EVPlugTypes {
   STATION = 3
 }
 
+export enum EVChargeModeTypes {
+  FAST = 0,
+  SLOW = 1,
+}
+
 // Status remapped
 export interface VehicleStatus {
   engine: {
@@ -440,10 +445,31 @@ export interface VehicleMonthlyReport {
       idle: number;
     }
   },
+  breakdown: {
+    ecuIdx: string;
+    ecuStatus: string;
+  }[],
   vehicleStatus: {
     tpms: boolean;
     tirePressure: {
       tirePressureLampAll: boolean;
     }
   }
+}
+export interface VehicleTargetSOC {
+  type: EVChargeModeTypes;
+  distance: number;
+  targetLevel: number;
+}
+
+export interface VehicleDrivingHistory {
+  batteryMgPwrCsp: number;
+  calculativeOdo: number;
+  climatePwrCsp: number;
+  drivingDate: string;
+  drivingPeriod: number;
+  eDPwrCsp: number;
+  motorPwrCsp: number;
+  regenPwr: number;
+  totalPwrCsp: number;
 }

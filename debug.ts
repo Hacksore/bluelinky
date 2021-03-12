@@ -19,6 +19,10 @@ const apiCalls = [
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
   { name: 'monthly report', value: 'monthlyReport' },
+  { name: 'history', value: 'history' },
+  { name: 'trip informations', value: 'tripInfo' },
+  { name: '[EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EV] set charge targets', value: 'setChargeTargets' },
 ];
 
 let vehicle;
@@ -139,13 +143,29 @@ async function performCommand(command) {
         const lockRes = await vehicle.lock();
         console.log('lock : ' + JSON.stringify(lockRes, null, 2));
         break;
+      case 'unlock':
+        const unlockRes = await vehicle.unlock();
+        console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
+        break;
       case 'monthlyReport':
         const report = await vehicle.monthlyReport();
         console.log('monthyReport : ' + JSON.stringify(report, null, 2));
         break;
-      case 'unlock':
-        const unlockRes = await vehicle.unlock();
-        console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
+      case 'history':
+        const history = await vehicle.history();
+        console.log('history : ' + JSON.stringify(history, null, 2));
+        break;
+      case 'tripInfo':
+        const trips = await vehicle.tripInfo();
+        console.log('trips : ' + JSON.stringify(trips, null, 2));
+        break;
+      case 'getChargeTargets':
+        const targets = await vehicle.getChargeTargets();
+        console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'setChargeTargets':
+         await vehicle.setChargeTargets({ fast: 80, slow: 100 });
+        console.log('targets : OK');
         break;
     }
 

@@ -11,6 +11,9 @@ import {
   EVPlugTypes,
   VehicleMonthlyReport,
   DeepPartial,
+  VehicleTargetSOC,
+  EVChargeModeTypes,
+  VehicleDrivingHistory,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -450,7 +453,9 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
-  public async monthlyReport(): Promise<DeepPartial<VehicleMonthlyReport>|undefined> {
+  public async monthlyReport(
+    month: { year: number; month: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  ): Promise<DeepPartial<VehicleMonthlyReport>|undefined> {
     await this.checkControlToken();
     try {
       const response = await got(
@@ -464,18 +469,18 @@ export default class EuropeanVehicle extends Vehicle {
             'Stamp': await getStamp(),
           },
           body: {
-            setRptMonth: '202006'
+            setRptMonth: toMonthDate(month)
           },
           json: true,
         }
       );
 
-      // console.log(response.body);
       const rawData = response.body.resMsg?.monthlyReport;
       if(rawData) {
         return {
           start: rawData.ifo?.mvrMonthStart,
           end: rawData.ifo?.mvrMonthEnd,
+          breakdown: rawData.breakdown,
           driving: rawData.driving ? {
             distance: rawData.driving?.runDistance,
             startCount: rawData.driving?.engineStartCount,
@@ -497,4 +502,144 @@ export default class EuropeanVehicle extends Vehicle {
       throw manageBluelinkyError(err, 'EuropeVehicle.monthyReports');
     }
   }
+
+  public async history(
+  ): Promise<DeepPartial<VehicleDrivingHistory>[]|undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/drvhistory`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            periodTarget: 0 // 0 or 2
+          },
+          json: true,
+        }
+      );
+
+      // console.log(response.body);
+      const rawData = response.body.resMsg?.drivingInfoDetail;
+      if(rawData && Array.isArray(rawData)) {
+        return rawData;
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.history');
+    }
+  }
+
+  public async tripInfo(
+    date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  ): Promise<DeepPartial<VehicleDrivingHistory>[]|undefined> {
+      await this.checkControlToken();
+      try {
+        const response = await got(
+          `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': this.controller.session.controlToken,
+              'ccsp-device-id': this.controller.session.deviceId,
+              'Content-Type': 'application/json',
+              'Stamp': await getStamp(),
+            },
+            body: {
+              setTripMonth: toMonthDate(date),
+              setTripLatest: 0,
+              setTripDay: date.day ? toDayDate(date) : undefined,
+              tripPeriodType: 0
+            },
+            json: true,
+          }
+        );
+  
+        // console.log(response.body);
+        const rawData = response.body;
+        if(rawData && Array.isArray(rawData)) {
+          return rawData;
+        }
+        return;
+      } catch (err) {
+        throw manageBluelinkyError(err, 'EuropeVehicle.history');
+      }
+    }
+
+  /**
+   * @example Only works on EV
+   */
+  public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[]|undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          json: true,
+        }
+      );
+
+      const rawData = response.body.resMsg?.targetSOC;
+      if(rawData && Array.isArray(rawData)) {
+        return rawData.map((rawSOC) => ({
+          distance: rawSOC.drvDistance?.distanceType?.distanceValue,
+          targetLevel: rawSOC.targetSOClevel,
+          type: rawSOC.plugType
+        }));
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.getChargeTargets');
+    }
+  }
+
+  /**
+   * @example Only works on EV
+   */
+   public async setChargeTargets(limits: { fast: number; slow: number; }): Promise<void> {
+    await this.checkControlToken();
+    try {
+      await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            targetSOClist: [
+              { plugType: EVChargeModeTypes.FAST, targetSOClevel: limits.fast },
+              { plugType: EVChargeModeTypes.SLOW, targetSOClevel: limits.slow }
+            ]
+          },
+          json: true,
+        }
+      );
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
+    }
+  }
 }
+function toMonthDate(month: { year: number; month: number; }) {
+  return `${month.year}${month.month.toString().padStart(2, '0')}`;
+}
+
+function toDayDate(date: { year: number; month: number; day?: number; }) {
+  return `${toMonthDate(date)}${date.day ? date.day.toString().padStart(2, '0') : ''}`;
+}
+
