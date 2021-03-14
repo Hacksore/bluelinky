@@ -4,6 +4,7 @@
 import config from './config.json';
 import BlueLinky from './src';
 import inquirer from 'inquirer';
+import { Vehicle } from './src/vehicles/vehicle';
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -19,7 +20,6 @@ const apiCalls = [
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
   { name: 'monthly report', value: 'monthlyReport' },
-  { name: 'history', value: 'history' },
   { name: 'trip informations', value: 'tripInfo' },
   { name: '[EV] get charge targets', value: 'getChargeTargets' },
   { name: '[EV] set charge targets', value: 'setChargeTargets' },
@@ -28,7 +28,7 @@ const apiCalls = [
 let vehicle;
 const { username, password, vin, pin } = config;
 
-const onReadyHandler = vehicles => {
+const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
   askForCommandInput();
 };
@@ -58,7 +58,7 @@ const createInstance = region => {
   const client = new BlueLinky({
     username,
     password,
-    region: region,
+    region,
     pin
   });
   client.on('ready', onReadyHandler);
@@ -164,7 +164,7 @@ async function performCommand(command) {
         console.log('targets : ' + JSON.stringify(targets, null, 2));
         break;
       case 'setChargeTargets':
-         await vehicle.setChargeTargets({ fast: 80, slow: 100 });
+         await vehicle.setChargeTargets({ fast: 80, slow: 80 });
         console.log('targets : OK');
         break;
     }

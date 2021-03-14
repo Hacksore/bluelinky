@@ -452,7 +452,7 @@ export interface VehicleMonthlyReport {
   vehicleStatus: {
     tpms: boolean;
     tirePressure: {
-      tirePressureLampAll: boolean;
+      all: boolean;
     }
   }
 }
@@ -460,16 +460,4 @@ export interface VehicleTargetSOC {
   type: EVChargeModeTypes;
   distance: number;
   targetLevel: number;
-}
-
-export interface VehicleDrivingHistory {
-  batteryMgPwrCsp: number;
-  calculativeOdo: number;
-  climatePwrCsp: number;
-  drivingDate: string;
-  drivingPeriod: number;
-  eDPwrCsp: number;
-  motorPwrCsp: number;
-  regenPwr: number;
-  totalPwrCsp: number;
 }

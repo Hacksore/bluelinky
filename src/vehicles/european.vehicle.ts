@@ -13,7 +13,6 @@ import {
   DeepPartial,
   VehicleTargetSOC,
   EVChargeModeTypes,
-  VehicleDrivingHistory,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -23,7 +22,10 @@ import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
-import { manageBluelinkyError } from '../tools/common.tools';
+import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
+
+type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
+const POSSIBLE_CHARGE_LIMIT_VALUES = [50,60,70,80,90,100];
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -474,7 +476,6 @@ export default class EuropeanVehicle extends Vehicle {
           json: true,
         }
       );
-
       const rawData = response.body.resMsg?.monthlyReport;
       if(rawData) {
         return {
@@ -492,7 +493,7 @@ export default class EuropeanVehicle extends Vehicle {
           vehicleStatus: rawData.vehicleStatus ? {
             tpms: rawData.vehicleStatus?.tpmsSupport ? Boolean(rawData.vehicleStatus?.tpmsSupport) : undefined,
             tirePressure: {
-              tirePressureLampAll: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll ? Boolean(rawData.vehicleStatus?.tirePressure?.tirePressureLampAll): undefined
+              all: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll == '1',
             }
           } : undefined,
         };
@@ -503,41 +504,9 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
-  public async history(
-  ): Promise<DeepPartial<VehicleDrivingHistory>[]|undefined> {
-    await this.checkControlToken();
-    try {
-      const response = await got(
-        `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/drvhistory`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
-          },
-          body: {
-            periodTarget: 0 // 0 or 2
-          },
-          json: true,
-        }
-      );
-
-      // console.log(response.body);
-      const rawData = response.body.resMsg?.drivingInfoDetail;
-      if(rawData && Array.isArray(rawData)) {
-        return rawData;
-      }
-      return;
-    } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeVehicle.history');
-    }
-  }
-
   public async tripInfo(
-    date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
-  ): Promise<DeepPartial<VehicleDrivingHistory>[]|undefined> {
+    date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
+  ): Promise<DeepPartial<any>[]|undefined> {
       await this.checkControlToken();
       try {
         const response = await got(
@@ -551,10 +520,10 @@ export default class EuropeanVehicle extends Vehicle {
               'Stamp': await getStamp(),
             },
             body: {
-              setTripMonth: toMonthDate(date),
+              setTripMonth: !date.day ? toMonthDate(date) : undefined,
               setTripLatest: 0,
               setTripDay: date.day ? toDayDate(date) : undefined,
-              tripPeriodType: 0
+              tripPeriodType: 2
             },
             json: true,
           }
@@ -590,8 +559,7 @@ export default class EuropeanVehicle extends Vehicle {
           json: true,
         }
       );
-
-      const rawData = response.body.resMsg?.targetSOC;
+      const rawData = response.body.resMsg?.targetSOClist;
       if(rawData && Array.isArray(rawData)) {
         return rawData.map((rawSOC) => ({
           distance: rawSOC.drvDistance?.distanceType?.distanceValue,
@@ -608,8 +576,11 @@ export default class EuropeanVehicle extends Vehicle {
   /**
    * @example Only works on EV
    */
-   public async setChargeTargets(limits: { fast: number; slow: number; }): Promise<void> {
+   public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
     await this.checkControlToken();
+    if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) || !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)) {
+      throw new ManagedBluelinkyError(`Charge target values ar limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
+    }
     try {
       await got(
         `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,

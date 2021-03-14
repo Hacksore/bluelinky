@@ -1,39 +1,50 @@
-import { AmericanController } from './controllers/american.controller';
+import { AmericanBlueLinkyConfig, AmericanController } from './controllers/american.controller';
 import { EuropeanController, EuropeBlueLinkyConfig } from './controllers/european.controller';
-import { CanadianController } from './controllers/canadian.controller';
-import { SessionController } from './controllers/controller';
+import { CanadianBlueLinkyConfig, CanadianController } from './controllers/canadian.controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
-import { BlueLinkyConfig, Session } from './interfaces/common.interfaces';
+import { Session } from './interfaces/common.interfaces';
 import { REGIONS } from './constants';
+import AmericanVehicle from './vehicles/american.vehicle';
+import EuropeanVehicle from './vehicles/european.vehicle';
+import CanadianVehicle from './vehicles/canadian.vehicle';
+import { SessionController } from './controllers/controller';
 import { Vehicle } from './vehicles/vehicle';
 
-class BlueLinky extends EventEmitter {
+type BluelinkyConfigRegions = AmericanBlueLinkyConfig|CanadianBlueLinkyConfig|EuropeBlueLinkyConfig;
+
+const DEFAULT_CONFIG = {
+  username: '',
+  password: '',
+  region: REGIONS.US,
+  autoLogin: true,
+  pin: '1234',
+  vin: '',
+  vehicleId: undefined,
+};
+
+class BlueLinky<
+  T extends BluelinkyConfigRegions = AmericanBlueLinkyConfig,
+  R = T['region'],
+  V extends Vehicle = (R extends REGIONS.US ? AmericanVehicle : R extends REGIONS.CA ? CanadianVehicle : EuropeanVehicle)
+> extends EventEmitter {
   private controller: SessionController;
-  private vehicles: Array<Vehicle> = [];
+  private vehicles: Array<V> = [];
 
-  private config: BlueLinkyConfig = {
-    username: '',
-    password: '',
-    region: REGIONS.US,
-    autoLogin: true,
-    pin: '1234',
-    vin: '',
-    vehicleId: undefined,
-  };
+  private config: T;
 
-  constructor(config: BlueLinkyConfig|EuropeBlueLinkyConfig) {
+  constructor(config: T) {
     super();
 
     switch (config.region) {
       case REGIONS.EU:
-        this.controller = new EuropeanController(config);
+        this.controller = new EuropeanController(config as EuropeBlueLinkyConfig);
         break;
       case REGIONS.US:
-        this.controller = new AmericanController(config);
+        this.controller = new AmericanController(config as AmericanBlueLinkyConfig);
         break;
       case REGIONS.CA:
-        this.controller = new CanadianController(config);
+        this.controller = new CanadianController(config as CanadianBlueLinkyConfig);
         break;
       default:
         throw new Error('Your region is not supported yet.');
@@ -41,7 +52,7 @@ class BlueLinky extends EventEmitter {
 
     // merge configs
     this.config = {
-      ...this.config,
+      ...DEFAULT_CONFIG,
       ...config,
     };
 
@@ -50,6 +61,13 @@ class BlueLinky extends EventEmitter {
     }
 
     this.onInit();
+  }
+
+  on(event: 'ready', fnc: (vehicles: V[]) => void): this;
+  on(event: 'error', fnc: (error: any) => void): this;
+
+  on(event: string|symbol, listener: (...args: any[]) => void): this {
+    return super.on(event, listener);
   }
 
   private onInit(): void {
@@ -65,7 +83,7 @@ class BlueLinky extends EventEmitter {
       const response = await this.controller.login();
 
       // get all cars from the controller
-      this.vehicles = await this.controller.getVehicles();
+      this.vehicles = await this.getVehicles();
 
       logger.debug(`Found ${this.vehicles.length} on the account`);
 
@@ -77,11 +95,11 @@ class BlueLinky extends EventEmitter {
     }
   }
 
-  async getVehicles(): Promise<Array<Vehicle>> {
-    return this.controller.getVehicles() || [];
+  async getVehicles(): Promise<V[]> {
+    return (await this.controller.getVehicles() as unknown[]) as V[] || [];
   }
 
-  public getVehicle(input: string): Vehicle | undefined {
+  public getVehicle(input: string): V | undefined {
     try {
       const foundCar = this.vehicles.find(car => {
         return car.vin() === input || car.id() === input;

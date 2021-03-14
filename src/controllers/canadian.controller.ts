@@ -8,10 +8,15 @@ import { SessionController } from './controller';
 import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { manageBluelinkyError } from '../tools/common.tools';
+import { REGIONS } from '../constants';
 
-export class CanadianController extends SessionController {
+export interface CanadianBlueLinkyConfig extends BlueLinkyConfig {
+  region: REGIONS.CA;
+}
 
-  constructor(userConfig: BlueLinkyConfig) {
+export class CanadianController extends SessionController<CanadianBlueLinkyConfig> {
+
+  constructor(userConfig: CanadianBlueLinkyConfig) {
     super(userConfig);
     logger.debug('CA Controller created');
   }
