@@ -79,6 +79,7 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
+  lastupdate: Date
 }
 
 // TODO: fix/update

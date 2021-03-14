@@ -18,6 +18,7 @@ import {
 import { SessionController } from '../controllers/controller';
 import { Vehicle } from './vehicle';
 import { celciusToTempCode } from '../util';
+import { parse as parseDate } from 'date-fns';
 
 export default class CanadianVehicle extends Vehicle {
   public region = REGIONS.CA;
@@ -46,7 +47,7 @@ export default class CanadianVehicle extends Vehicle {
       const vehicleStatus = response.result;
 
       logger.debug(vehicleStatus);
-      const parsedStatus = {
+      const parsedStatus: VehicleStatus = {
         chassis: {
           hoodOpen: vehicleStatus?.hoodOpen,
           trunkOpen: vehicleStatus?.trunkOpen,
@@ -87,7 +88,8 @@ export default class CanadianVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-      } as VehicleStatus;
+        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
+      };
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;

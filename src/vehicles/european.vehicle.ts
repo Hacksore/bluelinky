@@ -19,6 +19,7 @@ import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
 import { manageBluelinkyError } from '../tools/common.tools';
+import { parse as parseDate } from 'date-fns';
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -168,9 +169,7 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
-  public async fullStatus(
-    input: VehicleStatusOptions
-  ): Promise<FullVehicleStatus | null> {
+  public async fullStatus(input: VehicleStatusOptions): Promise<FullVehicleStatus | null> {
     const statusConfig = {
       ...DEFAULT_VEHICLE_STATUS_OPTIONS,
       ...input,
@@ -195,7 +194,7 @@ export default class EuropeanVehicle extends Vehicle {
 
       const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
-      if(statusConfig.refresh) {
+      if (statusConfig.refresh) {
         const statusResponse = await got(
           `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
           {
@@ -297,7 +296,9 @@ export default class EuropeanVehicle extends Vehicle {
         engine: {
           ignition: vehicleStatus.engine,
           adaptiveCruiseControl: vehicleStatus?.acc,
-          rangeGas: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ?? vehicleStatus?.dte?.value,
+          rangeGas:
+            vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ??
+            vehicleStatus?.dte?.value,
           // EV
           range: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.totalAvailableRange?.value,
           rangeEV: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.evModeRange?.value,
@@ -310,13 +311,15 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
+        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
       };
 
-      if(!parsedStatus.engine.range) {
+      if (!parsedStatus.engine.range) {
         if (parsedStatus.engine.rangeEV || parsedStatus.engine.rangeGas) {
-          parsedStatus.engine.range = (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
+          parsedStatus.engine.range =
+            (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
         }
-    }
+      }
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
 
