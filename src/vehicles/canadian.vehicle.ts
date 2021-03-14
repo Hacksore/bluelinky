@@ -46,6 +46,10 @@ export default class CanadianVehicle extends Vehicle {
       const response = await this.request(endpoint, {});
       const vehicleStatus = response.result;
 
+      if (response?.error) {
+        throw response?.error?.errorDesc;
+      }
+
       logger.debug(vehicleStatus);
       const parsedStatus: VehicleStatus = {
         chassis: {
