@@ -26,7 +26,7 @@ import { getStamp } from '../tools/european.tools';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
-const POSSIBLE_CHARGE_LIMIT_VALUES = [50,60,70,80,90,100];
+const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -203,7 +203,7 @@ export default class EuropeanVehicle extends Vehicle {
 
       const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
-      if(statusConfig.refresh) {
+      if (statusConfig.refresh) {
         const statusResponse = await got(
           `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
           {
@@ -320,11 +320,11 @@ export default class EuropeanVehicle extends Vehicle {
         },
       };
 
-      if(!parsedStatus.engine.range) {
+      if (!parsedStatus.engine.range) {
         if (parsedStatus.engine.rangeEV || parsedStatus.engine.rangeGas) {
           parsedStatus.engine.range = (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
         }
-    }
+      }
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
 
@@ -458,7 +458,7 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async monthlyReport(
     month: { year: number; month: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
-  ): Promise<DeepPartial<VehicleMonthlyReport>|undefined> {
+  ): Promise<DeepPartial<VehicleMonthlyReport> | undefined> {
     await this.checkControlToken();
     try {
       const response = await got(
@@ -478,7 +478,7 @@ export default class EuropeanVehicle extends Vehicle {
         }
       );
       const rawData = response.body.resMsg?.monthlyReport;
-      if(rawData) {
+      if (rawData) {
         return {
           start: rawData.ifo?.mvrMonthStart,
           end: rawData.ifo?.mvrMonthEnd,
@@ -507,69 +507,69 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async tripInfo(
     date: { year: number; month: number; day: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
-  ): Promise<DeepPartial<VehicleDayTrip>[]|undefined> {
-      await this.checkControlToken();
-      try {
-        const response = await got(
-          `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': this.controller.session.accessToken,
-              'ccsp-device-id': this.controller.session.deviceId,
-              'Content-Type': 'application/json',
-              'Stamp': await getStamp(),
-            },
-            body: {
-              setTripMonth: !date.day ? toMonthDate(date) : undefined,
-              setTripLatest: 10,
-              setTripDay: date.day ? toDayDate(date) : undefined,
-              tripPeriodType: 1
-            },
-            json: true,
-          }
-        );
-  
-        const rawData = response.body.resMsg.dayTripList;
-        if(rawData && Array.isArray(rawData)) {
-          return rawData.map(day => ({
-            dayRaw: day.tripDay,
-            tripsCount: day.dayTripCnt,
-            distance: day.tripDist,
-            durations: {
-              drive: day.tripDrvTime,
-              idle: day.tripIdleTime
-            },
-            speed: {
-              avg: day.tripAvgSpeed,
-              max: day.tripMaxSpeed
-            },
-            trips: Array.isArray(day.tripList) ?
-              day.tripList.map(trip => ({
-                timeRaw: trip.tripTime,
-                durations: {
-                  drive: trip.tripDrvTime,
-                  idle: trip.tripIdleTime,
-                },
-                speed: {
-                  avg: trip.tripAvgSpeed,
-                  max: trip.tripMaxSpeed,
-                },
-                distance: trip.tripDist,
-              }))
-              : [],
-          }));
+  ): Promise<DeepPartial<VehicleDayTrip>[] | undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.accessToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            setTripMonth: !date.day ? toMonthDate(date) : undefined,
+            setTripLatest: 10,
+            setTripDay: date.day ? toDayDate(date) : undefined,
+            tripPeriodType: 1
+          },
+          json: true,
         }
-        return;
-      } catch (err) {
-        throw manageBluelinkyError(err, 'EuropeVehicle.history');
+      );
+
+      const rawData = response.body.resMsg.dayTripList;
+      if (rawData && Array.isArray(rawData)) {
+        return rawData.map(day => ({
+          dayRaw: day.tripDay,
+          tripsCount: day.dayTripCnt,
+          distance: day.tripDist,
+          durations: {
+            drive: day.tripDrvTime,
+            idle: day.tripIdleTime
+          },
+          speed: {
+            avg: day.tripAvgSpeed,
+            max: day.tripMaxSpeed
+          },
+          trips: Array.isArray(day.tripList) ?
+            day.tripList.map(trip => ({
+              timeRaw: trip.tripTime,
+              durations: {
+                drive: trip.tripDrvTime,
+                idle: trip.tripIdleTime,
+              },
+              speed: {
+                avg: trip.tripAvgSpeed,
+                max: trip.tripMaxSpeed,
+              },
+              distance: trip.tripDist,
+            }))
+            : [],
+        }));
       }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.history');
     }
+  }
 
   /**
-   * @example Only works on EV
+   * Warning: Only works on EV
    */
-  public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[]|undefined> {
+  public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[] | undefined> {
     await this.checkControlToken();
     try {
       const response = await got(
@@ -586,7 +586,7 @@ export default class EuropeanVehicle extends Vehicle {
         }
       );
       const rawData = response.body.resMsg?.targetSOClist;
-      if(rawData && Array.isArray(rawData)) {
+      if (rawData && Array.isArray(rawData)) {
         return rawData.map((rawSOC) => ({
           distance: rawSOC.drvDistance?.distanceType?.distanceValue,
           targetLevel: rawSOC.targetSOClevel,
@@ -600,9 +600,9 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   /**
-   * @example Only works on EV
+   * Warning: Only works on EV
    */
-   public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
+  public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
     await this.checkControlToken();
     if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) || !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)) {
       throw new ManagedBluelinkyError(`Charge target values ar limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
