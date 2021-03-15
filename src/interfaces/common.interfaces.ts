@@ -461,3 +461,29 @@ export interface VehicleTargetSOC {
   distance: number;
   targetLevel: number;
 }
+
+export interface VehicleDayTrip {
+  dayRaw: string;
+  tripsCount: number;
+  distance: number;
+  durations: {
+    drive: number;
+    idle: number;
+  };
+  speed: {
+    avg: number;
+    max: number;
+  };
+  trips: {
+    timeRaw: string;
+    durations: {
+      drive: number;
+      idle: number;
+    };
+    speed: {
+      avg: number;
+      max: number;
+    };
+    distance: number;
+  }[];
+}

@@ -13,6 +13,7 @@ import {
   DeepPartial,
   VehicleTargetSOC,
   EVChargeModeTypes,
+  VehicleDayTrip,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -505,8 +506,8 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async tripInfo(
-    date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
-  ): Promise<DeepPartial<any>[]|undefined> {
+    date: { year: number; month: number; day: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
+  ): Promise<DeepPartial<VehicleDayTrip>[]|undefined> {
       await this.checkControlToken();
       try {
         const response = await got(
@@ -514,25 +515,50 @@ export default class EuropeanVehicle extends Vehicle {
           {
             method: 'POST',
             headers: {
-              'Authorization': this.controller.session.controlToken,
+              'Authorization': this.controller.session.accessToken,
               'ccsp-device-id': this.controller.session.deviceId,
               'Content-Type': 'application/json',
               'Stamp': await getStamp(),
             },
             body: {
               setTripMonth: !date.day ? toMonthDate(date) : undefined,
-              setTripLatest: 0,
+              setTripLatest: 10,
               setTripDay: date.day ? toDayDate(date) : undefined,
-              tripPeriodType: 2
+              tripPeriodType: 1
             },
             json: true,
           }
         );
   
-        // console.log(response.body);
-        const rawData = response.body;
+        const rawData = response.body.resMsg.dayTripList;
         if(rawData && Array.isArray(rawData)) {
-          return rawData;
+          return rawData.map(day => ({
+            dayRaw: day.tripDay,
+            tripsCount: day.dayTripCnt,
+            distance: day.tripDist,
+            durations: {
+              drive: day.tripDrvTime,
+              idle: day.tripIdleTime
+            },
+            speed: {
+              avg: day.tripAvgSpeed,
+              max: day.tripMaxSpeed
+            },
+            trips: Array.isArray(day.tripList) ?
+              day.tripList.map(trip => ({
+                timeRaw: trip.tripTime,
+                durations: {
+                  drive: trip.tripDrvTime,
+                  idle: trip.tripIdleTime,
+                },
+                speed: {
+                  avg: trip.tripAvgSpeed,
+                  max: trip.tripMaxSpeed,
+                },
+                distance: trip.tripDist,
+              }))
+              : [],
+          }));
         }
         return;
       } catch (err) {
@@ -610,7 +636,7 @@ function toMonthDate(month: { year: number; month: number; }) {
   return `${month.year}${month.month.toString().padStart(2, '0')}`;
 }
 
-function toDayDate(date: { year: number; month: number; day?: number; }) {
-  return `${toMonthDate(date)}${date.day ? date.day.toString().padStart(2, '0') : ''}`;
+function toDayDate(date: { year: number; month: number; day: number; }) {
+  return `${toMonthDate(date)}${date.day.toString().padStart(2, '0')}`;
 }
 
