@@ -25,11 +25,11 @@ const DEFAULT_CONFIG = {
 
 class BlueLinky<
   T extends BluelinkyConfigRegions = AmericanBlueLinkyConfig,
-  R = T['region'],
-  V extends Vehicle = (R extends REGIONS.US ? AmericanVehicle : R extends REGIONS.CA ? CanadianVehicle : EuropeanVehicle)
+  REGION = T['region'],
+  VEHICLE_TYPE extends Vehicle = (REGION extends REGIONS.US ? AmericanVehicle : REGION extends REGIONS.CA ? CanadianVehicle : EuropeanVehicle)
 > extends EventEmitter {
   private controller: SessionController;
-  private vehicles: Array<V> = [];
+  private vehicles: Array<VEHICLE_TYPE> = [];
 
   private config: T;
 
@@ -63,7 +63,7 @@ class BlueLinky<
     this.onInit();
   }
 
-  on(event: 'ready', fnc: (vehicles: V[]) => void): this;
+  on(event: 'ready', fnc: (vehicles: VEHICLE_TYPE[]) => void): this;
   on(event: 'error', fnc: (error: any) => void): this;
 
   on(event: string|symbol, listener: (...args: any[]) => void): this {
@@ -95,11 +95,11 @@ class BlueLinky<
     }
   }
 
-  async getVehicles(): Promise<V[]> {
-    return (await this.controller.getVehicles() as unknown[]) as V[] || [];
+  async getVehicles(): Promise<VEHICLE_TYPE[]> {
+    return (await this.controller.getVehicles() as unknown[]) as VEHICLE_TYPE[] || [];
   }
 
-  public getVehicle(input: string): V | undefined {
+  public getVehicle(input: string): VEHICLE_TYPE | undefined {
     try {
       const foundCar = this.vehicles.find(car => {
         return car.vin() === input || car.id() === input;
@@ -125,6 +125,10 @@ class BlueLinky<
 
   public getSession(): Session | null {
     return this.controller.session;
+  }
+
+  public get cachedVehicles(): VEHICLE_TYPE[] {
+    return this.vehicles ?? [];
   }
 }
 
