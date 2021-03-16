@@ -151,10 +151,6 @@ async function performCommand(command) {
         const report = await vehicle.monthlyReport();
         console.log('monthyReport : ' + JSON.stringify(report, null, 2));
         break;
-      case 'history':
-        const history = await vehicle.history();
-        console.log('history : ' + JSON.stringify(history, null, 2));
-        break;
       case 'tripInfo':
         const trips = await vehicle.tripInfo();
         console.log('trips : ' + JSON.stringify(trips, null, 2));
