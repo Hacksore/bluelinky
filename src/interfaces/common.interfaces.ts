@@ -442,7 +442,7 @@ export interface VehicleMonthlyReport {
     distance: number;
     startCount: number;
     durations: {
-      on: number;
+      drive: number;
       idle: number;
     }
   },
@@ -457,6 +457,7 @@ export interface VehicleMonthlyReport {
     }
   }
 }
+
 export interface VehicleTargetSOC {
   type: EVChargeModeTypes;
   distance: number;

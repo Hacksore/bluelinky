@@ -491,7 +491,7 @@ export default class EuropeanVehicle extends Vehicle {
             startCount: rawData.driving?.engineStartCount,
             durations: {
               idle: rawData.driving?.engineIdleTime,
-              on: rawData.driving?.engineOnTime,
+              drive: rawData.driving?.engineOnTime,
             }
           } : undefined,
           vehicleStatus: rawData.vehicleStatus ? {
@@ -613,7 +613,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
     await this.checkControlToken();
     if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) || !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)) {
-      throw new ManagedBluelinkyError(`Charge target values ar limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
+      throw new ManagedBluelinkyError(`Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
     }
     try {
       await got(
