@@ -476,6 +476,8 @@ export interface VehicleDayTrip {
   };
   trips: {
     timeRaw: string;
+    start: Date;
+    end: Date;
     durations: {
       drive: number;
       idle: number;

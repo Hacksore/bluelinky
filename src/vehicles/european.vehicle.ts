@@ -24,6 +24,7 @@ import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
+import { addMinutes, parse } from 'date-fns';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
 const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
@@ -545,18 +546,23 @@ export default class EuropeanVehicle extends Vehicle {
             max: day.tripMaxSpeed
           },
           trips: Array.isArray(day.tripList) ?
-            day.tripList.map(trip => ({
-              timeRaw: trip.tripTime,
-              durations: {
-                drive: trip.tripDrvTime,
-                idle: trip.tripIdleTime,
-              },
-              speed: {
-                avg: trip.tripAvgSpeed,
-                max: trip.tripMaxSpeed,
-              },
-              distance: trip.tripDist,
-            }))
+            day.tripList.map(trip => {
+              const start = parse(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
+              return {
+                timeRaw: trip.tripTime,
+                start,
+                end: addMinutes(start, trip.tripDrvTime),
+                durations: {
+                  drive: trip.tripDrvTime,
+                  idle: trip.tripIdleTime,
+                },
+                speed: {
+                  avg: trip.tripAvgSpeed,
+                  max: trip.tripMaxSpeed,
+                },
+                distance: trip.tripDist,
+              };
+            })
             : [],
         }));
       }
