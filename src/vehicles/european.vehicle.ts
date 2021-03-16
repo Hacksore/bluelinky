@@ -455,7 +455,7 @@ export default class EuropeanVehicle extends Vehicle {
 
       throw 'Something went wrong!';
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeVehicle.startCharge');
+      throw manageBluelinkyError(err, 'EuropeVehicle.stopCharge');
     }
   }
 
