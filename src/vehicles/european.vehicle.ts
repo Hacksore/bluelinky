@@ -24,7 +24,7 @@ import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
-import { addMinutes, parse } from 'date-fns';
+import { addMinutes, parse as parseDate } from 'date-fns';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
 const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
@@ -177,9 +177,7 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
-  public async fullStatus(
-    input: VehicleStatusOptions
-  ): Promise<FullVehicleStatus | null> {
+  public async fullStatus(input: VehicleStatusOptions): Promise<FullVehicleStatus | null> {
     const statusConfig = {
       ...DEFAULT_VEHICLE_STATUS_OPTIONS,
       ...input,
@@ -306,7 +304,9 @@ export default class EuropeanVehicle extends Vehicle {
         engine: {
           ignition: vehicleStatus.engine,
           adaptiveCruiseControl: vehicleStatus?.acc,
-          rangeGas: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ?? vehicleStatus?.dte?.value,
+          rangeGas:
+            vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ??
+            vehicleStatus?.dte?.value,
           // EV
           range: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.totalAvailableRange?.value,
           rangeEV: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.evModeRange?.value,
@@ -319,11 +319,13 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
+        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
       };
 
       if (!parsedStatus.engine.range) {
         if (parsedStatus.engine.rangeEV || parsedStatus.engine.rangeGas) {
-          parsedStatus.engine.range = (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
+          parsedStatus.engine.range =
+            (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
         }
       }
 
@@ -547,7 +549,7 @@ export default class EuropeanVehicle extends Vehicle {
           },
           trips: Array.isArray(day.tripList) ?
             day.tripList.map(trip => {
-              const start = parse(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
+              const start = parseDate(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
               return {
                 timeRaw: trip.tripTime,
                 start,

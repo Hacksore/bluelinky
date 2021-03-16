@@ -178,7 +178,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     const { vehicleStatus } = JSON.parse(response.body);
-    const parsedStatus = {
+    const parsedStatus: VehicleStatus = {
       chassis: {
         hoodOpen: vehicleStatus?.hoodOpen,
         trunkOpen: vehicleStatus?.trunkOpen,
@@ -214,7 +214,8 @@ export default class AmericanVehicle extends Vehicle {
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
         batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
       },
-    } as VehicleStatus;
+      lastupdate: new Date(vehicleStatus?.dateTime),
+    };
 
     this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
 
@@ -289,7 +290,6 @@ export default class AmericanVehicle extends Vehicle {
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async _request(service: string, options): Promise<got.Response<any>> {
-    
     // add logic for token refresh if to ensure we don't use a stale token
     await this.controller.refreshAccessToken();
 
