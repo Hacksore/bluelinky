@@ -1,8 +1,7 @@
-
-export const EU_API_HOST = 'prd.eu-ccapi.kia.com:8080';
+export const EU_API_HOST = 'prd.eu-ccapi.hyundai.com:8080';
 export const EU_BASE_URL = `https://${EU_API_HOST}`;
 
-export const EU_CLIENT_ID = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
+export const EU_CLIENT_ID = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
 export const EU_APP_ID = '99cfff84-f4e2-4be8-a5ed-e5b755eb6581';
 
 export type EULanguages = 'cs'|'da'|'nl'|'en'|'fi'|'fr'|'de'|'it'|'pl'|'hu'|'no'|'sk'|'es'|'sv';
@@ -19,6 +18,6 @@ export const EU_ENDPOINTS = {
 
 export const EU_CONSTANTS = {
   basicToken:
-    'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
+    'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
   GCMSenderID: '199360397125',
 };
