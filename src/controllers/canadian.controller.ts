@@ -1,6 +1,6 @@
 import got from 'got';
 import { BlueLinkyConfig } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
+import { CanadianBrandEnvironment, getBrandEnvironment } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadian.vehicle';
 import { SessionController } from './controller';
@@ -15,10 +15,16 @@ export interface CanadianBlueLinkyConfig extends BlueLinkyConfig {
 }
 
 export class CanadianController extends SessionController<CanadianBlueLinkyConfig> {
+  private _environment: CanadianBrandEnvironment;
 
   constructor(userConfig: CanadianBlueLinkyConfig) {
     super(userConfig);
     logger.debug('CA Controller created');
+    this._environment = getBrandEnvironment('hyundai');
+  }
+
+  public get environment() : CanadianBrandEnvironment {
+    return this._environment;
   }
 
   private vehicles: Array<CanadianVehicle> = [];
@@ -45,7 +51,7 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
   public async login(): Promise<string> {
     logger.info('Begin login request');
     try {
-      const response = await this.request(CA_ENDPOINTS.login, {
+      const response = await this.request(this.environment.endpoints.login, {
         loginId: this.userConfig.username,
         password: this.userConfig.password,
       });
@@ -69,7 +75,7 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
   async getVehicles(): Promise<Array<Vehicle>> {
     logger.info('Begin getVehicleList request');
     try {
-      const response = await this.request(CA_ENDPOINTS.vehicleList, {});
+      const response = await this.request(this.environment.endpoints.vehicleList, {});
 
       const data = response.result;
       if (data.vehicles === undefined) {
@@ -112,7 +118,7 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
         method: 'POST',
         json: true,
         headers: {
-          from: CLIENT_ORIGIN,
+          from: this.environment.origin,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.session.accessToken,

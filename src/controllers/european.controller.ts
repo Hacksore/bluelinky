@@ -2,7 +2,7 @@ import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULang
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
-import { ALL_ENDPOINTS, REGIONS } from '../constants';
+import { REGIONS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -74,7 +74,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     formData.append('refresh_token', this.session.refreshToken);
 
     try {
-      const response = await got(ALL_ENDPOINTS.EU.token, {
+      const response = await got(this.environment.endpoints.token, {
         method: 'POST',
         headers: {
           'Authorization': this.environment.basicToken,
@@ -135,14 +135,14 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     try {
       // request cookie via got and store it to the cookieJar
       const cookieJar = new CookieJar();
-      await got(ALL_ENDPOINTS.EU.session, { cookieJar });
+      await got(this.environment.endpoints.session, { cookieJar });
       logger.debug('@EuropeController.login: Initialized the auth session');
 
       // required by the api to set lang
-      await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
+      await got(this.environment.endpoints.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
       logger.debug(`@EuropeController.login: defined the language to ${this.userConfig.language}`);
 
-      const authCodeResponse = await got(ALL_ENDPOINTS.EU.login, {
+      const authCodeResponse = await got(this.environment.endpoints.login, {
         method: 'POST',
         json: true,
         body: {
@@ -190,10 +190,10 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
-      formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
+      formData.append('redirect_uri', this.environment.endpoints.redirectUri);
       formData.append('code', authorizationCode);
 
-      const response = await got(ALL_ENDPOINTS.EU.token, {
+      const response = await got(this.environment.endpoints.token, {
         method: 'POST',
         headers: {
           'Authorization': this.environment.basicToken,

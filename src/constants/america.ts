@@ -1,7 +1,7 @@
-import { Brand } from "../interfaces/common.interfaces";
+import { Brand } from '../interfaces/common.interfaces';
 
 export interface AmericaBrandEnvironment {
-    constructor: Brand;
+    brand: Brand;
     host: string;
     baseUrl: string;
     clientId: string;
@@ -12,7 +12,7 @@ const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
     const host = 'prd.eu-ccapi.hyundai.com:8080';
     const baseUrl = `https://${host}`;
     return {
-        constructor: 'hyundai',
+        brand: 'hyundai',
         host,
         baseUrl,
         clientId: '815c046afaa4471aa578827ad546cc76',
