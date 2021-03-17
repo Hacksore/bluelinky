@@ -18,6 +18,7 @@ const BlueLinky = require('bluelinky');
 const client = new BlueLinky({
   username: 'someguy@example.com',
   password: 'hunter1',
+  brand: 'hyundai',
   region: 'US',
   pin: '1234'
 });
