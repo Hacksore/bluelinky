@@ -1,8 +1,8 @@
-import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
+import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
-import { ALL_ENDPOINTS, REGIONS } from '../constants';
+import { REGIONS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -12,7 +12,6 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
-import { getStamp } from '../tools/european.tools';
 import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
@@ -28,6 +27,7 @@ interface EuropeanVehicleDescription {
 }
 
 export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
+  private _environment: EuropeanBrandEnvironment;
   constructor(userConfig: EuropeBlueLinkyConfig) {
     super(userConfig);
     this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
@@ -35,10 +35,15 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
     this.session.deviceId = uuidV4();
+    this._environment = getBrandEnvironment(userConfig.brand);
     logger.debug('EU Controller created');
   }
 
-  session: Session = {
+  public get environment(): EuropeanBrandEnvironment {
+    return this._environment;
+  }
+
+  public session: Session = {
     accessToken: undefined,
     refreshToken: undefined,
     controlToken: undefined,
@@ -68,12 +73,12 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     formData.append('refresh_token', this.session.refreshToken);
 
     try {
-      const response = await got(ALL_ENDPOINTS.EU.token, {
+      const response = await got(this.environment.endpoints.token, {
         method: 'POST',
         headers: {
-          'Authorization': EU_CONSTANTS.basicToken,
+          'Authorization': this.environment.basicToken,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Host': EU_API_HOST,
+          'Host': this.environment.host,
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
@@ -104,7 +109,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
 
     try {
-      const response = await got(`${EU_BASE_URL}/api/v1/user/pin`, {
+      const response = await got(`${this.environment.baseUrl}/api/v1/user/pin`, {
         method: 'PUT',
         headers: {
           'Authorization': this.session.accessToken,
@@ -129,14 +134,14 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     try {
       // request cookie via got and store it to the cookieJar
       const cookieJar = new CookieJar();
-      await got(ALL_ENDPOINTS.EU.session, { cookieJar });
+      await got(this.environment.endpoints.session, { cookieJar });
       logger.debug('@EuropeController.login: Initialized the auth session');
 
       // required by the api to set lang
-      await got(ALL_ENDPOINTS.EU.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
+      await got(this.environment.endpoints.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
       logger.debug(`@EuropeController.login: defined the language to ${this.userConfig.language}`);
 
-      const authCodeResponse = await got(ALL_ENDPOINTS.EU.login, {
+      const authCodeResponse = await got(this.environment.endpoints.login, {
         method: 'POST',
         json: true,
         body: {
@@ -157,17 +162,17 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       }
       logger.debug('@EuropeController.login: Authenticated properly with user and password');
 
-      const credentials = await pr.register(EU_CONSTANTS.GCMSenderID);
-      const notificationReponse = await got(`${EU_BASE_URL}/api/v1/spa/notifications/register`, {
+      const credentials = await pr.register(this.environment.GCMSenderID);
+      const notificationReponse = await got(`${this.environment.baseUrl}/api/v1/spa/notifications/register`, {
         method: 'POST',
         headers: {
-          'ccsp-service-id': EU_CLIENT_ID,
+          'ccsp-service-id': this.environment.clientId,
           'Content-Type': 'application/json;charset=UTF-8',
-          'Host': EU_API_HOST,
+          'Host': this.environment.host,
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -184,20 +189,20 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
-      formData.append('redirect_uri', ALL_ENDPOINTS.EU.redirectUri);
+      formData.append('redirect_uri', this.environment.endpoints.redirectUri);
       formData.append('code', authorizationCode);
 
-      const response = await got(ALL_ENDPOINTS.EU.token, {
+      const response = await got(this.environment.endpoints.token, {
         method: 'POST',
         headers: {
-          'Authorization': EU_CONSTANTS.basicToken,
+          'Authorization': this.environment.basicToken,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Host': EU_API_HOST,
+          'Host': this.environment.host,
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         body: formData.toString(),
         cookieJar,
@@ -231,25 +236,25 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
 
     try {
-      const response = await got(`${EU_BASE_URL}/api/v1/spa/vehicles`, {
+      const response = await got(`${this.environment.baseUrl}/api/v1/spa/vehicles`, {
         method: 'GET',
         headers: {
           'Authorization': this.session.accessToken,
           'ccsp-device-id': this.session.deviceId,
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         json: true,
       });
   
       this.vehicles = await asyncMap<EuropeanVehicleDescription, EuropeanVehicle>(response.body.resMsg.vehicles, async v => {
         const vehicleProfileReponse = await got(
-          `${EU_BASE_URL}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
+          `${this.environment.baseUrl}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
           {
             method: 'GET',
             headers: {
               'Authorization': this.session.accessToken,
               'ccsp-device-id': this.session.deviceId,
-              'Stamp': await getStamp(),
+              'Stamp': this.environment.stamp(),
             },
             json: true,
           }

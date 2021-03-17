@@ -1,26 +1,81 @@
-// Kia seems to use myuvo.ca as mentioned by @wcomartin
-// forks can modify some things to make this work
-export const CA_API_HOST = 'mybluelink.ca';
-export const CA_BASE_URL = `https://${CA_API_HOST}`;
-export const CLIENT_ORIGIN = 'SPA';
+import { Brand } from '../interfaces/common.interfaces';
 
-export const CA_ENDPOINTS = {
-  login: `${CA_BASE_URL}/tods/api/lgn`,
-  logout: `${CA_BASE_URL}/tods/api/lgout`,
+export interface CanadianBrandEnvironment {
+  brand: Brand;
+  host: string;
+  baseUrl: string;
+  origin: 'SPA';
+  endpoints: {
+    login: string;
+    logout: string;
+    vehicleList:string;
+    vehicleInfo: string;
+    status: string;
+    remoteStatus: string;
+    lock: string;
+    unlock: string;
+    start: string;
+    stop: string;
+    locate: string;
+    hornlight: string;
+    verifyAccountToken: string;
+    verifyPin: string;
+    verifyToken: string;
+  }
+}
+
+const getEndpoints = (baseUrl: string) => ({
+  login: `${baseUrl}/tods/api/lgn`,
+  logout: `${baseUrl}/tods/api/lgout`,
   // Vehicle
-  vehicleList: `${CA_BASE_URL}/tods/api/vhcllst`,
-  vehicleInfo: `${CA_BASE_URL}/tods/api/sltvhcl`,
-  status: `${CA_BASE_URL}/tods/api/lstvhclsts`,
-  remoteStatus: `${CA_BASE_URL}/tods/api/rltmvhclsts`,
+  vehicleList: `${baseUrl}/tods/api/vhcllst`,
+  vehicleInfo: `${baseUrl}/tods/api/sltvhcl`,
+  status: `${baseUrl}/tods/api/lstvhclsts`,
+  remoteStatus: `${baseUrl}/tods/api/rltmvhclsts`,
   // Car commands with preauth (PIN)
-  lock: `${CA_BASE_URL}/tods/api/drlck`,
-  unlock: `${CA_BASE_URL}/tods/api/drulck`,
-  start: `${CA_BASE_URL}/tods/api/evc/rfon`,
-  stop: `${CA_BASE_URL}/tods/api/evc/rfoff`,
-  locate: `${CA_BASE_URL}/tods/api/fndmcr`,
-  hornlight: `${CA_BASE_URL}/tods/api/hornlight`,
+  lock: `${baseUrl}/tods/api/drlck`,
+  unlock: `${baseUrl}/tods/api/drulck`,
+  start: `${baseUrl}/tods/api/evc/rfon`,
+  stop: `${baseUrl}/tods/api/evc/rfoff`,
+  locate: `${baseUrl}/tods/api/fndmcr`,
+  hornlight: `${baseUrl}/tods/api/hornlight`,
   // System
-  verifyAccountToken: `${CA_BASE_URL}/tods/api/vrfyacctkn`,
-  verifyPin: `${CA_BASE_URL}/tods/api/vrfypin`,
-  verifyToken: `${CA_BASE_URL}/tods/api/vrfytnc`,
+  verifyAccountToken: `${baseUrl}/tods/api/vrfyacctkn`,
+  verifyPin: `${baseUrl}/tods/api/vrfypin`,
+  verifyToken: `${baseUrl}/tods/api/vrfytnc`,
+});
+
+const getEnvironment = (host: string): Omit<CanadianBrandEnvironment, 'brand'> => {
+  const baseUrl = `https://${host}`;
+  return {
+    host,
+    baseUrl,
+    origin: 'SPA',
+    endpoints: Object.freeze(getEndpoints(baseUrl)),
+  };
+};
+
+const getHyundaiEnvironment = (): CanadianBrandEnvironment => {
+  return {
+    brand: 'hyundai',
+    ...getEnvironment('mybluelink.ca')
+  };
+};
+
+const getKiaEnvironment = (): CanadianBrandEnvironment => {
+  return {
+    brand: 'hyundai',
+    ...getEnvironment('myuvo.ca')
+  };
+};
+
+export const getBrandEnvironment = (brand: Brand): CanadianBrandEnvironment => {
+  switch (brand) {
+    case 'hyundai':
+      return Object.freeze(getHyundaiEnvironment());
+    case 'kia':
+      return Object.freeze(getKiaEnvironment());
+    default:
+      throw new Error(`Constructor ${brand} is not managed.`);
+  }
 };

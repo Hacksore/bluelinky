@@ -21,8 +21,6 @@ import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
-import { EU_BASE_URL } from '../constants/europe';
-import { getStamp } from '../tools/european.tools';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
 import { addMinutes, parse as parseDate } from 'date-fns';
 
@@ -53,7 +51,7 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
           method: 'POST',
           body: {
@@ -70,7 +68,7 @@ export default class EuropeanVehicle extends Vehicle {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -86,7 +84,7 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
           method: 'POST',
           body: {
@@ -103,7 +101,7 @@ export default class EuropeanVehicle extends Vehicle {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -119,14 +117,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             action: 'close',
@@ -149,14 +147,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             action: 'open',
@@ -187,14 +185,14 @@ export default class EuropeanVehicle extends Vehicle {
 
     try {
       const cachedResponse = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
         {
           method: 'GET',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -204,14 +202,14 @@ export default class EuropeanVehicle extends Vehicle {
 
       if (statusConfig.refresh) {
         const statusResponse = await got(
-          `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
+          `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
           {
             method: 'GET',
             headers: {
               'Authorization': this.controller.session.controlToken,
               'ccsp-device-id': this.controller.session.deviceId,
               'Content-Type': 'application/json',
-              'Stamp': await getStamp(),
+              'Stamp': this.controller.environment.stamp(),
             },
             json: true,
           }
@@ -219,14 +217,14 @@ export default class EuropeanVehicle extends Vehicle {
         fullStatus.vehicleStatus = statusResponse.body.resMsg;
 
         const locationResponse = await got(
-          `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
+          `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
           {
             method: 'GET',
             headers: {
               'Authorization': this.controller.session.controlToken,
               'ccsp-device-id': this.controller.session.deviceId,
               'Content-Type': 'application/json',
-              'Stamp': await getStamp(),
+              'Stamp': this.controller.environment.stamp(),
             },
             json: true,
           }
@@ -255,14 +253,14 @@ export default class EuropeanVehicle extends Vehicle {
       const cacheString = statusConfig.refresh ? '' : '/latest';
 
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`,
         {
           method: 'GET',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -341,14 +339,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
         {
           method: 'GET',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -364,14 +362,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
         {
           method: 'GET',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -399,14 +397,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             action: 'start',
@@ -431,14 +429,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             action: 'stop',
@@ -465,14 +463,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             setRptMonth: toMonthDate(month)
@@ -514,14 +512,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
+        `${this.controller.environment.baseUrl}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.accessToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             setTripMonth: !date.day ? toMonthDate(date) : undefined,
@@ -581,14 +579,14 @@ export default class EuropeanVehicle extends Vehicle {
     await this.checkControlToken();
     try {
       const response = await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
         {
           method: 'GET',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           json: true,
         }
@@ -617,14 +615,14 @@ export default class EuropeanVehicle extends Vehicle {
     }
     try {
       await got(
-        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
         {
           method: 'POST',
           headers: {
             'Authorization': this.controller.session.controlToken,
             'ccsp-device-id': this.controller.session.deviceId,
             'Content-Type': 'application/json',
-            'Stamp': await getStamp(),
+            'Stamp': this.controller.environment.stamp(),
           },
           body: {
             targetSOClist: [
@@ -640,6 +638,7 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 }
+
 function toMonthDate(month: { year: number; month: number; }) {
   return `${month.year}${month.month.toString().padStart(2, '0')}`;
 }

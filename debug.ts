@@ -42,6 +42,12 @@ const askForRegionInput = () => {
         message: 'What Region are you in?',
         choices: ['US', 'EU', 'CA'],
       },
+      {
+        type: 'list',
+        name: 'brand',
+        message: 'Which brand are you using?',
+        choices: ['hyundai', 'kia'],
+      }
     ])
     .then(answers => {
       if (answers.command == 'exit') {
@@ -49,16 +55,17 @@ const askForRegionInput = () => {
       } else {
         console.log(answers)
         console.log('Logging in...');
-        createInstance(answers.region);
+        createInstance(answers.region, answers.brand);
       }
     });
 };
 
-const createInstance = region => {
+const createInstance = (region, brand) => {
   const client = new BlueLinky({
     username,
     password,
     region,
+    brand,
     pin
   });
   client.on('ready', onReadyHandler);

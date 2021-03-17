@@ -6,7 +6,7 @@ import AmericanVehicle from '../vehicles/american.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
-import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/america';
+import { getBrandEnvironment, AmericaBrandEnvironment } from '../constants/america';
 
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { manageBluelinkyError } from '../tools/common.tools';
@@ -17,9 +17,16 @@ export interface AmericanBlueLinkyConfig extends BlueLinkyConfig {
 }
 
 export class AmericanController extends SessionController<AmericanBlueLinkyConfig> {
+  private _environment: AmericaBrandEnvironment;
+
   constructor(userConfig: AmericanBlueLinkyConfig) {
     super(userConfig);
+    this._environment = getBrandEnvironment(userConfig.brand);
     logger.debug('US Controller created');
+  }
+
+  public get environment(): AmericaBrandEnvironment {
+    return this._environment;
   }
 
   private vehicles: Array<AmericanVehicle> = [];
@@ -30,14 +37,14 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
     try {
       if (this.session.refreshToken && shouldRefreshToken) {
         logger.debug('refreshing token');
-        const response = await got(`${BASE_URL}/v2/ac/oauth/token/refresh`, {
+        const response = await got(`${this.environment.baseUrl}/v2/ac/oauth/token/refresh`, {
           method: 'POST',
           body: {
             'refresh_token': this.session.refreshToken,
           },
           headers: {
-            'client_secret': CLIENT_SECRET,
-            'client_id': CLIENT_ID,
+            'client_secret': this.environment.clientSecret,
+            'client_id': this.environment.clientId,
           },
           json: true,
         });
@@ -64,15 +71,15 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
   public async login(): Promise<string> {
     logger.debug('Logging in to the API');
     try {
-      const response = await got(`${BASE_URL}/v2/ac/oauth/token`, {
+      const response = await got(`${this.environment.baseUrl}/v2/ac/oauth/token`, {
         method: 'POST',
         body: {
           username: this.userConfig.username,
           password: this.userConfig.password,
         },
         headers: {
-          'client_secret': CLIENT_SECRET,
-          'client_id': CLIENT_ID,
+          'client_secret': this.environment.clientSecret,
+          'client_id': this.environment.clientId,
         },
         json: true,
       });
@@ -101,12 +108,12 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
 
   async getVehicles(): Promise<Array<Vehicle>> {
     try {
-      const response = await got(`${BASE_URL}/ac/v2/enrollment/details/${this.userConfig.username}`, {
+      const response = await got(`${this.environment.baseUrl}/ac/v2/enrollment/details/${this.userConfig.username}`, {
         method: 'GET',
         headers: {
           'access_token': this.session.accessToken,
-          'client_id': CLIENT_ID,
-          'Host': API_HOST,
+          'client_id': this.environment.clientId,
+          'Host': this.environment.host,
           'User-Agent': 'okhttp/3.12.0',
           'payloadGenerated': '20200226171938',
           'includeNonConnectedVehicles': 'Y',

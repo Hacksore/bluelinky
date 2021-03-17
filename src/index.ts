@@ -17,6 +17,7 @@ const DEFAULT_CONFIG = {
   username: '',
   password: '',
   region: REGIONS.US,
+  brand: 'hyundai',
   autoLogin: true,
   pin: '1234',
   vin: '',
@@ -36,25 +37,25 @@ class BlueLinky<
   constructor(config: T) {
     super();
 
-    switch (config.region) {
-      case REGIONS.EU:
-        this.controller = new EuropeanController(config as EuropeBlueLinkyConfig);
-        break;
-      case REGIONS.US:
-        this.controller = new AmericanController(config as AmericanBlueLinkyConfig);
-        break;
-      case REGIONS.CA:
-        this.controller = new CanadianController(config as CanadianBlueLinkyConfig);
-        break;
-      default:
-        throw new Error('Your region is not supported yet.');
-    }
-
     // merge configs
     this.config = {
       ...DEFAULT_CONFIG,
       ...config,
     };
+
+    switch (config.region) {
+      case REGIONS.EU:
+        this.controller = new EuropeanController(this.config as EuropeBlueLinkyConfig);
+        break;
+      case REGIONS.US:
+        this.controller = new AmericanController(this.config as AmericanBlueLinkyConfig);
+        break;
+      case REGIONS.CA:
+        this.controller = new CanadianController(this.config as CanadianBlueLinkyConfig);
+        break;
+      default:
+        throw new Error('Your region is not supported yet.');
+    }
 
     if (config.autoLogin === undefined) {
       this.config.autoLogin = true;
