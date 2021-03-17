@@ -1,4 +1,3 @@
-
 export const EU_API_HOST = 'prd.eu-ccapi.hyundai.com:8080';
 export const EU_BASE_URL = `https://${EU_API_HOST}`;
 

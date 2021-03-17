@@ -33,6 +33,11 @@ export enum EVPlugTypes {
   STATION = 3
 }
 
+export enum EVChargeModeTypes {
+  FAST = 0,
+  SLOW = 1,
+}
+
 // Status remapped
 export interface VehicleStatus {
   engine: {
@@ -424,4 +429,65 @@ export interface VehicleRegisterOptions {
   regId: string;
   id: string;
   generation: string;
+}
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+export interface VehicleMonthlyReport {
+  start: string; // format YYYYMMDD, eg: 20210210
+  end: string; // format YYYYMMDD, eg: 20210312
+  driving: {
+    distance: number;
+    startCount: number;
+    durations: {
+      drive: number;
+      idle: number;
+    }
+  },
+  breakdown: {
+    ecuIdx: string;
+    ecuStatus: string;
+  }[],
+  vehicleStatus: {
+    tpms: boolean;
+    tirePressure: {
+      all: boolean;
+    }
+  }
+}
+
+export interface VehicleTargetSOC {
+  type: EVChargeModeTypes;
+  distance: number;
+  targetLevel: number;
+}
+
+export interface VehicleDayTrip {
+  dayRaw: string;
+  tripsCount: number;
+  distance: number;
+  durations: {
+    drive: number;
+    idle: number;
+  };
+  speed: {
+    avg: number;
+    max: number;
+  };
+  trips: {
+    timeRaw: string;
+    start: Date;
+    end: Date;
+    durations: {
+      drive: number;
+      idle: number;
+    };
+    speed: {
+      avg: number;
+      max: number;
+    };
+    distance: number;
+  }[];
 }

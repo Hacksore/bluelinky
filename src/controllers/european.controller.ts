@@ -2,7 +2,7 @@ import { EU_CONSTANTS, EU_BASE_URL, EU_API_HOST, EU_CLIENT_ID, DEFAULT_LANGUAGE,
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
-import { ALL_ENDPOINTS } from '../constants';
+import { ALL_ENDPOINTS, REGIONS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -17,6 +17,7 @@ import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
+  region: REGIONS.EU;
 }
 
 interface EuropeanVehicleDescription {

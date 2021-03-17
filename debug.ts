@@ -4,6 +4,7 @@
 import config from './config.json';
 import BlueLinky from './src';
 import inquirer from 'inquirer';
+import { Vehicle } from './src/vehicles/vehicle';
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -18,12 +19,16 @@ const apiCalls = [
   { name: 'lock', value: 'lock' },
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
+  { name: 'monthly report', value: 'monthlyReport' },
+  { name: 'trip informations', value: 'tripInfo' },
+  { name: '[EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EV] set charge targets', value: 'setChargeTargets' },
 ];
 
 let vehicle;
 const { username, password, vin, pin } = config;
 
-const onReadyHandler = vehicles => {
+const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
   askForCommandInput();
 };
@@ -53,7 +58,7 @@ const createInstance = region => {
   const client = new BlueLinky({
     username,
     password,
-    region: region,
+    region,
     pin
   });
   client.on('ready', onReadyHandler);
@@ -141,6 +146,22 @@ async function performCommand(command) {
       case 'unlock':
         const unlockRes = await vehicle.unlock();
         console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
+        break;
+      case 'monthlyReport':
+        const report = await vehicle.monthlyReport();
+        console.log('monthyReport : ' + JSON.stringify(report, null, 2));
+        break;
+      case 'tripInfo':
+        const trips = await vehicle.tripInfo();
+        console.log('trips : ' + JSON.stringify(trips, null, 2));
+        break;
+      case 'getChargeTargets':
+        const targets = await vehicle.getChargeTargets();
+        console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'setChargeTargets':
+         await vehicle.setChargeTargets({ fast: 80, slow: 80 });
+        console.log('targets : OK');
         break;
     }
 

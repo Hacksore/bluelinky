@@ -10,8 +10,14 @@ import { BASE_URL, CLIENT_ID, CLIENT_SECRET, API_HOST } from '../constants/ameri
 
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { manageBluelinkyError } from '../tools/common.tools';
-export class AmericanController extends SessionController {
-  constructor(userConfig: BlueLinkyConfig) {
+import { REGIONS } from '../constants';
+
+export interface AmericanBlueLinkyConfig extends BlueLinkyConfig {
+  region: REGIONS.US;
+}
+
+export class AmericanController extends SessionController<AmericanBlueLinkyConfig> {
+  constructor(userConfig: AmericanBlueLinkyConfig) {
     super(userConfig);
     logger.debug('US Controller created');
   }

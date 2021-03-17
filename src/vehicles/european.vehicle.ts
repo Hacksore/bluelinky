@@ -9,6 +9,11 @@ import {
   VehicleStatusOptions,
   RawVehicleStatus,
   EVPlugTypes,
+  VehicleMonthlyReport,
+  DeepPartial,
+  VehicleTargetSOC,
+  EVChargeModeTypes,
+  VehicleDayTrip,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
@@ -18,8 +23,11 @@ import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { EU_BASE_URL } from '../constants/europe';
 import { getStamp } from '../tools/european.tools';
-import { manageBluelinkyError } from '../tools/common.tools';
-import { parse as parseDate } from 'date-fns';
+import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
+import { addMinutes, parse as parseDate } from 'date-fns';
+
+type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
+const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
@@ -447,7 +455,196 @@ export default class EuropeanVehicle extends Vehicle {
 
       throw 'Something went wrong!';
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeVehicle.startCharge');
+      throw manageBluelinkyError(err, 'EuropeVehicle.stopCharge');
+    }
+  }
+
+  public async monthlyReport(
+    month: { year: number; month: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  ): Promise<DeepPartial<VehicleMonthlyReport> | undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            setRptMonth: toMonthDate(month)
+          },
+          json: true,
+        }
+      );
+      const rawData = response.body.resMsg?.monthlyReport;
+      if (rawData) {
+        return {
+          start: rawData.ifo?.mvrMonthStart,
+          end: rawData.ifo?.mvrMonthEnd,
+          breakdown: rawData.breakdown,
+          driving: rawData.driving ? {
+            distance: rawData.driving?.runDistance,
+            startCount: rawData.driving?.engineStartCount,
+            durations: {
+              idle: rawData.driving?.engineIdleTime,
+              drive: rawData.driving?.engineOnTime,
+            }
+          } : undefined,
+          vehicleStatus: rawData.vehicleStatus ? {
+            tpms: rawData.vehicleStatus?.tpmsSupport ? Boolean(rawData.vehicleStatus?.tpmsSupport) : undefined,
+            tirePressure: {
+              all: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll == '1',
+            }
+          } : undefined,
+        };
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.monthyReports');
+    }
+  }
+
+  public async tripInfo(
+    date: { year: number; month: number; day: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
+  ): Promise<DeepPartial<VehicleDayTrip>[] | undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.accessToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            setTripMonth: !date.day ? toMonthDate(date) : undefined,
+            setTripLatest: 10,
+            setTripDay: date.day ? toDayDate(date) : undefined,
+            tripPeriodType: 1
+          },
+          json: true,
+        }
+      );
+
+      const rawData = response.body.resMsg.dayTripList;
+      if (rawData && Array.isArray(rawData)) {
+        return rawData.map(day => ({
+          dayRaw: day.tripDay,
+          tripsCount: day.dayTripCnt,
+          distance: day.tripDist,
+          durations: {
+            drive: day.tripDrvTime,
+            idle: day.tripIdleTime
+          },
+          speed: {
+            avg: day.tripAvgSpeed,
+            max: day.tripMaxSpeed
+          },
+          trips: Array.isArray(day.tripList) ?
+            day.tripList.map(trip => {
+              const start = parseDate(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
+              return {
+                timeRaw: trip.tripTime,
+                start,
+                end: addMinutes(start, trip.tripDrvTime),
+                durations: {
+                  drive: trip.tripDrvTime,
+                  idle: trip.tripIdleTime,
+                },
+                speed: {
+                  avg: trip.tripAvgSpeed,
+                  max: trip.tripMaxSpeed,
+                },
+                distance: trip.tripDist,
+              };
+            })
+            : [],
+        }));
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.history');
+    }
+  }
+
+  /**
+   * Warning: Only works on EV
+   */
+  public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[] | undefined> {
+    await this.checkControlToken();
+    try {
+      const response = await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          json: true,
+        }
+      );
+      const rawData = response.body.resMsg?.targetSOClist;
+      if (rawData && Array.isArray(rawData)) {
+        return rawData.map((rawSOC) => ({
+          distance: rawSOC.drvDistance?.distanceType?.distanceValue,
+          targetLevel: rawSOC.targetSOClevel,
+          type: rawSOC.plugType
+        }));
+      }
+      return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.getChargeTargets');
+    }
+  }
+
+  /**
+   * Warning: Only works on EV
+   */
+  public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
+    await this.checkControlToken();
+    if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) || !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)) {
+      throw new ManagedBluelinkyError(`Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
+    }
+    try {
+      await got(
+        `${EU_BASE_URL}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': await getStamp(),
+          },
+          body: {
+            targetSOClist: [
+              { plugType: EVChargeModeTypes.FAST, targetSOClevel: limits.fast },
+              { plugType: EVChargeModeTypes.SLOW, targetSOClevel: limits.slow }
+            ]
+          },
+          json: true,
+        }
+      );
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
     }
   }
 }
+function toMonthDate(month: { year: number; month: number; }) {
+  return `${month.year}${month.month.toString().padStart(2, '0')}`;
+}
+
+function toDayDate(date: { year: number; month: number; day: number; }) {
+  return `${toMonthDate(date)}${date.day.toString().padStart(2, '0')}`;
+}
+
