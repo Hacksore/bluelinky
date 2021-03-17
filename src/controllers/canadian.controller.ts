@@ -20,7 +20,7 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
   constructor(userConfig: CanadianBlueLinkyConfig) {
     super(userConfig);
     logger.debug('CA Controller created');
-    this._environment = getBrandEnvironment('hyundai');
+    this._environment = getBrandEnvironment(userConfig.brand);
   }
 
   public get environment() : CanadianBrandEnvironment {

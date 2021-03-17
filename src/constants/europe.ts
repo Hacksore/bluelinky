@@ -58,7 +58,7 @@ const getKiaEnvironment = (): EuropeanBrandEnvironment => {
     host,
     baseUrl,
     clientId,
-    appId: '99cfff84-f4e2-4be8-a5ed-e5b755eb6581',
+    appId: '693a33fa-c117-43f2-ae3b-61a02d24f417',
     endpoints: getEndpoints(baseUrl, clientId),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
     GCMSenderID: '199360397125',

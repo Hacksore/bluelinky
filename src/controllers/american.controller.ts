@@ -21,7 +21,7 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
 
   constructor(userConfig: AmericanBlueLinkyConfig) {
     super(userConfig);
-    this._environment = getBrandEnvironment('hyundai');
+    this._environment = getBrandEnvironment(userConfig.brand);
     logger.debug('US Controller created');
   }
 

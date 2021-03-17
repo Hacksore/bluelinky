@@ -12,7 +12,6 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
-import { getStamp } from '../tools/european.tools';
 import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
@@ -36,7 +35,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
     this.session.deviceId = uuidV4();
-    this._environment = getBrandEnvironment('hyundai');
+    this._environment = getBrandEnvironment(userConfig.brand);
     logger.debug('EU Controller created');
   }
 
@@ -173,7 +172,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -203,7 +202,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         body: formData.toString(),
         cookieJar,
@@ -242,7 +241,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         headers: {
           'Authorization': this.session.accessToken,
           'ccsp-device-id': this.session.deviceId,
-          'Stamp': await getStamp(),
+          'Stamp': this.environment.stamp(),
         },
         json: true,
       });
@@ -255,7 +254,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             headers: {
               'Authorization': this.session.accessToken,
               'ccsp-device-id': this.session.deviceId,
-              'Stamp': await getStamp(),
+              'Stamp': this.environment.stamp(),
             },
             json: true,
           }
