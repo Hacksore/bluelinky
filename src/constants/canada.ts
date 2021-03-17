@@ -51,7 +51,7 @@ const getEnvironment = (host: string): Omit<CanadianBrandEnvironment, 'brand'> =
     host,
     baseUrl,
     origin: 'SPA',
-    endpoints: getEndpoints(baseUrl),
+    endpoints: Object.freeze(getEndpoints(baseUrl)),
   };
 };
 

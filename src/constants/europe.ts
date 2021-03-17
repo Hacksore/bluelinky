@@ -42,7 +42,7 @@ const getHyundaiEnvironment = (): EuropeanBrandEnvironment => {
     baseUrl,
     clientId,
     appId: '99cfff84-f4e2-4be8-a5ed-e5b755eb6581',
-    endpoints: getEndpoints(baseUrl, clientId),
+    endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
     GCMSenderID: '199360397125',
     stamp: () => hyundaiStamps[Math.floor(Math.random() * hyundaiStamps.length)]
@@ -59,7 +59,7 @@ const getKiaEnvironment = (): EuropeanBrandEnvironment => {
     baseUrl,
     clientId,
     appId: '693a33fa-c117-43f2-ae3b-61a02d24f417',
-    endpoints: getEndpoints(baseUrl, clientId),
+    endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
     GCMSenderID: '199360397125',
     stamp: () => kiaStamps[Math.floor(Math.random() * kiaStamps.length)]
