@@ -48,6 +48,7 @@ describe('BlueLinky', () => {
       username: 'someone@gmai.com',
       password: '123',
       pin: '1234',
+      brand: 'hyundai',
       region: 'US',
     });
 
@@ -79,6 +80,7 @@ describe('BlueLinky', () => {
       username: 'someone@gmail.com',
       password: 'hunter1',
       pin: '1234',
+      brand: 'hyundai',
       region: 'US',
     });
 
@@ -96,6 +98,7 @@ describe('BlueLinky', () => {
         username: 'someone@gmail.com',
         password: 'hunter1',
         pin: '1234',
+        brand: 'hyundai',
         region: 'KR',
       });
     }).toThrowError('Your region is not supported yet.');
@@ -106,6 +109,7 @@ describe('BlueLinky', () => {
       username: 'someone@gmail.com',
       password: 'hunter1',
       pin: '1234',
+      brand: 'hyundai',
       region: 'US',
     });
 
@@ -119,6 +123,7 @@ describe('BlueLinky', () => {
       username: 'someone@gmail.com',
       password: 'hunter1',
       pin: '1234',
+      brand: 'hyundai',
       region: 'US',
     });
 
@@ -133,6 +138,7 @@ describe('BlueLinky', () => {
       username: 'someone@gmai.com',
       password: 'hunter1',
       pin: '1234',
+      brand: 'hyundai',
       region: 'US',
     });
 
