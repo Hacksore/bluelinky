@@ -46,7 +46,8 @@ Ensure you have a `config.json` that matches the structure of the following, wit
 {
   "username": "email",
   "password": "password",
-  "pin": "ping",
+  "pin": "pin",
+  "brand": "brand: kia or huyndai",
   "vin": "vin"
 }
 ```
@@ -62,7 +63,14 @@ Checkout out the [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) fo
 - Unlock
 - Start (with climate control)
 - Stop
-- Status
+- Status (full, parsed, cached)
+- odometer
+- location
+- startCharge
+- monthlyReport
+- tripInfo
+- EV: getChargeTargets
+- EV: setChargeLimits
 
 ## Supported Regions
 | [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) 
