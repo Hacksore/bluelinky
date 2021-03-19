@@ -301,7 +301,7 @@ export default class EuropeanVehicle extends Vehicle {
         },
         engine: {
           ignition: vehicleStatus.engine,
-          adaptiveCruiseControl: vehicleStatus?.acc,
+          accessory: vehicleStatus?.acc,
           rangeGas:
             vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.gasModeRange?.value ??
             vehicleStatus?.dte?.value,

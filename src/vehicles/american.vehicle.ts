@@ -207,7 +207,7 @@ export default class AmericanVehicle extends Vehicle {
       },
       engine: {
         ignition: vehicleStatus?.engine,
-        adaptiveCruiseControl: vehicleStatus?.acc,
+        accessory: vehicleStatus?.acc,
         range: vehicleStatus?.dte?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
