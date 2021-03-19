@@ -85,7 +85,7 @@ export default class CanadianVehicle extends Vehicle {
         // example EV status is in lib/__mock__/canadianStatus.json
         engine: {
           ignition: vehicleStatus?.engine,
-          adaptiveCruiseControl: vehicleStatus?.acc,
+          accessory: vehicleStatus?.acc,
           range: vehicleStatus?.dte?.value,
           charging: vehicleStatus?.evStatus?.batteryCharge,
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
