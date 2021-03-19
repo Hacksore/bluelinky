@@ -58,7 +58,7 @@ export interface VehicleStatus {
     estimatedStationChargeDuration?: number;
     batteryCharge12v?: number;
     batteryChargeHV?: number;
-    adaptiveCruiseControl: boolean;
+    accessory: boolean;
   };
   climate: {
     active: boolean;
