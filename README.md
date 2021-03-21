@@ -47,7 +47,7 @@ Ensure you have a `config.json` that matches the structure of the following, wit
   "username": "email",
   "password": "password",
   "pin": "pin",
-  "brand": "brand: kia or huyndai",
+  "brand": "kia" or "hyundai",
   "vin": "vin"
 }
 ```
