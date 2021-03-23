@@ -1,6 +1,6 @@
 # bluelinky
 
-An unoffcial nodejs API wrapper for Hyundai BlueLink
+An unofficial nodejs API wrapper for Hyundai BlueLink
 
 [![CI](https://img.shields.io/github/workflow/status/Hacksore/bluelinky/npm)](https://github.com/Hacksore/bluelinky/actions?query=workflow%3Anpm)
 [![npm](https://img.shields.io/npm/v/bluelinky.svg)](https://www.npmjs.com/package/bluelinky)
