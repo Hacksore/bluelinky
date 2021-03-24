@@ -174,7 +174,22 @@ async function performCommand(command) {
         console.log('targets : ' + JSON.stringify(targets, null, 2));
         break;
       case 'setChargeTargets':
-         await vehicle.setChargeTargets({ fast: 80, slow: 80 });
+        const { fast, slow } = await inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'fast',
+              message: 'What fast charge limit do you which to set?',
+              choices: [50, 60, 70, 80, 90, 100],
+            },
+            {
+              type: 'list',
+              name: 'slow',
+              message: 'What slow charge limit do you which to set?',
+              choices: [50, 60, 70, 80, 90, 100],
+            }
+          ]);
+        await vehicle.setChargeTargets({ fast, slow });
         console.log('targets : OK');
         break;
     }
