@@ -23,6 +23,7 @@ import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
 import { addMinutes, parse as parseDate } from 'date-fns';
+import { EUPOIInformation } from '../interfaces/european.interfaces';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
 const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
@@ -635,6 +636,35 @@ export default class EuropeanVehicle extends Vehicle {
       );
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
+    }
+  }
+
+  /**
+   * Define a navigation route
+   * @param poiInformations The list of POIs and waypoint to go through
+   */
+  public async setNavigation(poiInformations: EUPOIInformation[]): Promise<void> {
+    await this.checkControlToken();
+    try {
+      await got(
+        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location/routes`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': this.controller.session.controlToken,
+            'ccsp-device-id': this.controller.session.deviceId,
+            'Content-Type': 'application/json',
+            'Stamp': this.controller.environment.stamp(),
+          },
+          body: {
+            deviceID: this.controller.session.deviceId,
+            poiInfoList: poiInformations,
+          },
+          json: true,
+        }
+      );
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.setNavigation');
     }
   }
 }
