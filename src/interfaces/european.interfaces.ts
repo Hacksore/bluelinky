@@ -13,7 +13,7 @@ export interface EUPOIInformation {
   coords: {
     lat: number;
     alt: number;
-    long: number;
+    lon: number;
     type: 0;
   },
   addr: string;
