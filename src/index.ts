@@ -65,8 +65,11 @@ class BlueLinky<
   }
 
   on(event: 'ready', fnc: (vehicles: VEHICLE_TYPE[]) => void): this;
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: 'error', fnc: (error: any) => void): this;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: string|symbol, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }

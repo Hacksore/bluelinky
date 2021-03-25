@@ -78,8 +78,9 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
           password: this.userConfig.password,
         },
         headers: {
-          'client_secret': this.environment.clientSecret,
+          'User-Agent': 'PostmanRuntime/7.26.10',
           'client_id': this.environment.clientId,
+          'client_secret': this.environment.clientSecret,
         },
         json: true,
       });

@@ -9,7 +9,7 @@ export interface AmericaBrandEnvironment {
 }
 
 const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
-  const host = 'prd.eu-ccapi.hyundai.com:8080';
+  const host = 'api.telematics.hyundaiusa.com';
   const baseUrl = `https://${host}`;
   return {
     brand: 'hyundai',
