@@ -2,8 +2,6 @@ import got from 'got';
 import logger from '../logger';
 
 import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
-import { BASE_URL, CLIENT_ID, API_HOST } from '../constants/america';
-import { SessionController } from '../controllers/controller';
 
 import {
   VehicleStartOptions,
@@ -19,11 +17,12 @@ import { RequestHeaders } from '../interfaces/american.interfaces';
 
 import { Vehicle } from './vehicle';
 import { URLSearchParams } from 'url';
+import { AmericanController } from '../controllers/american.controller';
 
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
 
-  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: AmericanController) {
     super(vehicleConfig, controller);
     logger.debug(`US Vehicle ${this.vehicleConfig.regId} created`);
   }
@@ -31,8 +30,8 @@ export default class AmericanVehicle extends Vehicle {
   private getDefaultHeaders(): RequestHeaders {
     return {
       'access_token': this.controller.session.accessToken,
-      'client_id': CLIENT_ID,
-      'Host': API_HOST,
+      'client_id': this.controller.environment.clientId,
+      'Host': this.controller.environment.host,
       'User-Agent': 'okhttp/3.12.0',
       'registrationId': this.vehicleConfig.regId,
       'gen': this.vehicleConfig.generation,
@@ -178,7 +177,7 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     const { vehicleStatus } = JSON.parse(response.body);
-    const parsedStatus = {
+    const parsedStatus: VehicleStatus = {
       chassis: {
         hoodOpen: vehicleStatus?.hoodOpen,
         trunkOpen: vehicleStatus?.trunkOpen,
@@ -208,13 +207,14 @@ export default class AmericanVehicle extends Vehicle {
       },
       engine: {
         ignition: vehicleStatus?.engine,
-        adaptiveCruiseControl: vehicleStatus?.acc,
+        accessory: vehicleStatus?.acc,
         range: vehicleStatus?.dte?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
         batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
       },
-    } as VehicleStatus;
+      lastupdate: new Date(vehicleStatus?.dateTime),
+    };
 
     this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
 
@@ -289,14 +289,13 @@ export default class AmericanVehicle extends Vehicle {
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async _request(service: string, options): Promise<got.Response<any>> {
-    
     // add logic for token refresh if to ensure we don't use a stale token
     await this.controller.refreshAccessToken();
 
     // if we refreshed token make sure to apply it to the request
     options.headers.access_token = this.controller.session.accessToken;
 
-    const response = await got(`${BASE_URL}/${service}`, { throwHttpErrors: false, ...options });
+    const response = await got(`${this.controller.environment.baseUrl}/${service}`, { throwHttpErrors: false, ...options });
 
     if (response?.body) {
       logger.debug(response.body);

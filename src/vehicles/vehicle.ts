@@ -40,6 +40,7 @@ export abstract class Vehicle {
     username: undefined,
     password: undefined,
     region: REGIONS.EU,
+    brand: 'hyundai',
     autoLogin: true,
     pin: undefined,
     vin: undefined,

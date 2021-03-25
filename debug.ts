@@ -4,6 +4,7 @@
 import config from './config.json';
 import BlueLinky from './src';
 import inquirer from 'inquirer';
+import { Vehicle } from './src/vehicles/vehicle';
 
 const apiCalls = [
   { name: 'exit', value: 'exit' },
@@ -18,12 +19,16 @@ const apiCalls = [
   { name: 'lock', value: 'lock' },
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
+  { name: 'monthly report', value: 'monthlyReport' },
+  { name: 'trip informations', value: 'tripInfo' },
+  { name: '[EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EV] set charge targets', value: 'setChargeTargets' },
 ];
 
 let vehicle;
 const { username, password, vin, pin } = config;
 
-const onReadyHandler = vehicles => {
+const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
   askForCommandInput();
 };
@@ -37,6 +42,12 @@ const askForRegionInput = () => {
         message: 'What Region are you in?',
         choices: ['US', 'EU', 'CA'],
       },
+      {
+        type: 'list',
+        name: 'brand',
+        message: 'Which brand are you using?',
+        choices: ['hyundai', 'kia'],
+      }
     ])
     .then(answers => {
       if (answers.command == 'exit') {
@@ -44,16 +55,17 @@ const askForRegionInput = () => {
       } else {
         console.log(answers)
         console.log('Logging in...');
-        createInstance(answers.region);
+        createInstance(answers.region, answers.brand);
       }
     });
 };
 
-const createInstance = region => {
+const createInstance = (region, brand) => {
   const client = new BlueLinky({
     username,
     password,
-    region: region,
+    region,
+    brand,
     pin
   });
   client.on('ready', onReadyHandler);
@@ -99,6 +111,13 @@ async function performCommand(command) {
         });
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
+      case 'statusU':
+        const statusU = await vehicle.status({
+          refresh: false,
+          parsed: false,
+        });
+        console.log('status : ' + JSON.stringify(statusU, null, 2));
+        break;
       case 'statusR':
         const statusR = await vehicle.status({
           refresh: true,
@@ -141,6 +160,37 @@ async function performCommand(command) {
       case 'unlock':
         const unlockRes = await vehicle.unlock();
         console.log('unlock : ' + JSON.stringify(unlockRes, null, 2));
+        break;
+      case 'monthlyReport':
+        const report = await vehicle.monthlyReport();
+        console.log('monthyReport : ' + JSON.stringify(report, null, 2));
+        break;
+      case 'tripInfo':
+        const trips = await vehicle.tripInfo();
+        console.log('trips : ' + JSON.stringify(trips, null, 2));
+        break;
+      case 'getChargeTargets':
+        const targets = await vehicle.getChargeTargets();
+        console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'setChargeTargets':
+        const { fast, slow } = await inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'fast',
+              message: 'What fast charge limit do you which to set?',
+              choices: [50, 60, 70, 80, 90, 100],
+            },
+            {
+              type: 'list',
+              name: 'slow',
+              message: 'What slow charge limit do you which to set?',
+              choices: [50, 60, 70, 80, 90, 100],
+            }
+          ]);
+        await vehicle.setChargeTargets({ fast, slow });
+        console.log('targets : OK');
         break;
     }
 

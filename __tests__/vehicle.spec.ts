@@ -41,6 +41,7 @@ const getVehicle = (region: string) => {
     password: 'test',
     region: region,
     autoLogin: true,
+    brand: 'hyundai',
     pin: '1234',
     vin: '4444444444444',
     vehicleId: undefined,

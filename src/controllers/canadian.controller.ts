@@ -1,18 +1,30 @@
 import got from 'got';
 import { BlueLinkyConfig } from '../interfaces/common.interfaces';
-import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
+import { CanadianBrandEnvironment, getBrandEnvironment } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
 import CanadianVehicle from '../vehicles/canadian.vehicle';
 import { SessionController } from './controller';
 
 import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
+import { manageBluelinkyError } from '../tools/common.tools';
+import { REGIONS } from '../constants';
 
-export class CanadianController extends SessionController {
+export interface CanadianBlueLinkyConfig extends BlueLinkyConfig {
+  region: REGIONS.CA;
+}
 
-  constructor(userConfig: BlueLinkyConfig) {
+export class CanadianController extends SessionController<CanadianBlueLinkyConfig> {
+  private _environment: CanadianBrandEnvironment;
+
+  constructor(userConfig: CanadianBlueLinkyConfig) {
     super(userConfig);
     logger.debug('CA Controller created');
+    this._environment = getBrandEnvironment(userConfig.brand);
+  }
+
+  public get environment() : CanadianBrandEnvironment {
+    return this._environment;
   }
 
   private vehicles: Array<CanadianVehicle> = [];
@@ -39,7 +51,7 @@ export class CanadianController extends SessionController {
   public async login(): Promise<string> {
     logger.info('Begin login request');
     try {
-      const response = await this.request(CA_ENDPOINTS.login, {
+      const response = await this.request(this.environment.endpoints.login, {
         loginId: this.userConfig.username,
         password: this.userConfig.password,
       });
@@ -63,7 +75,7 @@ export class CanadianController extends SessionController {
   async getVehicles(): Promise<Array<Vehicle>> {
     logger.info('Begin getVehicleList request');
     try {
-      const response = await this.request(CA_ENDPOINTS.vehicleList, {});
+      const response = await this.request(this.environment.endpoints.vehicleList, {});
 
       const data = response.result;
       if (data.vehicles === undefined) {
@@ -106,7 +118,7 @@ export class CanadianController extends SessionController {
         method: 'POST',
         json: true,
         headers: {
-          from: CLIENT_ORIGIN,
+          from: this.environment.origin,
           language: 1,
           offset: this.timeOffset,
           accessToken: this.session.accessToken,
@@ -123,7 +135,7 @@ export class CanadianController extends SessionController {
 
       return response.body;
     } catch (err) {
-      throw err.message;
+      throw manageBluelinkyError(err, 'CanadianController');
     }
   }
 }

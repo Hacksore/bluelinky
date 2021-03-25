@@ -2,7 +2,6 @@ import got from 'got';
 import logger from '../logger';
 
 import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
-import { CA_ENDPOINTS, CLIENT_ORIGIN } from '../constants/canada';
 
 import {
   VehicleStartOptions,
@@ -15,15 +14,16 @@ import {
   FullVehicleStatus,
 } from '../interfaces/common.interfaces';
 
-import { SessionController } from '../controllers/controller';
 import { Vehicle } from './vehicle';
 import { celciusToTempCode } from '../util';
+import { parse as parseDate } from 'date-fns';
+import { CanadianController } from '../controllers/canadian.controller';
 
 export default class CanadianVehicle extends Vehicle {
   public region = REGIONS.CA;
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
-  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: SessionController) {
+  constructor(public vehicleConfig: VehicleRegisterOptions, public controller: CanadianController) {
     super(vehicleConfig, controller);
     logger.debug(`CA Vehicle ${this.vehicleConfig.id} created`);
   }
@@ -41,12 +41,16 @@ export default class CanadianVehicle extends Vehicle {
     };
     logger.debug('Begin status request, polling car: ' + input.refresh);
     try {
-      const endpoint = statusConfig.refresh ? CA_ENDPOINTS.remoteStatus : CA_ENDPOINTS.status;
+      const endpoint = statusConfig.refresh ? this.controller.environment.endpoints.remoteStatus : this.controller.environment.endpoints.status;
       const response = await this.request(endpoint, {});
       const vehicleStatus = response.result;
 
+      if (response?.error) {
+        throw response?.error?.errorDesc;
+      }
+
       logger.debug(vehicleStatus);
-      const parsedStatus = {
+      const parsedStatus: VehicleStatus = {
         chassis: {
           hoodOpen: vehicleStatus?.hoodOpen,
           trunkOpen: vehicleStatus?.trunkOpen,
@@ -81,13 +85,14 @@ export default class CanadianVehicle extends Vehicle {
         // example EV status is in lib/__mock__/canadianStatus.json
         engine: {
           ignition: vehicleStatus?.engine,
-          adaptiveCruiseControl: vehicleStatus?.acc,
+          accessory: vehicleStatus?.acc,
           range: vehicleStatus?.dte?.value,
           charging: vehicleStatus?.evStatus?.batteryCharge,
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-      } as VehicleStatus;
+        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
+      };
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
@@ -105,7 +110,7 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const preAuth = await this.getPreAuth();
       // assuming the API returns a bad status code for failed attempts
-      await this.request(CA_ENDPOINTS.lock, {}, { pAuth: preAuth });
+      await this.request(this.controller.environment.endpoints.lock, {}, { pAuth: preAuth });
       return 'Lock successful';
     } catch (err) {
       throw err.message;
@@ -116,7 +121,7 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug('Begin unlock request');
     try {
       const preAuth = await this.getPreAuth();
-      await this.request(CA_ENDPOINTS.unlock, {}, { pAuth: preAuth });
+      await this.request(this.controller.environment.endpoints.unlock, {}, { pAuth: preAuth });
       return 'Unlock successful';
     } catch (err) {
       throw err.message;
@@ -150,7 +155,7 @@ export default class CanadianVehicle extends Vehicle {
       }
 
       const preAuth = await this.getPreAuth();
-      const response = await this.request(CA_ENDPOINTS.start, body, { pAuth: preAuth });
+      const response = await this.request(this.controller.environment.endpoints.start, body, { pAuth: preAuth });
 
       logger.debug(response);
 
@@ -168,7 +173,7 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug('Begin stop request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(CA_ENDPOINTS.stop, {
+      const response = await this.request(this.controller.environment.endpoints.stop, {
         pAuth: preAuth,
       });
       return response;
@@ -183,7 +188,7 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const preAuth = await this.getPreAuth();
       const response = await this.request(
-        CA_ENDPOINTS.hornlight,
+        this.controller.environment.endpoints.hornlight,
         { horn: withHorn },
         { pAuth: preAuth }
       );
@@ -202,7 +207,7 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug('Begin locate request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(CA_ENDPOINTS.locate, {}, { pAuth: preAuth });
+      const response = await this.request(this.controller.environment.endpoints.locate, {}, { pAuth: preAuth });
       this._location = response.result as VehicleLocation;
       return this._location;
     } catch (err) {
@@ -217,7 +222,7 @@ export default class CanadianVehicle extends Vehicle {
   private async getPreAuth(): Promise<string> {
     logger.info('Begin pre-authentication');
     try {
-      const response = await this.request(CA_ENDPOINTS.verifyPin, {});
+      const response = await this.request(this.controller.environment.endpoints.verifyPin, {});
       return response.result.pAuth;
     } catch (err) {
       throw 'error: ' + err;
@@ -237,7 +242,7 @@ export default class CanadianVehicle extends Vehicle {
       json: true,
       throwHttpErrors: false,
       headers: {
-        from: CLIENT_ORIGIN,
+        from: this.controller.environment.origin,
         language: 1,
         offset: this.timeOffset,
         accessToken: this.controller.session.accessToken,

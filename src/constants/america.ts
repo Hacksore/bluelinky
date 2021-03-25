@@ -1,8 +1,30 @@
-//TODO: Someone needs to figure out the Kia endpoints
-// we can then make a fork easier to maintain
+import { Brand } from '../interfaces/common.interfaces';
 
-export const API_HOST = 'api.telematics.hyundaiusa.com';
+export interface AmericaBrandEnvironment {
+  brand: Brand;
+  host: string;
+  baseUrl: string;
+  clientId: string;
+  clientSecret: string;
+}
 
-export const BASE_URL = `https://${API_HOST}`;
-export const CLIENT_ID = '815c046afaa4471aa578827ad546cc76';
-export const CLIENT_SECRET = 'GXZveJJAVTehh/OtakM3EQ==';
+const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
+  const host = 'api.telematics.hyundaiusa.com';
+  const baseUrl = `https://${host}`;
+  return {
+    brand: 'hyundai',
+    host,
+    baseUrl,
+    clientId: '815c046afaa4471aa578827ad546cc76',
+    clientSecret: 'GXZveJJAVTehh/OtakM3EQ==',
+  };
+};
+
+export const getBrandEnvironment = (brand: Brand): AmericaBrandEnvironment => {
+  switch (brand) {
+    case 'hyundai':
+      return Object.freeze(getHyundaiEnvironment());
+    default:
+      throw new Error(`Constructor ${brand} is not managed.`);
+  }
+};

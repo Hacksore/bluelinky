@@ -18,6 +18,7 @@ const getController = region => {
     username: 'testuser@gmail.com',
     password: 'test',
     region: 'US',
+    brand: 'hyundai',
     autoLogin: true,
     pin: '1234',
     vin: '4444444444444',

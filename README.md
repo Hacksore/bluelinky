@@ -1,6 +1,6 @@
 # bluelinky
 
-An unoffcial nodejs API wrapper for Hyundai BlueLink
+An unofficial nodejs API wrapper for Hyundai BlueLink
 
 [![CI](https://img.shields.io/github/workflow/status/Hacksore/bluelinky/npm)](https://github.com/Hacksore/bluelinky/actions?query=workflow%3Anpm)
 [![npm](https://img.shields.io/npm/v/bluelinky.svg)](https://www.npmjs.com/package/bluelinky)
@@ -18,6 +18,7 @@ const BlueLinky = require('bluelinky');
 const client = new BlueLinky({
   username: 'someguy@example.com',
   password: 'hunter1',
+  brand: 'hyundai',
   region: 'US',
   pin: '1234'
 });
@@ -45,7 +46,8 @@ Ensure you have a `config.json` that matches the structure of the following, wit
 {
   "username": "email",
   "password": "password",
-  "pin": "ping",
+  "pin": "pin",
+  "brand": "kia" or "hyundai",
   "vin": "vin"
 }
 ```
@@ -56,12 +58,23 @@ Now you can invoke the debug.ts script with `npm run debug`
 ## Documentation
 Checkout out the [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) for more info.
 
+Important information for login problems:
+- If you experience login problems, please logout from the app on your phone and login again. You might need to ' upgrade ' your account to a generic Kia/Hyundai account, or create a new password or PIN.
+- After you migrated your Bluelink account to a generic Hyundai account, or your UVO account to a generic Kia account, make sure that both accounts have the same credentials (userid and password) to avoid confusion in logging in.
+
 ## Supported Features
 - Lock
 - Unlock
 - Start (with climate control)
 - Stop
-- Status
+- Status (full, parsed, cached)
+- odometer
+- location
+- startCharge
+- monthlyReport
+- tripInfo
+- EV: getChargeTargets
+- EV: setChargeLimits
 
 ## Supported Regions
 | [Regions](https://github.com/Hacksore/bluelinky/wiki/Regions) 
