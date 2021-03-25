@@ -43,6 +43,7 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
             'refresh_token': this.session.refreshToken,
           },
           headers: {
+            'User-Agent': 'PostmanRuntime/7.26.10',
             'client_secret': this.environment.clientSecret,
             'client_id': this.environment.clientId,
           },
