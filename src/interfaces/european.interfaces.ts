@@ -10,10 +10,10 @@ export interface EUPOIInformation {
   waypointID: number;
   lang: 1;
   src: 'HERE';
-  coords: {
+  coord: {
     lat: number;
     alt: number;
-    long: number;
+    lon: number;
     type: 0;
   },
   addr: string;
