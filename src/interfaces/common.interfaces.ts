@@ -1,4 +1,4 @@
-import { REGIONS } from '../constants';
+import { REGION } from '../constants';
 
 export type Brand = 'kia' | 'hyundai';
 
@@ -6,7 +6,7 @@ export type Brand = 'kia' | 'hyundai';
 export interface BlueLinkyConfig {
   username: string | undefined;
   password: string | undefined;
-  region: REGIONS | undefined;
+  region: REGION | undefined;
   brand: Brand;
   autoLogin?: boolean;
   pin: string | undefined;

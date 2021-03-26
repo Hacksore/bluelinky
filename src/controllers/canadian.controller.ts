@@ -8,10 +8,9 @@ import { SessionController } from './controller';
 import logger from '../logger';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { manageBluelinkyError } from '../tools/common.tools';
-import { REGIONS } from '../constants';
 
 export interface CanadianBlueLinkyConfig extends BlueLinkyConfig {
-  region: REGIONS.CA;
+  region: 'CA';
 }
 
 export class CanadianController extends SessionController<CanadianBlueLinkyConfig> {
