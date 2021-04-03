@@ -509,7 +509,7 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async tripInfo(date: { year: number; month: number; day: number; }): Promise<DeepPartial<VehicleDayTrip>[] | undefined>;
-  public async tripInfo(date?: { year?: number; month?: number; }): Promise<DeepPartial<VehicleMonthTrip> | undefined>;
+  public async tripInfo(date?: { year: number; month: number; }): Promise<DeepPartial<VehicleMonthTrip> | undefined>;
 
   public async tripInfo(
     date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
