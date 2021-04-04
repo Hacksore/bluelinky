@@ -467,6 +467,19 @@ export interface VehicleTargetSOC {
   targetLevel: number;
 }
 
+export interface VehicleMonthTrip {
+  days: Array<{ dayRaw: string; date?: Date; tripsCount: number }>;
+  durations: {
+    drive: number;
+    idle: number;
+  };
+  speed: {
+    avg: number;
+    max: number;
+  };
+  distance: number;
+}
+
 export interface VehicleDayTrip {
   dayRaw: string;
   tripsCount: number;
