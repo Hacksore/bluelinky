@@ -199,6 +199,88 @@ describe('CanadianVehicle', () => {
     const response = await vehicle.lock();
     expect(response).toEqual('Lock successful');
   });
+  it('call start command succesfully', async () => {
+    // default session with a valid token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Date.now() / 1000 + 300,
+    };
+
+    gotMock.mockReturnValueOnce({
+      body: {
+        result: {
+          pAuth: 'test',
+        },
+        responseHeader: {
+          responseCode: 0,
+        },
+      },
+      statusCode: 200,
+      json: true,
+    });
+
+    gotMock.mockReturnValueOnce({
+      body: {
+        responseHeader: {
+          responseCode: 0,
+        },
+      },
+      statusCode: 200,
+      json: true,
+    });
+
+    const response = await vehicle.start({
+      airCtrl: false,
+      igniOnDuration: 10,
+      airTempvalue: 70,
+      defrost: false,
+      heating1: false,
+    });
+    expect(response).toEqual('Vehicle started!');
+  });
+
+  it('call start command with error', async () => {
+    // default session with a valid token
+    vehicle.controller.session = {
+      accessToken: 'JEST_TOKEN',
+      refreshToken: 'JEST_TOKEN',
+      tokenExpiresAt: Date.now() / 1000 + 300,
+    };
+
+    gotMock.mockReturnValueOnce({
+      body: {
+        result: {
+          pAuth: 'test',
+        },
+        responseHeader: {
+          responseCode: 0,
+        },
+      },
+      statusCode: 200,
+      json: true,
+    });
+
+    gotMock.mockReturnValueOnce({
+      body: {
+        responseHeader: {
+          responseCode: 1,
+          responseDesc: 'failed'
+        },
+      },
+      statusCode: 200,
+      json: true,
+    });
+
+    const response = await vehicle.start({
+      airCtrl: false,
+      igniOnDuration: 10,
+      airTempvalue: 70,
+      defrost: false,
+      heating1: false,
+    });
+    expect(response).toEqual('Failed to start vehicle');
+  });
 });
 
 describe('EuropeanVehicle', () => {
