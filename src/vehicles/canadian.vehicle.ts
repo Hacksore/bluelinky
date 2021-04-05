@@ -159,7 +159,7 @@ export default class CanadianVehicle extends Vehicle {
 
       logger.debug(response);
 
-      if (response.statusCode === 200) {
+      if (response.responseHeader && response.responseHeader.responseCode === 0) {
         return 'Vehicle started!';
       }
 
