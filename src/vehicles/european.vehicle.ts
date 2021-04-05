@@ -21,7 +21,7 @@ import got from 'got';
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { celciusToTempCode, tempCodeToCelsius, parseDate } from '../util';
+import { celciusToTempCode, tempCodeToCelsius, parseDate, addMinutes } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
 import { EUPOIInformation } from '../interfaces/european.interfaces';
 
@@ -575,9 +575,7 @@ export default class EuropeanVehicle extends Vehicle {
                 return {
                   timeRaw: trip.tripTime,
                   start,
-                  end: 0 ,
-                  // TODO: thisis borken after remove date-fns, needs refactor sorry @neoPix :(
-                  // end: addMinutes(start, trip.tripDrvTime),
+                  end: addMinutes(start, trip.tripDrvTime),
                   durations: {
                     drive: trip.tripDrvTime,
                     idle: trip.tripIdleTime,
