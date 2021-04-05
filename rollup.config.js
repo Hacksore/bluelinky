@@ -12,7 +12,7 @@ export default {
     file: 'dist/index.js',
     banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
   },
-  external: [...Object.keys(pkg.dependencies || {}), 'events'],
+  external: [...Object.keys(pkg.dependencies || {}), 'events', 'url'],
   plugins: [
     resolve({ preferBuiltins: true }),
     typescript({}),

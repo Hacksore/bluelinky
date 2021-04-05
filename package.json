@@ -18,11 +18,9 @@
   "author": "Hacksore",
   "license": "MIT",
   "dependencies": {
-    "date-fns": "^2.19.0",
     "got": "^9.6.0",
     "push-receiver": "^2.1.1",
     "tough-cookie": "^4.0.0",
-    "url": "^0.11.0",
     "winston": "^3.3.3"
   },
   "husky": {

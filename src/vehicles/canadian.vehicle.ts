@@ -15,8 +15,7 @@ import {
 } from '../interfaces/common.interfaces';
 
 import { Vehicle } from './vehicle';
-import { celciusToTempCode } from '../util';
-import { parse as parseDate } from 'date-fns';
+import { celciusToTempCode, parseDate } from '../util';
 import { CanadianController } from '../controllers/canadian.controller';
 
 export default class CanadianVehicle extends Vehicle {
@@ -91,7 +90,7 @@ export default class CanadianVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
+        lastupdate: parseDate(vehicleStatus?.time)
       };
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;

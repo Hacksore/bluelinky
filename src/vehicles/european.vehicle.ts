@@ -21,9 +21,8 @@ import got from 'got';
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { celciusToTempCode, tempCodeToCelsius } from '../util';
+import { celciusToTempCode, tempCodeToCelsius, parseDate } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
-import { addMinutes, parse as parseDate } from 'date-fns';
 import { EUPOIInformation } from '../interfaces/european.interfaces';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
@@ -319,7 +318,7 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
+        lastupdate: parseDate(vehicleStatus?.time)
       };
 
       if (!parsedStatus.engine.range) {
@@ -542,7 +541,7 @@ export default class EuropeanVehicle extends Vehicle {
         return {
           days: Array.isArray(rawData?.tripDayList) ? rawData?.tripDayList.map(day => ({
             dayRaw: day.tripDayInMonth,
-            date: day.tripDayInMonth ? parseDate(day.tripDayInMonth, 'yyyyMMdd', Date.now()) : undefined,
+            date: day.tripDayInMonth ? parseDate(day.tripDayInMonth) : undefined,
             tripsCount: day.tripCntDay,
           })) : [],
           durations: {
@@ -572,11 +571,13 @@ export default class EuropeanVehicle extends Vehicle {
             },
             trips: Array.isArray(day.tripList) ?
               day.tripList.map(trip => {
-                const start = parseDate(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
+                const start = parseDate(`${day.tripDay}${trip.tripTime}`);
                 return {
                   timeRaw: trip.tripTime,
                   start,
-                  end: addMinutes(start, trip.tripDrvTime),
+                  end: 0 ,
+                  // TODO: thisis borken after remove date-fns, needs refactor sorry @neoPix :(
+                  // end: addMinutes(start, trip.tripDrvTime),
                   durations: {
                     drive: trip.tripDrvTime,
                     idle: trip.tripIdleTime,

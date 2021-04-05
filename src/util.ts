@@ -39,3 +39,15 @@ export const tempCodeToCelsius = (code: string): number => {
   // return the relevant celsius temp
   return tempRange[tempIndex];
 };
+
+// parse date
+
+export const parseDate = (str: string): Date => {
+	const year = parseInt(str.substring(0, 4));
+	const month = parseInt(str.substring(4, 6));
+	const day = parseInt(str.substring(6, 8));
+	const hour = parseInt(str.substring(8, 10));
+	const minute = parseInt(str.substring(10, 12));
+	const second = parseInt(str.substring(12, 14));
+	return new Date(year, month - 1, day, hour, minute, second);
+};
