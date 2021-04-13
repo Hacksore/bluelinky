@@ -39,3 +39,32 @@ export const tempCodeToCelsius = (code: string): number => {
   // return the relevant celsius temp
   return tempRange[tempIndex];
 };
+
+/**
+ * Parses an API date string
+ * @param str the date in yyyyMMdd or yyyyMMddHHmmss format
+ * @returns The parsed date
+ */
+export const parseDate = (str: string): Date => {
+	const year = parseInt(str.substring(0, 4));
+	const month = parseInt(str.substring(4, 6));
+	const day = parseInt(str.substring(6, 8));
+	const hour = parseInt(str.substring(8, 10));
+	const minute = parseInt(str.substring(10, 12));
+	const second = parseInt(str.substring(12, 14));
+	return new Date(year, month - 1, day, hour, minute, second);
+};
+
+const MILISECONDS_PER_SECOND = 1000;
+const MILISECONDS_PER_MINUTE = MILISECONDS_PER_SECOND * 60;
+
+/**
+ * Adds a certain amount of minutes to a date
+ * @param date The date to adds minutes to
+ * @param minutes The number of minutes to add
+ * @returns The updated date
+ */
+export const addMinutes = (date: Date, minutes: number): Date => {
+  return new Date(date.getTime() + (minutes * MILISECONDS_PER_MINUTE));
+};
+

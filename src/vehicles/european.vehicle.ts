@@ -14,15 +14,15 @@ import {
   VehicleTargetSOC,
   EVChargeModeTypes,
   VehicleDayTrip,
+  VehicleMonthTrip,
 } from '../interfaces/common.interfaces';
 import got from 'got';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
-import { celciusToTempCode, tempCodeToCelsius } from '../util';
+import { celciusToTempCode, tempCodeToCelsius, parseDate, addMinutes } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
-import { addMinutes, parse as parseDate } from 'date-fns';
 import { EUPOIInformation } from '../interfaces/european.interfaces';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
@@ -318,7 +318,7 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time, 'yyyyMMddHHmmSS', new Date())
+        lastupdate: parseDate(vehicleStatus?.time)
       };
 
       if (!parsedStatus.engine.range) {
@@ -507,11 +507,15 @@ export default class EuropeanVehicle extends Vehicle {
     }
   }
 
+  public async tripInfo(date: { year: number; month: number; day: number; }): Promise<DeepPartial<VehicleDayTrip>[] | undefined>;
+  public async tripInfo(date?: { year: number; month: number; }): Promise<DeepPartial<VehicleMonthTrip> | undefined>;
+
   public async tripInfo(
-    date: { year: number; month: number; day: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() }
-  ): Promise<DeepPartial<VehicleDayTrip>[] | undefined> {
+    date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
+  ): Promise<DeepPartial<VehicleDayTrip>[] | DeepPartial<VehicleMonthTrip> | undefined> {
     await this.checkControlToken();
     try {
+      const perDay = Boolean(date.day);
       const response = await got(
         `${this.controller.environment.baseUrl}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
         {
@@ -523,49 +527,69 @@ export default class EuropeanVehicle extends Vehicle {
             'Stamp': this.controller.environment.stamp(),
           },
           body: {
-            setTripMonth: !date.day ? toMonthDate(date) : undefined,
             setTripLatest: 10,
-            setTripDay: date.day ? toDayDate(date) : undefined,
-            tripPeriodType: 1
+            setTripMonth: !perDay ? toMonthDate(date) : undefined,
+            setTripDay: perDay ? toDayDate(date) : undefined,
+            tripPeriodType: perDay ? 1 : 0
           },
           json: true,
         }
       );
 
-      const rawData = response.body.resMsg.dayTripList;
-      if (rawData && Array.isArray(rawData)) {
-        return rawData.map(day => ({
-          dayRaw: day.tripDay,
-          tripsCount: day.dayTripCnt,
-          distance: day.tripDist,
+      if (!perDay) {
+        const rawData = response.body.resMsg;
+        return {
+          days: Array.isArray(rawData?.tripDayList) ? rawData?.tripDayList.map(day => ({
+            dayRaw: day.tripDayInMonth,
+            date: day.tripDayInMonth ? parseDate(day.tripDayInMonth) : undefined,
+            tripsCount: day.tripCntDay,
+          })) : [],
           durations: {
-            drive: day.tripDrvTime,
-            idle: day.tripIdleTime
+            drive: rawData?.tripDrvTime,
+            idle: rawData?.tripIdleTime,
           },
+          distance: rawData?.tripDist,
           speed: {
-            avg: day.tripAvgSpeed,
-            max: day.tripMaxSpeed
-          },
-          trips: Array.isArray(day.tripList) ?
-            day.tripList.map(trip => {
-              const start = parseDate(`${day.tripDay}${trip.tripTime}`, 'yyyyMMddHHmmss', Date.now());
-              return {
-                timeRaw: trip.tripTime,
-                start,
-                end: addMinutes(start, trip.tripDrvTime),
-                durations: {
-                  drive: trip.tripDrvTime,
-                  idle: trip.tripIdleTime,
-                },
-                speed: {
-                  avg: trip.tripAvgSpeed,
-                  max: trip.tripMaxSpeed,
-                },
-                distance: trip.tripDist,
-              };
-            })
-            : [],
-        }));
+            avg: rawData?.tripAvgSpeed,
+            max: rawData?.tripMaxSpeed,
+          }
+        } as VehicleMonthTrip;
+      } else {
+        const rawData = response.body.resMsg.dayTripList;
+        if (rawData && Array.isArray(rawData)) {
+          return rawData.map(day => ({
+            dayRaw: day.tripDay,
+            tripsCount: day.dayTripCnt,
+            distance: day.tripDist,
+            durations: {
+              drive: day.tripDrvTime,
+              idle: day.tripIdleTime
+            },
+            speed: {
+              avg: day.tripAvgSpeed,
+              max: day.tripMaxSpeed
+            },
+            trips: Array.isArray(day.tripList) ?
+              day.tripList.map(trip => {
+                const start = parseDate(`${day.tripDay}${trip.tripTime}`);
+                return {
+                  timeRaw: trip.tripTime,
+                  start,
+                  end: addMinutes(start, trip.tripDrvTime),
+                  durations: {
+                    drive: trip.tripDrvTime,
+                    idle: trip.tripIdleTime,
+                  },
+                  speed: {
+                    avg: trip.tripAvgSpeed,
+                    max: trip.tripMaxSpeed,
+                  },
+                  distance: trip.tripDist,
+                };
+              })
+              : [],
+          }));
+        }
       }
       return;
     } catch (err) {
@@ -673,7 +697,7 @@ function toMonthDate(month: { year: number; month: number; }) {
   return `${month.year}${month.month.toString().padStart(2, '0')}`;
 }
 
-function toDayDate(date: { year: number; month: number; day: number; }) {
-  return `${toMonthDate(date)}${date.day.toString().padStart(2, '0')}`;
+function toDayDate(date: { year: number; month: number; day?: number; }) {
+  return date.day ? `${toMonthDate(date)}${date.day.toString().padStart(2, '0')}` : toMonthDate(date);
 }
 

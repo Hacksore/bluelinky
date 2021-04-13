@@ -1,0 +1,113 @@
+{
+  "dateTime": "2021-04-03T19:58:29Z",
+  "acc": false,
+  "trunkOpen": false,
+  "doorLock": true,
+  "defrostStatus": "false",
+  "transCond": true,
+  "doorLockStatus": "true",
+  "doorOpen": { "frontRight": 0, "frontLeft": 0, "backLeft": 0, "backRight": 0 },
+  "airCtrlOn": false,
+  "airTemp": { "unit": 1, "hvacTempType": 1, "value": "LO" },
+  "evStatus": {
+    "valueDiff": 0,
+    "remainTime2": {
+      "etc3": { "unit": 1, "value": 0 },
+      "etc2": { "unit": 1, "value": 0 },
+      "atc": { "unit": 1, "value": 0 },
+      "etc1": { "unit": 1, "value": 0 }
+    },
+    "evIgnitionStatus": true,
+    "batteryPlugin": 0,
+    "timeDiff": 20415,
+    "batteryCharge": false,
+    "batteryStatus": 100,
+    "remainTime": [],
+    "drvDistance": [
+      {
+        "rangeByFuel": {
+          "gasModeRange": { "unit": 3, "value": 0 },
+          "totalAvailableRange": { "unit": 3, "value": 294 },
+          "evModeRange": { "unit": 3, "value": 294 }
+        },
+        "type": 2
+      }
+    ],
+    "reservChargeInfos": {
+      "targetSOClist": [
+        {
+          "rangeByFuel": {
+            "gasModeRange": { "unit": 3, "value": 0 },
+            "totalAvailableRange": { "unit": 3, "value": 294 },
+            "evModeRange": { "unit": 3, "value": 294 }
+          },
+          "plugType": 0,
+          "targetSOClevel": 100,
+          "type": 2
+        },
+        {
+          "rangeByFuel": {
+            "gasModeRange": { "unit": 3, "value": 0 },
+            "totalAvailableRange": { "unit": 3, "value": 294 },
+            "evModeRange": { "unit": 3, "value": 294 }
+          },
+          "plugType": 1,
+          "targetSOClevel": 100,
+          "type": 2
+        }
+      ],
+      "reservChargeInfo": {
+        "dateTime": "2021/04/03T14:16:58Z",
+        "reservChargeInfoDetail": {
+          "reservChargeSet": false,
+          "reservEndTime": "",
+          "reservFatcSet": {
+            "defrost": false,
+            "airTemp": { "unit": 1, "value": "75" },
+            "airCtrl": 0
+          },
+          "reservInfo": { "time": { "timeSection": 0, "time": "1200" }, "day": [9] }
+        }
+      },
+      "reservFlag": 0,
+      "reserveChargeInfo2": {
+        "reservChargeInfoDetail": {
+          "reservChargeSet": false,
+          "reservEndTime": "",
+          "reservFatcSet": {
+            "defrost": false,
+            "airTemp": { "unit": 1, "value": "75" },
+            "airCtrl": 0
+          },
+          "reservInfo": { "time": { "timeSection": 0, "time": "1200" }, "day": [9] }
+        }
+      },
+      "offpeakPowerInfo": {
+        "offPeakPowerFlag": 0,
+        "offPeakPowerTime1": {
+          "startTime": { "timeSection": 0, "time": "1200" },
+          "endTime": { "timeSection": 0, "time": "1200" }
+        }
+      }
+    }
+  },
+  "battery": { "batSoc": 82, "batState": 0, "sjbDeliveryMode": 0 },
+  "ign3": true,
+  "ignitionStatus": "false",
+  "lowFuelLight": false,
+  "sideBackWindowHeat": 0,
+  "engine": false,
+  "sleepModeCheck": false,
+  "defrost": false,
+  "hoodOpen": false,
+  "airConditionStatus": "false",
+  "steerWheelHeat": 0,
+  "tirePressureLamp": {
+    "tirePressureWarningLampRearLeft": 0,
+    "tirePressureWarningLampFrontLeft": 0,
+    "tirePressureWarningLampFrontRight": 0,
+    "tirePressureWarningLampAll": 0,
+    "tirePressureWarningLampRearRight": 0
+  },
+  "trunkOpenStatus": "false"
+}

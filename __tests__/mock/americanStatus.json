@@ -19,7 +19,9 @@
     "value": "LO"
   },
   "battery": {
-    "batSignalReferenceValue": {},
+    "batSignalReferenceValue": {
+      
+    },
     "batSoc": 67,
     "batState": 0,
     "sjbDeliveryMode": 1

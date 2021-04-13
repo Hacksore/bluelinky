@@ -2,7 +2,6 @@ import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULang
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got from 'got';
-import { REGIONS } from '../constants';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -13,10 +12,12 @@ import { URLSearchParams } from 'url';
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
+import { AuthStrategy } from './authStrategies/authStrategy';
+import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
-  region: REGIONS.EU;
+  region: 'EU';
 }
 
 interface EuropeanVehicleDescription {
@@ -28,6 +29,7 @@ interface EuropeanVehicleDescription {
 
 export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
   private _environment: EuropeanBrandEnvironment;
+  private authStrategy: AuthStrategy;
   constructor(userConfig: EuropeBlueLinkyConfig) {
     super(userConfig);
     this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
@@ -36,6 +38,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
     this.session.deviceId = uuidV4();
     this._environment = getBrandEnvironment(userConfig.brand);
+    this.authStrategy = new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
     logger.debug('EU Controller created');
   }
 
@@ -132,6 +135,9 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
 
   public async login(): Promise<string> {
     try {
+      if (!this.userConfig.password || !this.userConfig.username) {
+        throw new Error('@EuropeController.login: username and password must be defined.');
+      }
       // request cookie via got and store it to the cookieJar
       const cookieJar = new CookieJar();
       await got(this.environment.endpoints.session, { cookieJar });
@@ -141,25 +147,8 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       await got(this.environment.endpoints.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
       logger.debug(`@EuropeController.login: defined the language to ${this.userConfig.language}`);
 
-      const authCodeResponse = await got(this.environment.endpoints.login, {
-        method: 'POST',
-        json: true,
-        body: {
-          'email': this.userConfig.username,
-          'password': this.userConfig.password,
-        },
-        cookieJar,
-      });
-
-      let authorizationCode;
-      if (authCodeResponse) {
-        const regexMatch = /code=([^&]*)/g.exec(authCodeResponse.body.redirectUrl);
-        if (regexMatch !== null) {
-          authorizationCode = regexMatch[1];
-        } else {
-          throw new Error('@EuropeController.login: AuthCode was not found, you probably need to migrate your account.');
-        }
-      }
+      logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategy.name}`);
+      const authorizationCode = await this.authStrategy.login({ password: this.userConfig.password, username: this.userConfig.username }, { cookieJar });
       logger.debug('@EuropeController.login: Authenticated properly with user and password');
 
       const credentials = await pr.register(this.environment.GCMSenderID);

@@ -19,10 +19,10 @@ const apiCalls = [
   { name: 'lock', value: 'lock' },
   { name: 'unlock', value: 'unlock' },
   { name: 'locate', value: 'locate' },
-  { name: 'monthly report', value: 'monthlyReport' },
-  { name: 'trip informations', value: 'tripInfo' },
-  { name: '[EV] get charge targets', value: 'getChargeTargets' },
-  { name: '[EV] set charge targets', value: 'setChargeTargets' },
+  { name: '[EU] monthly report', value: 'monthlyReport' },
+  { name: '[EU] trip informations', value: 'tripInfo' },
+  { name: '[EU][EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
 ];
 
 let vehicle;
@@ -166,7 +166,29 @@ async function performCommand(command) {
         console.log('monthyReport : ' + JSON.stringify(report, null, 2));
         break;
       case 'tripInfo':
-        const trips = await vehicle.tripInfo();
+        const currentYear = new Date().getFullYear();
+        const { year, month, day } = await inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'year',
+              message: 'Which year?',
+              choices: new Array(currentYear - 2015).fill(0).map((_, i) => currentYear - i),
+            },
+            {
+              type: 'list',
+              name: 'month',
+              message: 'Which month?',
+              choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            },
+            {
+              type: 'list',
+              name: 'day',
+              message: 'Which day (0 to ignore the day)?',
+              choices: new Array(32).fill(0).map((_, i) => i),
+            }
+          ]);
+        const trips = await vehicle.tripInfo({ year, month, day: day === 0 ? undefined : day });
         console.log('trips : ' + JSON.stringify(trips, null, 2));
         break;
       case 'getChargeTargets':

@@ -1,4 +1,4 @@
-import { REGIONS } from '../constants';
+import { REGION } from '../constants';
 
 export type Brand = 'kia' | 'hyundai';
 
@@ -6,7 +6,7 @@ export type Brand = 'kia' | 'hyundai';
 export interface BlueLinkyConfig {
   username: string | undefined;
   password: string | undefined;
-  region: REGIONS | undefined;
+  region: REGION | undefined;
   brand: Brand;
   autoLogin?: boolean;
   pin: string | undefined;
@@ -465,6 +465,19 @@ export interface VehicleTargetSOC {
   type: EVChargeModeTypes;
   distance: number;
   targetLevel: number;
+}
+
+export interface VehicleMonthTrip {
+  days: Array<{ dayRaw: string; date?: Date; tripsCount: number }>;
+  durations: {
+    drive: number;
+    idle: number;
+  };
+  speed: {
+    avg: number;
+    max: number;
+  };
+  distance: number;
 }
 
 export interface VehicleDayTrip {

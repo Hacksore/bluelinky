@@ -11,7 +11,7 @@ export const ALL_ENDPOINTS = {
 
 export const GEN2 = 2;
 export const GEN1 = 1;
-
+export type REGION = 'US'|'CA'|'EU';
 export enum REGIONS {
   US = 'US',
   CA = 'CA',
