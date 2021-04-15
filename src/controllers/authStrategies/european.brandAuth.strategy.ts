@@ -1,7 +1,7 @@
 import got from 'got';
 import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
-import { AuthStrategy, Code } from './authStrategy';
+import { AuthStrategy, Code, initSession } from './authStrategy';
 import Url from 'url';
 
 const stdHeaders = {
@@ -24,7 +24,8 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 		return 'EuropeanBrandAuthStrategy';
 	}
 
-	public async login(user: { username: string; password: string; }, { cookieJar }: { cookieJar: CookieJar }): Promise<Code> {
+	public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
+		const cookieJar = await initSession(this.environment, this.language, options?.cookieJar);
 		const { body: { userId, serviceId } } = await got(this.environment.endpoints.integration, {
 			cookieJar,
 			json: true,
@@ -78,6 +79,9 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 		if (!code) {
 			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument code in ${redirectUrl}.`);
 		}
-		return code as Code;
+		return {
+			code: code as Code,
+			cookies: cookieJar,
+		};
 	}
 }
