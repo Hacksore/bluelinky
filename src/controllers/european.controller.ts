@@ -1,7 +1,7 @@
 import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
-import got from 'got';
+import got, { GotInstance, GotJSONFn } from 'got';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -274,5 +274,45 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
 
     return this.vehicles;
+  }
+
+  private async checkControlToken(): Promise<void> {
+    await this.refreshAccessToken();
+    if (this.session?.controlTokenExpiresAt !== undefined) {
+      if (
+        !this.session.controlToken ||
+        Date.now() / 1000 > this.session.controlTokenExpiresAt
+      ) {
+        await this.enterPin();
+      }
+    }
+  }
+
+  public async getVehicleHttpService(): Promise<GotInstance<GotJSONFn>> {
+    await this.checkControlToken();
+    return got.extend({
+      baseUrl: this.environment.baseUrl,
+      headers: {
+        'Authorization': this.session.controlToken,
+        'ccsp-device-id': this.session.deviceId,
+        'Content-Type': 'application/json',
+        'Stamp': this.environment.stamp(),
+      },
+      json: true
+    });
+  }
+
+  public async getApiHttpService(): Promise<GotInstance<GotJSONFn>> {
+    await this.refreshAccessToken();
+    return got.extend({
+      baseUrl: this.environment.baseUrl,
+      headers: {
+        'Authorization': this.session.accessToken,
+        'ccsp-device-id': this.session.deviceId,
+        'Content-Type': 'application/json',
+        'Stamp': this.environment.stamp(),
+      },
+      json: true
+    });
   }
 }
