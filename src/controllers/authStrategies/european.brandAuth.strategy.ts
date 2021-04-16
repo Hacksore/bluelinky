@@ -2,7 +2,7 @@ import got from 'got';
 import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
 import { AuthStrategy, Code, initSession } from './authStrategy';
-import Url from 'url';
+import Url, { URLSearchParams } from 'url';
 
 const stdHeaders = {
 	'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1'
@@ -41,9 +41,14 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 		if (!preparedUrl) {
 			throw new Error('@EuropeanBrandAuthStrategy.login: cannot found the auth url from the form.');
 		}
+		const formData = new URLSearchParams();
+		formData.append('username', user.username);
+		formData.append('password', user.password);
+		formData.append('credentialId', '');
+		formData.append('rememberMe', 'on');
 		const { headers: { location: redirectTo }, body } = await manageGot302(got.post(preparedUrl, {
 			cookieJar,
-			body: `username=${user.username}&rememberMe=on&password=${user.password}&credentialId=`, // TODO have a better management of the query string encoding
+			body: formData.toString(),
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				...stdHeaders
