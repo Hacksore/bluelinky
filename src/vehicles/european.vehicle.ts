@@ -318,7 +318,7 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time)
+        lastupdate: vehicleStatus?.time ? parseDate(vehicleStatus?.time) : null
       };
 
       if (!parsedStatus.engine.range) {

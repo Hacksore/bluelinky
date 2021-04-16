@@ -87,7 +87,7 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
-  lastupdate: Date
+  lastupdate: Date|null
 }
 
 // TODO: fix/update

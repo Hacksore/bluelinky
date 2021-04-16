@@ -90,7 +90,7 @@ export default class CanadianVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time)
+        lastupdate: vehicleStatus?.time ? parseDate(vehicleStatus?.time) : null,
       };
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
