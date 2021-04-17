@@ -208,7 +208,8 @@ export default class AmericanVehicle extends Vehicle {
       engine: {
         ignition: vehicleStatus?.engine,
         accessory: vehicleStatus?.acc,
-        range: vehicleStatus?.dte?.value,
+        // try ev range first then fallback to ice range
+        range: vehicleStatus.evStatus?.drvDistance[0]?.totalAvailableRange.value || vehicleStatus?.dte?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
         batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
