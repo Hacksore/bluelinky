@@ -42,7 +42,7 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const endpoint = statusConfig.refresh ? this.controller.environment.endpoints.remoteStatus : this.controller.environment.endpoints.status;
       const response = await this.request(endpoint, {});
-      const vehicleStatus = response.result;
+      const vehicleStatus = response.result?.status;
 
       if (response?.error) {
         throw response?.error?.errorDesc;
