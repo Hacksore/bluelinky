@@ -16,7 +16,6 @@ import {
   VehicleDayTrip,
   VehicleMonthTrip,
 } from '../interfaces/common.interfaces';
-import got from 'got';
 
 import logger from '../logger';
 import { Vehicle } from './vehicle';
@@ -36,25 +35,12 @@ export default class EuropeanVehicle extends Vehicle {
     logger.debug(`EU Vehicle ${this.vehicleConfig.id} created`);
   }
 
-  private async checkControlToken(): Promise<void> {
-    await this.controller.refreshAccessToken();
-    if (this.controller.session?.controlTokenExpiresAt !== undefined) {
-      if (
-        !this.controller.session.controlToken ||
-        Date.now() / 1000 > this.controller.session.controlTokenExpiresAt
-      ) {
-        await this.controller.enterPin();
-      }
-    }
-  }
-
   public async start(config: VehicleClimateOptions): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
-          method: 'POST',
           body: {
             action: 'start',
             hvacType: 0,
@@ -64,14 +50,7 @@ export default class EuropeanVehicle extends Vehicle {
             },
             tempCode: celciusToTempCode(config.temperature),
             unit: config.unit,
-          },
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
+          }
         }
       );
       logger.info(`Climate started for vehicle ${this.vehicleConfig.id}`);
@@ -82,12 +61,11 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async stop(): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
-          method: 'POST',
           body: {
             action: 'stop',
             hvacType: 0,
@@ -97,14 +75,7 @@ export default class EuropeanVehicle extends Vehicle {
             },
             tempCode: '10H',
             unit: 'C',
-          },
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
+          }
         }
       );
       logger.info(`Climate stopped for vehicle ${this.vehicleConfig.id}`);
@@ -115,23 +86,15 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async lock(): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             action: 'close',
             deviceId: this.controller.session.deviceId,
-          },
-          json: true,
+          }
         }
       );
       if (response.statusCode === 200) {
@@ -145,23 +108,15 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async unlock(): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             action: 'open',
             deviceId: this.controller.session.deviceId,
-          },
-          json: true,
+          }
         }
       );
 
@@ -182,54 +137,18 @@ export default class EuropeanVehicle extends Vehicle {
       ...input,
     };
 
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
 
     try {
-      const cachedResponse = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
-        }
-      );
+      const cachedResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`);
 
       const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
       if (statusConfig.refresh) {
-        const statusResponse = await got(
-          `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': this.controller.session.controlToken,
-              'ccsp-device-id': this.controller.session.deviceId,
-              'Content-Type': 'application/json',
-              'Stamp': this.controller.environment.stamp(),
-            },
-            json: true,
-          }
-        );
+        const statusResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`);
         fullStatus.vehicleStatus = statusResponse.body.resMsg;
 
-        const locationResponse = await got(
-          `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': this.controller.session.controlToken,
-              'ccsp-device-id': this.controller.session.deviceId,
-              'Content-Type': 'application/json',
-              'Stamp': this.controller.environment.stamp(),
-            },
-            json: true,
-          }
-        );
+        const locationResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`);
         fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
       }
 
@@ -248,24 +167,12 @@ export default class EuropeanVehicle extends Vehicle {
       ...input,
     };
 
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
 
     try {
       const cacheString = statusConfig.refresh ? '' : '/latest';
 
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
-        }
-      );
+      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`);
 
       // handles refreshing data
       const vehicleStatus = statusConfig.refresh
@@ -318,7 +225,7 @@ export default class EuropeanVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time)
+        lastupdate: vehicleStatus?.time ? parseDate(vehicleStatus?.time) : null
       };
 
       if (!parsedStatus.engine.range) {
@@ -337,21 +244,9 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async odometer(): Promise<VehicleOdometer | null> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
-        }
-      );
+      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`);
       this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
       return this._odometer;
     } catch (err) {
@@ -360,21 +255,9 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async location(): Promise<VehicleLocation> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
-        }
-      );
+      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`);
 
       const data = response.body.resMsg?.gpsDetail ?? response.body.resMsg;
       this._location = {
@@ -395,23 +278,15 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async startCharge(): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             action: 'start',
             deviceId: this.controller.session.deviceId,
-          },
-          json: true,
+          }
         }
       );
 
@@ -427,23 +302,15 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async stopCharge(): Promise<string> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             action: 'stop',
             deviceId: this.controller.session.deviceId,
-          },
-          json: true,
+          }
         }
       );
 
@@ -461,22 +328,14 @@ export default class EuropeanVehicle extends Vehicle {
   public async monthlyReport(
     month: { year: number; month: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
   ): Promise<DeepPartial<VehicleMonthlyReport> | undefined> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
+      const response = await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             setRptMonth: toMonthDate(month)
-          },
-          json: true,
+          }
         }
       );
       const rawData = response.body.resMsg?.monthlyReport;
@@ -513,26 +372,18 @@ export default class EuropeanVehicle extends Vehicle {
   public async tripInfo(
     date: { year: number; month: number; day?: number; } = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 }
   ): Promise<DeepPartial<VehicleDayTrip>[] | DeepPartial<VehicleMonthTrip> | undefined> {
-    await this.checkControlToken();
+    const http = await this.controller.getApiHttpService();
     try {
       const perDay = Boolean(date.day);
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
+      const response = await http.post(
+        `/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.accessToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             setTripLatest: 10,
             setTripMonth: !perDay ? toMonthDate(date) : undefined,
             setTripDay: perDay ? toDayDate(date) : undefined,
             tripPeriodType: perDay ? 1 : 0
-          },
-          json: true,
+          }
         }
       );
 
@@ -601,21 +452,9 @@ export default class EuropeanVehicle extends Vehicle {
    * Warning: Only works on EV
    */
   public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[] | undefined> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
-          json: true,
-        }
-      );
+      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`);
       const rawData = response.body.resMsg?.targetSOClist;
       if (rawData && Array.isArray(rawData)) {
         return rawData.map((rawSOC) => ({
@@ -634,28 +473,20 @@ export default class EuropeanVehicle extends Vehicle {
    * Warning: Only works on EV
    */
   public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget; }): Promise<void> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     if (!POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) || !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)) {
       throw new ManagedBluelinkyError(`Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
     }
     try {
-      await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
+      await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             targetSOClist: [
               { plugType: EVChargeModeTypes.FAST, targetSOClevel: limits.fast },
               { plugType: EVChargeModeTypes.SLOW, targetSOClevel: limits.slow }
             ]
-          },
-          json: true,
+          }
         }
       );
     } catch (err) {
@@ -668,23 +499,15 @@ export default class EuropeanVehicle extends Vehicle {
    * @param poiInformations The list of POIs and waypoint to go through
    */
   public async setNavigation(poiInformations: EUPOIInformation[]): Promise<void> {
-    await this.checkControlToken();
+    const http = await this.controller.getVehicleHttpService();
     try {
-      await got(
-        `${this.controller.environment.baseUrl}/api/v2/spa/vehicles/${this.vehicleConfig.id}/location/routes`,
+      await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/location/routes`,
         {
-          method: 'POST',
-          headers: {
-            'Authorization': this.controller.session.controlToken,
-            'ccsp-device-id': this.controller.session.deviceId,
-            'Content-Type': 'application/json',
-            'Stamp': this.controller.environment.stamp(),
-          },
           body: {
             deviceID: this.controller.session.deviceId,
             poiInfoList: poiInformations,
-          },
-          json: true,
+          }
         }
       );
     } catch (err) {

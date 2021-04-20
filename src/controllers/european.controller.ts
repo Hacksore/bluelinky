@@ -1,7 +1,7 @@
 import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
-import got from 'got';
+import got, { GotInstance, GotJSONFn } from 'got';
 import { Vehicle } from '../vehicles/vehicle';
 import EuropeanVehicle from '../vehicles/european.vehicle';
 import { SessionController } from './controller';
@@ -12,8 +12,9 @@ import { URLSearchParams } from 'url';
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
-import { AuthStrategy } from './authStrategies/authStrategy';
+import { AuthStrategy, Code } from './authStrategies/authStrategy';
 import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
+import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth.strategy';
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
@@ -29,7 +30,10 @@ interface EuropeanVehicleDescription {
 
 export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
   private _environment: EuropeanBrandEnvironment;
-  private authStrategy: AuthStrategy;
+  private authStrategies: {
+    main: AuthStrategy;
+    fallback: AuthStrategy;
+  };
   constructor(userConfig: EuropeBlueLinkyConfig) {
     super(userConfig);
     this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
@@ -38,7 +42,10 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
     this.session.deviceId = uuidV4();
     this._environment = getBrandEnvironment(userConfig.brand);
-    this.authStrategy = new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
+    this.authStrategies = {
+      main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
+      fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
+    };
     logger.debug('EU Controller created');
   }
 
@@ -138,17 +145,15 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       if (!this.userConfig.password || !this.userConfig.username) {
         throw new Error('@EuropeController.login: username and password must be defined.');
       }
-      // request cookie via got and store it to the cookieJar
-      const cookieJar = new CookieJar();
-      await got(this.environment.endpoints.session, { cookieJar });
-      logger.debug('@EuropeController.login: Initialized the auth session');
-
-      // required by the api to set lang
-      await got(this.environment.endpoints.language, { method: 'POST', body: `{"lang":"${this.userConfig.language}"}`, cookieJar });
-      logger.debug(`@EuropeController.login: defined the language to ${this.userConfig.language}`);
-
-      logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategy.name}`);
-      const authorizationCode = await this.authStrategy.login({ password: this.userConfig.password, username: this.userConfig.username }, { cookieJar });
+      let authResult: { code: Code, cookies: CookieJar }|null = null;
+      try {
+        logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.main.name}`);
+        authResult = await this.authStrategies.main.login({ password: this.userConfig.password, username: this.userConfig.username });
+      } catch (e) {
+        logger.error(`@EuropeController.login: sign in with ${this.authStrategies.main.name} failed with error ${e.toString()}`);
+        logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.fallback.name}`);
+        authResult = await this.authStrategies.fallback.login({ password: this.userConfig.password, username: this.userConfig.username });
+      }
       logger.debug('@EuropeController.login: Authenticated properly with user and password');
 
       const credentials = await pr.register(this.environment.GCMSenderID);
@@ -179,7 +184,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
       formData.append('redirect_uri', this.environment.endpoints.redirectUri);
-      formData.append('code', authorizationCode);
+      formData.append('code', authResult.code);
 
       const response = await got(this.environment.endpoints.token, {
         method: 'POST',
@@ -194,7 +199,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Stamp': this.environment.stamp(),
         },
         body: formData.toString(),
-        cookieJar,
+        cookieJar: authResult.cookies,
       });
 
       if (response.statusCode !== 200) {
@@ -269,5 +274,45 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
 
     return this.vehicles;
+  }
+
+  private async checkControlToken(): Promise<void> {
+    await this.refreshAccessToken();
+    if (this.session?.controlTokenExpiresAt !== undefined) {
+      if (
+        !this.session.controlToken ||
+        Date.now() / 1000 > this.session.controlTokenExpiresAt
+      ) {
+        await this.enterPin();
+      }
+    }
+  }
+
+  public async getVehicleHttpService(): Promise<GotInstance<GotJSONFn>> {
+    await this.checkControlToken();
+    return got.extend({
+      baseUrl: this.environment.baseUrl,
+      headers: {
+        'Authorization': this.session.controlToken,
+        'ccsp-device-id': this.session.deviceId,
+        'Content-Type': 'application/json',
+        'Stamp': this.environment.stamp(),
+      },
+      json: true
+    });
+  }
+
+  public async getApiHttpService(): Promise<GotInstance<GotJSONFn>> {
+    await this.refreshAccessToken();
+    return got.extend({
+      baseUrl: this.environment.baseUrl,
+      headers: {
+        'Authorization': this.session.accessToken,
+        'ccsp-device-id': this.session.deviceId,
+        'Content-Type': 'application/json',
+        'Stamp': this.environment.stamp(),
+      },
+      json: true
+    });
   }
 }

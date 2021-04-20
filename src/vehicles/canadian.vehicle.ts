@@ -42,7 +42,7 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const endpoint = statusConfig.refresh ? this.controller.environment.endpoints.remoteStatus : this.controller.environment.endpoints.status;
       const response = await this.request(endpoint, {});
-      const vehicleStatus = response.result;
+      const vehicleStatus = response.result?.status;
 
       if (response?.error) {
         throw response?.error?.errorDesc;
@@ -90,7 +90,7 @@ export default class CanadianVehicle extends Vehicle {
           batteryCharge12v: vehicleStatus?.battery?.batSoc,
           batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
         },
-        lastupdate: parseDate(vehicleStatus?.time)
+        lastupdate: vehicleStatus?.time ? parseDate(vehicleStatus?.lastStatusDate) : null,
       };
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
