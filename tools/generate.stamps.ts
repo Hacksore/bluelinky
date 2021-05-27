@@ -1,6 +1,7 @@
-const { join, resolve } = require('path');
-const { writeFileSync } = require('fs');
-const { getStamps } = require('./european.tools.js');
+/* eslint-disable */
+import { join, resolve } from 'path';
+import { writeFileSync } from 'fs';
+import { getStamps } from './european.tools';
 
 const SIZE = 1000;
 
