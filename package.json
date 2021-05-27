@@ -1,12 +1,12 @@
 {
   "name": "bluelinky",
-  "version": "7.2.0",
+  "version": "7.2.2",
   "description": "An unofficial nodejs API wrapper for Hyundai bluelink",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "stamps": "node ./tools/generate.stamps.js",
+    "stamps": "ts-node ./tools/generate.stamps.ts",
     "dev": "rollup -w -c rollup.config.js",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "prepublishOnly": "npm run build",
