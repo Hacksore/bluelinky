@@ -32,7 +32,7 @@ const cacheResult = <T, U>(fn: (...options: U[]) => Promise<T>, durationInMS = 6
     if(cache && age && (age + durationInMS) > Date.now()) {
       return cache;
     }
-    cache = fn(...options);
+    cache = fn(...options).catch(e => { cache = null; return e; });
     age = Date.now();
     return cache;
   };
@@ -41,7 +41,7 @@ const cacheResult = <T, U>(fn: (...options: U[]) => Promise<T>, durationInMS = 6
 const ONE_DAY = 60000 * 60 * 24;
 
 const getStampList = cacheResult(async (brand: Brand): Promise<string[]> => {
-  const { body } = await got.get(`https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${brand}.json`, { json: true });
+  const { body } = await got(`https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${brand}.json`, { json: true });
   return body;
 }, ONE_DAY);
 
