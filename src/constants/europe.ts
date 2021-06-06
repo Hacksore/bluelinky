@@ -1,4 +1,6 @@
 import { Brand } from '../interfaces/common.interfaces';
+import { readFile } from 'fs';
+import { promisify } from 'util';
 import got from 'got';
 
 export type EULanguages = 'cs'|'da'|'nl'|'en'|'fi'|'fr'|'de'|'it'|'pl'|'hu'|'no'|'sk'|'es'|'sv';
@@ -22,13 +24,13 @@ export interface EuropeanBrandEnvironment {
   },
   basicToken: string;
   GCMSenderID: string;
-  stamp: () => Promise<string>;
+  stamp: (stampsFile?: string) => Promise<string>;
   brandAuthUrl: (options: { language: EULanguages; serviceId: string; userId: string; }) => string;
 }
-const cacheResult = <T, U>(fn: (...options: U[]) => Promise<T>, durationInMS = 60000): (...options: U[]) => Promise<T> => {
+const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60000): (...options: any[]) => Promise<T> => {
   let cache: Promise<T> | null = null;
   let age: number | null = null;
-  return (...options: U[]) => {
+  return (...options: any[]) => {
     if(cache && age && (age + durationInMS) > Date.now()) {
       return cache;
     }
@@ -40,13 +42,18 @@ const cacheResult = <T, U>(fn: (...options: U[]) => Promise<T>, durationInMS = 6
 
 const ONE_DAY = 60000 * 60 * 24;
 
-const getStampList = cacheResult(async (brand: Brand): Promise<string[]> => {
-  const { body } = await got(`https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${brand}.json`, { json: true });
+const getStampList = cacheResult(async (brand: Brand, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${brand}.json`): Promise<string[]> => {
+  if (stampsFile.startsWith(('file://'))) {
+    const [path] = stampsFile.split('file://');
+    const content = await promisify(readFile)(path);
+    return JSON.parse(content.toString('utf-8'));
+  }
+  const { body } = await got(stampsFile, { json: true });
   return body;
 }, ONE_DAY);
 
-const getStamps = (brand: Brand) => async () => {
-  const list = await getStampList(brand);
+const getStamps = (brand: Brand) => async (stampsFile?: string) => {
+  const list = await getStampList(brand, stampsFile);
   return list[Math.floor(Math.random() * list.length)];
 };
 

@@ -31,12 +31,12 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 			json: true,
 			headers: stdHeaders
 		});
-		const { body: htmlForm } = await got(
+		const { body: authForm } = await got(
 			this.environment.brandAuthUrl({ language: this.language, userId, serviceId }), {
 			cookieJar,
 			headers: stdHeaders
 		});
-		const actionUrl = /action="([a-z0-9:/\-.?_=&;]*)"/gi.exec(htmlForm);
+		const actionUrl = /action="([a-z0-9:/\-.?_=&;]*)"/gi.exec(authForm);
 		const preparedUrl = actionUrl?.[1].replace(/&amp;/g, '&');
 		if (!preparedUrl) {
 			throw new Error('@EuropeanBrandAuthStrategy.login: cannot found the auth url from the form.');
@@ -46,7 +46,7 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 		formData.append('password', user.password);
 		formData.append('credentialId', '');
 		formData.append('rememberMe', 'on');
-		const { headers: { location: redirectTo }, body } = await manageGot302(got.post(preparedUrl, {
+		const { headers: { location: redirectTo }, body: afterAuthForm } = await manageGot302(got.post(preparedUrl, {
 			cookieJar,
 			body: formData.toString(),
 			headers: {
@@ -55,21 +55,24 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 			},
 		}));
 		if(!redirectTo) {
-			const errorMessage = /<span class="kc-feedback-text">(.+)<\/span>/gm.exec(body);
+			const errorMessage = /<span class="kc-feedback-text">(.+)<\/span>/gm.exec(afterAuthForm);
 			if (errorMessage) {
 				throw new Error(`@EuropeanBrandAuthStrategy.login: Authentication failed with message : ${errorMessage[1]}`);
 			}
 			throw new Error('@EuropeanBrandAuthStrategy.login: Authentication failed, cannot retrieve error message');
 		}
-		const { url } = await got(redirectTo, {
+		const { url, body: htmlPage } = await got(redirectTo, {
 			cookieJar,
 			headers: stdHeaders
 		});
+		if(!url) {
+			throw new Error(`@EuropeanBrandAuthStrategy.login: after login redirection got stuck : ${htmlPage}`);
+		}
 		const { userId: appUser } = Url.parse(url, true).query;
 		if (!appUser) {
 			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument userId in ${url}.`);
 		}
-		const { body: { redirectUrl } } = await got.post(this.environment.endpoints.silentSignIn, {
+		const { body, statusCode } = await got.post(this.environment.endpoints.silentSignIn, {
 			cookieJar,
 			body: {
 				userId: appUser
@@ -80,9 +83,12 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 				'ccsp-service-id': this.environment.clientId,
 			}
 		});
-		const { code } = Url.parse(redirectUrl, true).query;
+		if(!body.redirectUrl) {
+			throw new Error(`@EuropeanBrandAuthStrategy.login: silent sign In didn't work, could not retrieve auth code. status: ${statusCode}, body: ${JSON.stringify(body)}`);
+		}
+		const { code } = Url.parse(body.redirectUrl, true).query;
 		if (!code) {
-			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument code in ${redirectUrl}.`);
+			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument code in ${body.redirectUrl}.`);
 		}
 		return {
 			code: code as Code,
