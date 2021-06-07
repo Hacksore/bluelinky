@@ -75,6 +75,11 @@ describe('EuropeanController', () => {
     controller.session.accessToken = 'MockToken';
 
     (got as any).mockReturnValueOnce({
+      body: ['stamp1', 'stamp2'],
+      statusCode: 200,
+    });
+
+    (got as any).mockReturnValueOnce({
       body: {
         resMsg: {
           vehicles: [

@@ -1,6 +1,7 @@
 import { Brand } from '../interfaces/common.interfaces';
-import hyundaiStamps from '../tools/european.hyundai.token.collection';
-import kiaStamps from '../tools/european.kia.token.collection';
+import { readFile } from 'fs';
+import { promisify } from 'util';
+import got from 'got';
 
 export type EULanguages = 'cs'|'da'|'nl'|'en'|'fi'|'fr'|'de'|'it'|'pl'|'hu'|'no'|'sk'|'es'|'sv';
 export const EU_LANGUAGES: EULanguages[] = ['cs', 'da', 'nl', 'en', 'fi', 'fr', 'de', 'it', 'pl', 'hu', 'no', 'sk', 'es', 'sv'];
@@ -23,9 +24,39 @@ export interface EuropeanBrandEnvironment {
   },
   basicToken: string;
   GCMSenderID: string;
-  stamp: () => string;
+  stamp: (stampsFile?: string) => Promise<string>;
   brandAuthUrl: (options: { language: EULanguages; serviceId: string; userId: string; }) => string;
 }
+const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60000): (...options: any[]) => Promise<T> => {
+  let cache: Promise<T> | null = null;
+  let age: number | null = null;
+  return (...options: any[]) => {
+    if(cache && age && (age + durationInMS) > Date.now()) {
+      return cache;
+    }
+    cache = fn(...options).catch(e => { cache = null; return e; });
+    age = Date.now();
+    return cache;
+  };
+};
+
+const ONE_DAY = 60000 * 60 * 24;
+
+const getStampList = cacheResult(async (brand: Brand, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${brand}.json`): Promise<string[]> => {
+  if (stampsFile.startsWith(('file://'))) {
+    const [path] = stampsFile.split('file://');
+    const content = await promisify(readFile)(path);
+    return JSON.parse(content.toString('utf-8'));
+  }
+  const { body } = await got(stampsFile, { json: true });
+  return body;
+}, ONE_DAY);
+
+const getStamps = (brand: Brand) => async (stampsFile?: string) => {
+  const list = await getStampList(brand, stampsFile);
+  return list[Math.floor(Math.random() * list.length)];
+};
+
 
 const getEndpoints = (baseUrl: string, clientId: string): EuropeanBrandEnvironment['endpoints'] => ({
   session: `${baseUrl}/api/v1/user/oauth2/authorize?response_type=code&state=test&client_id=${clientId}&redirect_uri=${baseUrl}/api/v1/user/oauth2/redirect`,
@@ -50,7 +81,7 @@ const getHyundaiEnvironment = (): EuropeanBrandEnvironment => {
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
     GCMSenderID: '199360397125',
-    stamp: () => hyundaiStamps[Math.floor(Math.random() * hyundaiStamps.length)],
+    stamp: getStamps('hyundai'),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '97516a3c-2060-48b4-98cd-8e7dcd3c47b2';
       return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
@@ -71,7 +102,7 @@ const getKiaEnvironment = (): EuropeanBrandEnvironment => {
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
     GCMSenderID: '199360397125',
-    stamp: () => kiaStamps[Math.floor(Math.random() * kiaStamps.length)],
+    stamp: getStamps('kia'),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = 'f4d531c7-1043-444d-b09a-ad24bd913dd4';
       return `https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;

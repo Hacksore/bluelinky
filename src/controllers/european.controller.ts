@@ -18,6 +18,7 @@ import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth
 
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
+  stampsFile?: string;
   region: 'EU';
 }
 
@@ -166,7 +167,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
-          'Stamp': this.environment.stamp(),
+          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -196,7 +197,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
-          'Stamp': this.environment.stamp(),
+          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         body: formData.toString(),
         cookieJar: authResult.cookies,
@@ -235,7 +236,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         headers: {
           'Authorization': this.session.accessToken,
           'ccsp-device-id': this.session.deviceId,
-          'Stamp': this.environment.stamp(),
+          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         json: true,
       });
@@ -248,7 +249,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             headers: {
               'Authorization': this.session.accessToken,
               'ccsp-device-id': this.session.deviceId,
-              'Stamp': this.environment.stamp(),
+              'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
             },
             json: true,
           }
@@ -296,7 +297,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         'Authorization': this.session.controlToken,
         'ccsp-device-id': this.session.deviceId,
         'Content-Type': 'application/json',
-        'Stamp': this.environment.stamp(),
+        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
       },
       json: true
     });
@@ -310,7 +311,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         'Authorization': this.session.accessToken,
         'ccsp-device-id': this.session.deviceId,
         'Content-Type': 'application/json',
-        'Stamp': this.environment.stamp(),
+        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
       },
       json: true
     });

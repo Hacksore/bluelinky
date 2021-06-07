@@ -13,7 +13,7 @@ export class EuropeanLegacyAuthStrategy implements AuthStrategy {
 
 	async login(user: { username: string; password: string; }, options?: { cookieJar: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
 		const cookieJar = await initSession(this.environment, this.language, options?.cookieJar);
-		const { body: { redirectUrl } } = await got(this.environment.endpoints.login, {
+		const { body, statusCode } = await got(this.environment.endpoints.login, {
 			method: 'POST',
 			json: true,
 			body: {
@@ -22,7 +22,10 @@ export class EuropeanLegacyAuthStrategy implements AuthStrategy {
 			},
 			cookieJar,
 		});
-		const { code } = Url.parse(redirectUrl, true).query;
+		if(!body.redirectUrl) {
+			throw new Error(`@EuropeanLegacyAuthStrategy.login: sign In didn't work, could not retrieve auth code. status: ${statusCode}, body: ${JSON.stringify(body)}`);
+		}
+		const { code } = Url.parse(body.redirectUrl, true).query;
 		if (!code) {
 			throw new Error('@EuropeanLegacyAuthStrategy.login: AuthCode was not found, you probably need to migrate your account.');
 		}
