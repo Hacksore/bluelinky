@@ -19,6 +19,7 @@ import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
   stampsFile?: string;
+  stampsFileCacheDurationInMs?: number;
   region: 'EU';
 }
 
@@ -42,7 +43,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
     this.session.deviceId = uuidV4();
-    this._environment = getBrandEnvironment(userConfig.brand);
+    this._environment = getBrandEnvironment(userConfig.brand, userConfig.stampsFileCacheDurationInMs);
     this.authStrategies = {
       main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
       fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
@@ -167,6 +168,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
+          'ccsp-application-id': this.environment.appId,
           'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         body: {
@@ -197,6 +199,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
+          'ccsp-application-id': this.environment.appId,
           'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         body: formData.toString(),
@@ -234,8 +237,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       const response = await got(`${this.environment.baseUrl}/api/v1/spa/vehicles`, {
         method: 'GET',
         headers: {
-          'Authorization': this.session.accessToken,
-          'ccsp-device-id': this.session.deviceId,
+          ...this.defaultHeaders,
           'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
         },
         json: true,
@@ -247,8 +249,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           {
             method: 'GET',
             headers: {
-              'Authorization': this.session.accessToken,
-              'ccsp-device-id': this.session.deviceId,
+              ...this.defaultHeaders,
               'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
             },
             json: true,
@@ -294,9 +295,8 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     return got.extend({
       baseUrl: this.environment.baseUrl,
       headers: {
+        ...this.defaultHeaders,
         'Authorization': this.session.controlToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Content-Type': 'application/json',
         'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
       },
       json: true
@@ -308,12 +308,20 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     return got.extend({
       baseUrl: this.environment.baseUrl,
       headers: {
-        'Authorization': this.session.accessToken,
-        'ccsp-device-id': this.session.deviceId,
-        'Content-Type': 'application/json',
+        ...this.defaultHeaders,
         'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
       },
       json: true
     });
+  }
+
+  private get defaultHeaders() {
+    return {
+      'Authorization': this.session.accessToken,
+      'offset': (new Date().getTimezoneOffset() / 60).toFixed(2),
+      'ccsp-device-id': this.session.deviceId,
+      'ccsp-application-id': this.environment.appId,
+      'Content-Type': 'application/json',
+    };
   }
 }
