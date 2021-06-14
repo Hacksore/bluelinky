@@ -48,7 +48,7 @@ export default class EuropeanVehicle extends Vehicle {
               defrost: config.defrost,
               heating1: config.windscreenHeating ? 1 : 0,
             },
-            tempCode: celciusToTempCode(config.temperature),
+            tempCode: celciusToTempCode(REGIONS.EU, config.temperature),
             unit: config.unit,
           }
         }
@@ -204,7 +204,7 @@ export default class EuropeanVehicle extends Vehicle {
           sideMirrorHeat: false,
           rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
           defrost: vehicleStatus?.defrost,
-          temperatureSetpoint: tempCodeToCelsius(vehicleStatus?.airTemp?.value),
+          temperatureSetpoint: tempCodeToCelsius(REGIONS.EU, vehicleStatus?.airTemp?.value),
           temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
         engine: {

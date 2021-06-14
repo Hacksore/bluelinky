@@ -148,7 +148,7 @@ export default class CanadianVehicle extends Vehicle {
       const airTemp = startConfig.airTempvalue;
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
-        body.hvacInfo['airTemp'] = { value: celciusToTempCode(airTemp), unit: 0, hvacTempType: 1 };
+        body.hvacInfo['airTemp'] = { value: celciusToTempCode(REGIONS.CA, airTemp), unit: 0, hvacTempType: 1 };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
         throw 'air temperature should be specified';
       }

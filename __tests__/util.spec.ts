@@ -1,14 +1,13 @@
 import { tempCodeToCelsius, celciusToTempCode, parseDate, addMinutes } from '../src/util';
+import { REGIONS } from '../src/constants';
 
 describe('Utility', () => {
-  it('converts temp code to celsius', () => {
-    expect(tempCodeToCelsius('0H')).toEqual(14);
-    expect(tempCodeToCelsius('AH')).toEqual(19);
+  it('converts temp code to celsius in CA', () => {
+    expect(tempCodeToCelsius(REGIONS.CA, '06H')).toEqual(17);
   });
 
-  it('converts celsius to temp code', () => {
-    expect(celciusToTempCode(14)).toEqual('0H');
-    expect(celciusToTempCode(19)).toEqual('AH');
+  it('converts celsius to temp code in CA', () => {
+    expect(celciusToTempCode(REGIONS.CA, 17)).toEqual('06H');
   });
 
   it('parseDate converts string to date', () => {
