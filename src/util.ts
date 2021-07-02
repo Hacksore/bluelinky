@@ -39,12 +39,12 @@ export const celciusToTempCode = (region: REGION, temperature: number): string =
 
   // get the second param and stick an H on the end?
   // this needs more testing I guess :P
-  return hexCode.split('x')[1].toUpperCase() + 'H';
+  return `${hexCode.split('x')[1].toUpperCase()}H`.padStart(3, '0');
 };
 
 export const tempCodeToCelsius = (region: REGION, code: string): number => { 
   // get first part
-  const hexTempIndex = code[0];
+  const hexTempIndex = region === 'EU' ? code :  code[0];
 
   // create a range
   const { start, end, step } = REGION_STEP_RANGES[region];
