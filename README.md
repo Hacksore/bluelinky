@@ -73,6 +73,7 @@ Important information for login problems:
 - startCharge
 - monthlyReport
 - tripInfo
+- EV: driveHistory
 - EV: getChargeTargets
 - EV: setChargeLimits
 

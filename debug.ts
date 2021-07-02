@@ -21,6 +21,7 @@ const apiCalls = [
   { name: 'locate', value: 'locate' },
   { name: '[EU] monthly report', value: 'monthlyReport' },
   { name: '[EU] trip informations', value: 'tripInfo' },
+  { name: '[EU] drive informations', value: 'drvInfo' },
   { name: '[EU][EV] get charge targets', value: 'getChargeTargets' },
   { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
 ];
@@ -164,6 +165,10 @@ async function performCommand(command) {
       case 'monthlyReport':
         const report = await vehicle.monthlyReport();
         console.log('monthyReport : ' + JSON.stringify(report, null, 2));
+        break;
+      case 'drvInfo':
+        const info = await vehicle.driveHistory();
+        console.log('drvInfo : ', info);
         break;
       case 'tripInfo':
         const currentYear = new Date().getFullYear();

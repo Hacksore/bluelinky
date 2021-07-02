@@ -22,7 +22,7 @@ import { Vehicle } from './vehicle';
 import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius, parseDate, addMinutes } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
-import { EUPOIInformation } from '../interfaces/european.interfaces';
+import { EUDatedDriveHistory, EUDriveHistory, EUPOIInformation, historyDrivingPeriod } from '../interfaces/european.interfaces';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
 const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
@@ -443,6 +443,53 @@ export default class EuropeanVehicle extends Vehicle {
         }
       }
       return;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.history');
+    }
+  }
+
+  public async driveHistory(period: historyDrivingPeriod = historyDrivingPeriod.DAY): Promise<DeepPartial<{
+    cumulated: EUDriveHistory[],
+    history: EUDatedDriveHistory[]
+  }>> {
+    const http = await this.controller.getApiHttpService();
+    try {
+      const response = await http.post(
+        `/api/v1/spa/vehicles/${this.vehicleConfig.id}/drvhistory`,
+        {
+          body: {
+            periodTarget: period
+          }
+        }
+      );
+      return {
+        cumulated: response.body.resMsg.drivingInfo.map((line) => ({
+          period: line.drivingPeriod,
+          consumption: {
+            total: line.totalPwrCsp,
+            engine: line.motorPwrCsp,
+            climate: line.climatePwrCsp,
+            devices: line.eDPwrCsp,
+            battery: line.batteryMgPwrCsp
+          },
+          regen: line.regenPwr,
+          distance: line.calculativeOdo
+        })),
+        history: response.body.resMsg.drivingInfoDetail.map((line) => ({
+          period: line.drivingPeriod,
+          rawDate: line.drivingDate,
+          date: line.drivingDate ? parseDate(line.drivingDate) : undefined,
+          consumption: {
+            total: line.totalPwrCsp,
+            engine: line.motorPwrCsp,
+            climate: line.climatePwrCsp,
+            devices: line.eDPwrCsp,
+            battery: line.batteryMgPwrCsp
+          },
+          regen: line.regenPwr,
+          distance: line.calculativeOdo
+        }))
+      };
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.history');
     }
