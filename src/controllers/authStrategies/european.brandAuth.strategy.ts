@@ -68,14 +68,14 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 		if(!url) {
 			throw new Error(`@EuropeanBrandAuthStrategy.login: after login redirection got stuck : ${htmlPage}`);
 		}
-		const { userId: appUser } = Url.parse(url, true).query;
+		const { intUserId: appUser } = Url.parse(url, true).query;
 		if (!appUser) {
 			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument userId in ${url}.`);
 		}
 		const { body, statusCode } = await got.post(this.environment.endpoints.silentSignIn, {
 			cookieJar,
 			body: {
-				userId: appUser
+				intUserId: appUser
 			},
 			json: true,
 			headers: {
