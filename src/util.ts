@@ -17,8 +17,8 @@ const REGION_STEP_RANGES = {
     step: 0.5,
   },
   CA: {
-    start: 17,
-    end: 27,
+    start: 16,
+    end: 32,
     step: 0.5,
   }
 };
@@ -43,15 +43,12 @@ export const celciusToTempCode = (region: REGION, temperature: number): string =
 };
 
 export const tempCodeToCelsius = (region: REGION, code: string): number => { 
-  // get first part
-  const hexTempIndex = region === 'EU' ? code :  code[0];
-
   // create a range
   const { start, end, step } = REGION_STEP_RANGES[region];
   const tempRange = floatRange(start, end, step);
 
   // get the index
-  const tempIndex = parseInt(hexTempIndex, 16);
+  const tempIndex = parseInt(code, 16);
 
   // return the relevant celsius temp
   return tempRange[tempIndex];
