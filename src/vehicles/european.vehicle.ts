@@ -23,12 +23,22 @@ import { EuropeanController } from '../controllers/european.controller';
 import { celciusToTempCode, tempCodeToCelsius, parseDate, addMinutes } from '../util';
 import { manageBluelinkyError, ManagedBluelinkyError } from '../tools/common.tools';
 import { EUDatedDriveHistory, EUDriveHistory, EUPOIInformation, historyDrivingPeriod } from '../interfaces/european.interfaces';
+import got from 'got';
 
 type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
 const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
 
 export default class EuropeanVehicle extends Vehicle {
   public region = REGIONS.EU;
+  public serverRates: {
+    max: number;
+    current: number;
+    reset?: Date;
+    updatedAt?: Date;
+  } = {
+    max: -1,
+    current: -1
+  };
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: EuropeanController) {
     super(vehicleConfig, controller);
@@ -38,7 +48,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async start(config: VehicleClimateOptions): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
           body: {
@@ -48,11 +58,11 @@ export default class EuropeanVehicle extends Vehicle {
               defrost: config.defrost,
               heating1: config.windscreenHeating ? 1 : 0,
             },
-            tempCode: celciusToTempCode(config.temperature),
+            tempCode: celciusToTempCode(REGIONS.EU, config.temperature),
             unit: config.unit,
           }
         }
-      );
+      ));
       logger.info(`Climate started for vehicle ${this.vehicleConfig.id}`);
       return response.body;
     } catch (err) {
@@ -63,7 +73,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async stop(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/temperature`,
         {
           body: {
@@ -77,7 +87,7 @@ export default class EuropeanVehicle extends Vehicle {
             unit: 'C',
           }
         }
-      );
+      ));
       logger.info(`Climate stopped for vehicle ${this.vehicleConfig.id}`);
       return response.body;
     } catch (err) {
@@ -88,7 +98,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async lock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
           body: {
@@ -96,7 +106,7 @@ export default class EuropeanVehicle extends Vehicle {
             deviceId: this.controller.session.deviceId,
           }
         }
-      );
+      ));
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} locked`);
         return 'Lock successful';
@@ -110,7 +120,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async unlock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`,
         {
           body: {
@@ -118,7 +128,7 @@ export default class EuropeanVehicle extends Vehicle {
             deviceId: this.controller.session.deviceId,
           }
         }
-      );
+      ));
 
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} unlocked`);
@@ -140,15 +150,15 @@ export default class EuropeanVehicle extends Vehicle {
     const http = await this.controller.getVehicleHttpService();
 
     try {
-      const cachedResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`);
+      const cachedResponse = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`));
 
       const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
       if (statusConfig.refresh) {
-        const statusResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`);
+        const statusResponse = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`));
         fullStatus.vehicleStatus = statusResponse.body.resMsg;
 
-        const locationResponse = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`);
+        const locationResponse = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`));
         fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
       }
 
@@ -172,7 +182,7 @@ export default class EuropeanVehicle extends Vehicle {
     try {
       const cacheString = statusConfig.refresh ? '' : '/latest';
 
-      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`);
+      const response = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`));
 
       // handles refreshing data
       const vehicleStatus = statusConfig.refresh
@@ -204,7 +214,7 @@ export default class EuropeanVehicle extends Vehicle {
           sideMirrorHeat: false,
           rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
           defrost: vehicleStatus?.defrost,
-          temperatureSetpoint: tempCodeToCelsius(vehicleStatus?.airTemp?.value),
+          temperatureSetpoint: tempCodeToCelsius(REGIONS.EU, vehicleStatus?.airTemp?.value),
           temperatureUnit: vehicleStatus?.airTemp?.unit,
         },
         engine: {
@@ -246,7 +256,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async odometer(): Promise<VehicleOdometer | null> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`);
+      const response = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`));
       this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
       return this._odometer;
     } catch (err) {
@@ -257,7 +267,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async location(): Promise<VehicleLocation> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`);
+      const response = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`));
 
       const data = response.body.resMsg?.gpsDetail ?? response.body.resMsg;
       this._location = {
@@ -280,7 +290,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async startCharge(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
           body: {
@@ -288,7 +298,7 @@ export default class EuropeanVehicle extends Vehicle {
             deviceId: this.controller.session.deviceId,
           }
         }
-      );
+      ));
 
       if (response.statusCode === 200) {
         logger.debug(`Send start charge command to Vehicle ${this.vehicleConfig.id}`);
@@ -304,7 +314,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async stopCharge(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`,
         {
           body: {
@@ -312,7 +322,7 @@ export default class EuropeanVehicle extends Vehicle {
             deviceId: this.controller.session.deviceId,
           }
         }
-      );
+      ));
 
       if (response.statusCode === 200) {
         logger.debug(`Send stop charge command to Vehicle ${this.vehicleConfig.id}`);
@@ -330,14 +340,14 @@ export default class EuropeanVehicle extends Vehicle {
   ): Promise<DeepPartial<VehicleMonthlyReport> | undefined> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/monthlyreport`,
         {
           body: {
             setRptMonth: toMonthDate(month)
           }
         }
-      );
+      ));
       const rawData = response.body.resMsg?.monthlyReport;
       if (rawData) {
         return {
@@ -375,7 +385,7 @@ export default class EuropeanVehicle extends Vehicle {
     const http = await this.controller.getApiHttpService();
     try {
       const perDay = Boolean(date.day);
-      const response = await http.post(
+      const response = this.updateRates(await http.post(
         `/api/v1/spa/vehicles/${this.vehicleConfig.id}/tripinfo`,
         {
           body: {
@@ -385,7 +395,7 @@ export default class EuropeanVehicle extends Vehicle {
             tripPeriodType: perDay ? 1 : 0
           }
         }
-      );
+      ));
 
       if (!perDay) {
         const rawData = response.body.resMsg;
@@ -501,7 +511,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async getChargeTargets(): Promise<DeepPartial<VehicleTargetSOC>[] | undefined> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`);
+      const response = this.updateRates(await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`));
       const rawData = response.body.resMsg?.targetSOClist;
       if (rawData && Array.isArray(rawData)) {
         return rawData.map((rawSOC) => ({
@@ -525,7 +535,7 @@ export default class EuropeanVehicle extends Vehicle {
       throw new ManagedBluelinkyError(`Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`);
     }
     try {
-      await http.post(
+      this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/charge/target`,
         {
           body: {
@@ -535,7 +545,7 @@ export default class EuropeanVehicle extends Vehicle {
             ]
           }
         }
-      );
+      ));
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
     }
@@ -548,7 +558,7 @@ export default class EuropeanVehicle extends Vehicle {
   public async setNavigation(poiInformations: EUPOIInformation[]): Promise<void> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      await http.post(
+      this.updateRates(await http.post(
         `/api/v2/spa/vehicles/${this.vehicleConfig.id}/location/routes`,
         {
           body: {
@@ -556,10 +566,22 @@ export default class EuropeanVehicle extends Vehicle {
             poiInfoList: poiInformations,
           }
         }
-      );
+      ));
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setNavigation');
     }
+  }
+
+  private updateRates<T extends Record<string, unknown>>(resp: got.Response<T>): got.Response<T> {
+    if (resp.headers?.['x-ratelimit-limit']) {
+      this.serverRates.max = Number(resp.headers?.['x-ratelimit-limit']);
+      this.serverRates.current = Number(resp.headers?.['x-ratelimit-remaining']);
+      if (resp.headers?.['x-ratelimit-reset']) {
+        this.serverRates.reset = new Date(Number(`${resp.headers?.['x-ratelimit-reset']}000`));
+      }
+      this.serverRates.updatedAt = new Date();
+    }
+    return resp;
   }
 }
 
