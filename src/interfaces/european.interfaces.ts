@@ -21,3 +21,34 @@ export interface EUPOIInformation {
   placeid: string;
   name: string;
 }
+
+export enum historyDrivingPeriod {
+  DAY = 0,
+  MONTH = 1,
+  ALL = 2
+}
+
+export enum historyCumulatedTypes {
+  TOTAL = 0,
+  AVERAGE = 1,
+  TODAY = 2
+}
+
+export interface EUDriveHistory {
+  period: historyCumulatedTypes,
+  consumption: {
+    total: number,
+    engine: number,
+    climate: number,
+    devices: number,
+    battery: number
+  },
+  regen: number,
+  distance: number
+}
+
+export interface EUDatedDriveHistory extends Omit<EUDriveHistory, 'period'> {
+  period: historyDrivingPeriod,
+  rawDate: string;
+  date: Date,
+}
