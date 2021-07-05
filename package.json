@@ -1,6 +1,6 @@
 {
   "name": "bluelinky",
-  "version": "7.3.1",
+  "version": "7.4.0",
   "description": "An unofficial nodejs API wrapper for Hyundai bluelink",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
