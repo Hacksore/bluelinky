@@ -15,8 +15,8 @@ const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
     brand: 'hyundai',
     host,
     baseUrl,
-    clientId: '815c046afaa4471aa578827ad546cc76',
-    clientSecret: 'GXZveJJAVTehh/OtakM3EQ==',
+    clientId: 'm66129Bb-em93-SPAHYN-bZ91-am4540zp19920',
+    clientSecret: 'v558o935-6nne-423i-baa8',
   };
 };
 
