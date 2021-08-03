@@ -80,6 +80,7 @@ The JSON file must respect [this format](https://github.com/neoPix/bluelinky-sta
 - startCharge
 - monthlyReport
 - tripInfo
+- EV: driveHistory
 - EV: getChargeTargets
 - EV: setChargeLimits
 
