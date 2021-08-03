@@ -9,6 +9,7 @@ import { Vehicle } from './src/vehicles/vehicle';
 const apiCalls = [
   { name: 'exit', value: 'exit' },
   { name: 'start', value: 'start' },
+  { name: 'vehicles', value: 'vehicles' },
   { name: 'odometer', value: 'odometer' },
   { name: 'stop', value: 'stop' },
   { name: 'status (on server cache)', value: 'status' },
@@ -25,6 +26,7 @@ const apiCalls = [
   { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
 ];
 
+let client;
 let vehicle;
 const { username, password, vin, pin } = config;
 
@@ -61,7 +63,8 @@ const askForRegionInput = () => {
 };
 
 const createInstance = (region, brand) => {
-  const client = new BlueLinky({
+  // global abuse :)
+  client = new BlueLinky({
     username,
     password,
     region,
@@ -103,6 +106,14 @@ async function performCommand(command) {
       case 'odometer':
         const odometer = await vehicle.odometer();
         console.log('odometer', JSON.stringify(odometer, null, 2));
+        break;
+      case 'vehicles':
+        const vehicles = await client.getVehicles();
+        const response = vehicles.map(v => {
+          const { name, vin, nickname, regDate } = v.vehicleConfig;
+          return { name, vin, nickname, regDate };
+        });
+        console.log('vehicles', JSON.stringify(response, null, 2));
         break;
       case 'status':
         const status = await vehicle.status({
