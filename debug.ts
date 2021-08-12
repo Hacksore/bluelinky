@@ -27,7 +27,7 @@ const apiCalls = [
   { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
 ];
 
-let client;
+let client: BlueLinky;
 let vehicle;
 const { username, password, vin, pin } = config;
 
@@ -210,6 +210,12 @@ async function performCommand(command) {
       case 'getChargeTargets':
         const targets = await vehicle.getChargeTargets();
         console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'startCharge':
+        await vehicle.startCharge();
+        break;
+      case 'stopCharge':
+        await vehicle.stopCharge();
         break;
       case 'setChargeTargets':
         const { fast, slow } = await inquirer
