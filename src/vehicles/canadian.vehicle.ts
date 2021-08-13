@@ -273,8 +273,8 @@ export default class CanadianVehicle extends Vehicle {
         pin: this.controller.userConfig.pin,
         pAuth: preAuth,
         tsoc: [
-          { plugType: EVChargeModeTypes.FAST, targetSOClevel: limits.fast },
-          { plugType: EVChargeModeTypes.SLOW, targetSOClevel: limits.slow },
+          { plugType: EVChargeModeTypes.FAST, level: limits.fast },
+          { plugType: EVChargeModeTypes.SLOW, level: limits.slow },
         ],
       });
       return response;
