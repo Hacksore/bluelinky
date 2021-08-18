@@ -1,7 +1,12 @@
 import got from 'got';
 import logger from '../logger';
 
-import { REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS } from '../constants';
+import {
+  REGIONS,
+  DEFAULT_VEHICLE_STATUS_OPTIONS,
+  ChargeTarget,
+  POSSIBLE_CHARGE_LIMIT_VALUES,
+} from '../constants';
 
 import {
   VehicleStartOptions,
@@ -12,11 +17,13 @@ import {
   VehicleStatusOptions,
   RawVehicleStatus,
   FullVehicleStatus,
+  EVChargeModeTypes,
 } from '../interfaces/common.interfaces';
 
 import { Vehicle } from './vehicle';
 import { celciusToTempCode, parseDate } from '../util';
 import { CanadianController } from '../controllers/canadian.controller';
+import { ManagedBluelinkyError } from '../tools/common.tools';
 
 export default class CanadianVehicle extends Vehicle {
   public region = REGIONS.CA;
@@ -40,7 +47,9 @@ export default class CanadianVehicle extends Vehicle {
     };
     logger.debug('Begin status request, polling car: ' + input.refresh);
     try {
-      const endpoint = statusConfig.refresh ? this.controller.environment.endpoints.remoteStatus : this.controller.environment.endpoints.status;
+      const endpoint = statusConfig.refresh
+        ? this.controller.environment.endpoints.remoteStatus
+        : this.controller.environment.endpoints.status;
       const response = await this.request(endpoint, {});
       const vehicleStatus = response.result?.status;
 
@@ -148,13 +157,19 @@ export default class CanadianVehicle extends Vehicle {
       const airTemp = startConfig.airTempvalue;
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
-        body.hvacInfo['airTemp'] = { value: celciusToTempCode(REGIONS.CA, airTemp), unit: 0, hvacTempType: 1 };
+        body.hvacInfo['airTemp'] = {
+          value: celciusToTempCode(REGIONS.CA, airTemp),
+          unit: 0,
+          hvacTempType: 1,
+        };
       } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
         throw 'air temperature should be specified';
       }
 
       const preAuth = await this.getPreAuth();
-      const response = await this.request(this.controller.environment.endpoints.start, body, { pAuth: preAuth });
+      const response = await this.request(this.controller.environment.endpoints.start, body, {
+        pAuth: preAuth,
+      });
 
       logger.debug(response);
 
@@ -197,6 +212,77 @@ export default class CanadianVehicle extends Vehicle {
     }
   }
 
+  /**
+   * Warning only works on EV vehicles
+   * @returns
+   */
+  public async stopCharge(): Promise<void> {
+    logger.debug('Begin stopCharge');
+    const { stopCharge } = this.controller.environment.endpoints;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(stopCharge, {
+        pin: this.controller.userConfig.pin,
+        pAuth: preAuth,
+      });
+      return response;
+    } catch (err) {
+      throw 'error: ' + err;
+    }
+  }
+
+  /**
+   * Warning only works on EV vehicles
+   * @returns
+   */
+  public async startCharge(): Promise<void> {
+    logger.debug('Begin startCharge');
+    const { startCharge } = this.controller.environment.endpoints;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(startCharge, {
+        pin: this.controller.userConfig.pin,
+        pAuth: preAuth,
+      });
+      return response;
+    } catch (err) {
+      throw 'error: ' + err;
+    }
+  }
+
+  /**
+   *  Warning only works on EV vehicles
+   * @param limits
+   * @returns Promise<void>
+   */
+  public async setChargeTargets(limits: { fast: ChargeTarget; slow: ChargeTarget }): Promise<void> {
+    logger.debug('Begin setChargeTarget');
+    if (
+      !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.fast) ||
+      !POSSIBLE_CHARGE_LIMIT_VALUES.includes(limits.slow)
+    ) {
+      throw new ManagedBluelinkyError(
+        `Charge target values are limited to ${POSSIBLE_CHARGE_LIMIT_VALUES.join(', ')}`
+      );
+    }
+
+    const { setChargeTarget } = this.controller.environment.endpoints;
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(setChargeTarget, {
+        pin: this.controller.userConfig.pin,
+        pAuth: preAuth,
+        tsoc: [
+          { plugType: EVChargeModeTypes.FAST, level: limits.fast },
+          { plugType: EVChargeModeTypes.SLOW, level: limits.slow },
+        ],
+      });
+      return response;
+    } catch (err) {
+      throw 'error: ' + err;
+    }
+  }
+
   // TODO: @Seb to take a look at doing this
   public odometer(): Promise<VehicleOdometer | null> {
     throw new Error('Method not implemented.');
@@ -206,7 +292,11 @@ export default class CanadianVehicle extends Vehicle {
     logger.debug('Begin locate request');
     try {
       const preAuth = await this.getPreAuth();
-      const response = await this.request(this.controller.environment.endpoints.locate, {}, { pAuth: preAuth });
+      const response = await this.request(
+        this.controller.environment.endpoints.locate,
+        {},
+        { pAuth: preAuth }
+      );
       this._location = response.result as VehicleLocation;
       return this._location;
     } catch (err) {

@@ -23,13 +23,15 @@ const apiCalls = [
   { name: '[EU] monthly report', value: 'monthlyReport' },
   { name: '[EU] trip informations', value: 'tripInfo' },
   { name: '[EU] drive informations', value: 'drvInfo' },
-  { name: '[EU][EV] get charge targets', value: 'getChargeTargets' },
-  { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
+  { name: '[EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EV] set charge targets', value: 'setChargeTargets' },
+  { name: '[EV] start charging', value: 'startCharge' },
+  { name: '[EV] stop charging', value: 'stopCharge' },
 ];
 
-let client;
+let client: BlueLinky;
 let vehicle;
-const { username, password, vin, pin } = config;
+const { username, password, pin } = config;
 
 const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
@@ -210,6 +212,12 @@ async function performCommand(command) {
       case 'getChargeTargets':
         const targets = await vehicle.getChargeTargets();
         console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'startCharge':
+        await vehicle.startCharge();
+        break;
+      case 'stopCharge':
+        await vehicle.stopCharge();
         break;
       case 'setChargeTargets':
         const { fast, slow } = await inquirer
