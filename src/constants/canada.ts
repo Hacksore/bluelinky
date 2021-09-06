@@ -21,6 +21,9 @@ export interface CanadianBrandEnvironment {
     verifyAccountToken: string;
     verifyPin: string;
     verifyToken: string;
+    setChargeTarget: string;
+    stopCharge: string;
+    startCharge: string;
   }
 }
 
@@ -37,6 +40,9 @@ const getEndpoints = (baseUrl: string) => ({
   unlock: `${baseUrl}/tods/api/drulck`,
   start: `${baseUrl}/tods/api/evc/rfon`,
   stop: `${baseUrl}/tods/api/evc/rfoff`,
+  startCharge: `${baseUrl}/tods/api/evc/rcstrt`,
+  stopCharge: `${baseUrl}/tods/api/evc/rcstp`,
+  setChargeTarget: `${baseUrl}/tods/api/evc/setsoc`,
   locate: `${baseUrl}/tods/api/fndmcr`,
   hornlight: `${baseUrl}/tods/api/hornlight`,
   // System

@@ -56,7 +56,7 @@ Run an install for all the dependencies, `npm install`
 Now you can invoke the debug.ts script with `npm run debug`
 
 ## Documentation
-Checkout out the [bluelinky-docs](https://hacksore.github.io/bluelinky-docs/) for more info.
+Checkout out the [docs](https://bluelinky.readme.io) for more info.
 
 Important information for login problems:
 - If you experience login problems, please logout from the app on your phone and login again. You might need to ' upgrade ' your account to a generic Kia/Hyundai account, or create a new password or PIN.
@@ -80,6 +80,7 @@ The JSON file must respect [this format](https://github.com/neoPix/bluelinky-sta
 - startCharge
 - monthlyReport
 - tripInfo
+- EV: driveHistory
 - EV: getChargeTargets
 - EV: setChargeLimits
 

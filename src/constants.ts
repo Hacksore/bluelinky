@@ -18,6 +18,10 @@ export enum REGIONS {
   EU = 'EU',
 }
 
+// ev stuffz
+export type ChargeTarget = 50 | 60 | 70 | 80 | 90 | 100;
+export const POSSIBLE_CHARGE_LIMIT_VALUES = [50, 60, 70, 80, 90, 100];
+
 export const DEFAULT_VEHICLE_STATUS_OPTIONS: VehicleStatusOptions = {
   refresh: false,
   parsed: false,

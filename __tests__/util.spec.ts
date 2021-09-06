@@ -34,6 +34,10 @@ describe('Utility', () => {
     expect(parseDate('20210118153031')).toEqual(new Date('2021-01-18:15:30:31'));
   });
 
+  it('parseDate converts shortdate to date', () => {
+    expect(parseDate('20210117')).toEqual(new Date('2021-01-17:00:00:00'));
+  });
+
   it('addTime can add minutes to a date', () => {
     const start = new Date('2021-01-18:12:00:00');
     expect(addMinutes(start, 30)).toEqual(new Date('2021-01-18:12:30:00'));

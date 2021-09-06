@@ -63,6 +63,9 @@ export const parseDate = (str: string): Date => {
 	const year = parseInt(str.substring(0, 4));
 	const month = parseInt(str.substring(4, 6));
 	const day = parseInt(str.substring(6, 8));
+  if (str.length <= 8) {
+    return new Date(year, month - 1, day);
+  }
 	const hour = parseInt(str.substring(8, 10));
 	const minute = parseInt(str.substring(10, 12));
 	const second = parseInt(str.substring(12, 14));

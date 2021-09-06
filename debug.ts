@@ -9,6 +9,7 @@ import { Vehicle } from './src/vehicles/vehicle';
 const apiCalls = [
   { name: 'exit', value: 'exit' },
   { name: 'start', value: 'start' },
+  { name: 'vehicles', value: 'vehicles' },
   { name: 'odometer', value: 'odometer' },
   { name: 'stop', value: 'stop' },
   { name: 'status (on server cache)', value: 'status' },
@@ -21,12 +22,16 @@ const apiCalls = [
   { name: 'locate', value: 'locate' },
   { name: '[EU] monthly report', value: 'monthlyReport' },
   { name: '[EU] trip informations', value: 'tripInfo' },
-  { name: '[EU][EV] get charge targets', value: 'getChargeTargets' },
-  { name: '[EU][EV] set charge targets', value: 'setChargeTargets' },
+  { name: '[EU] drive informations', value: 'drvInfo' },
+  { name: '[EV] get charge targets', value: 'getChargeTargets' },
+  { name: '[EV] set charge targets', value: 'setChargeTargets' },
+  { name: '[EV] start charging', value: 'startCharge' },
+  { name: '[EV] stop charging', value: 'stopCharge' },
 ];
 
+let client: BlueLinky;
 let vehicle;
-const { username, password, vin, pin } = config;
+const { username, password, pin } = config;
 
 const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
@@ -61,7 +66,8 @@ const askForRegionInput = () => {
 };
 
 const createInstance = (region, brand) => {
-  const client = new BlueLinky({
+  // global abuse :)
+  client = new BlueLinky({
     username,
     password,
     region,
@@ -103,6 +109,14 @@ async function performCommand(command) {
       case 'odometer':
         const odometer = await vehicle.odometer();
         console.log('odometer', JSON.stringify(odometer, null, 2));
+        break;
+      case 'vehicles':
+        const vehicles = await client.getVehicles();
+        const response = vehicles.map(v => {
+          const { name, vin, nickname, regDate } = v.vehicleConfig;
+          return { name, vin, nickname, regDate };
+        });
+        console.log('vehicles', JSON.stringify(response, null, 2));
         break;
       case 'status':
         const status = await vehicle.status({
@@ -165,6 +179,10 @@ async function performCommand(command) {
         const report = await vehicle.monthlyReport();
         console.log('monthyReport : ' + JSON.stringify(report, null, 2));
         break;
+      case 'drvInfo':
+        const info = await vehicle.driveHistory();
+        console.log('drvInfo : ', info);
+        break;
       case 'tripInfo':
         const currentYear = new Date().getFullYear();
         const { year, month, day } = await inquirer
@@ -194,6 +212,12 @@ async function performCommand(command) {
       case 'getChargeTargets':
         const targets = await vehicle.getChargeTargets();
         console.log('targets : ' + JSON.stringify(targets, null, 2));
+        break;
+      case 'startCharge':
+        await vehicle.startCharge();
+        break;
+      case 'stopCharge':
+        await vehicle.stopCharge();
         break;
       case 'setChargeTargets':
         const { fast, slow } = await inquirer
