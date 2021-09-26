@@ -181,8 +181,9 @@ async function performCommand(command) {
         break;
       case 'drvInfo':
         const info = await vehicle.driveHistory();
-        console.log('drvInfo : ', info);
-        break;
+        console.log('drvInfo : ');
+        console.dir(info,{ depth: null });
+      break;
       case 'tripInfo':
         const currentYear = new Date().getFullYear();
         const { year, month, day } = await inquirer
