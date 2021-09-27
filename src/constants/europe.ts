@@ -72,7 +72,7 @@ const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment
   const host = 'prd.eu-ccapi.hyundai.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
-  const appId = '99cfff84-f4e2-4be8-a5ed-e5b755eb6581';
+  const appId = '014d2225-8495-4735-812d-2616334fd15d';
   return {
     brand: 'hyundai',
     host,
@@ -81,8 +81,8 @@ const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment
     appId,
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
-    GCMSenderID: '199360397125',
-    stamp: getStamp('hyundai', stampsTimeout),
+    GCMSenderID: '414998006775',
+    stamp: getStamp(`hyundai-${appId}`, stampsTimeout),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '97516a3c-2060-48b4-98cd-8e7dcd3c47b2';
       return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
@@ -103,7 +103,7 @@ const getKiaEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => 
     appId,
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
-    GCMSenderID: '199360397125',
+    GCMSenderID: '345127537656',
     stamp: getStamp(`kia-${appId}`, stampsTimeout),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = 'f4d531c7-1043-444d-b09a-ad24bd913dd4';
