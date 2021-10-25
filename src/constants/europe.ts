@@ -106,7 +106,7 @@ const getKiaEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => 
     GCMSenderID: '345127537656',
     stamp: getStamp(`kia-${appId}`, stampsTimeout),
     brandAuthUrl({ language, serviceId, userId }) {
-      const newAuthClientId = 'f4d531c7-1043-444d-b09a-ad24bd913dd4';
+      const newAuthClientId = '572e0304-5f8d-4b4c-9dd5-41aa84eed160';
       return `https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
     }
   };
