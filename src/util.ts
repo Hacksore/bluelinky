@@ -1,4 +1,4 @@
-import { REGION } from "./constants";
+import { REGION } from './constants';
 
 const dec2hexString = (dec: number) => '0x' + dec.toString(16).substr(-4).toUpperCase();
 
