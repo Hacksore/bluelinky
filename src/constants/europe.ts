@@ -84,7 +84,7 @@ const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment
     GCMSenderID: '414998006775',
     stamp: getStamp(`hyundai-${appId}`, stampsTimeout),
     brandAuthUrl({ language, serviceId, userId }) {
-      const newAuthClientId = '97516a3c-2060-48b4-98cd-8e7dcd3c47b2';
+      const newAuthClientId = '64621b96-0f0d-11ec-82a8-0242ac130003';
       return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
     }
   };
