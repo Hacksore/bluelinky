@@ -1,8 +1,11 @@
 name: npm
 
 on:
-  release:
-    types: [created]
+  # Allow manual
+  workflow_dispatch:
+  push:
+    tags:        
+      - "v*"
 
 jobs:
   publish:
