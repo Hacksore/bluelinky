@@ -1,9 +1,11 @@
 name: npm
 
 on:
+  # Allow manual
+  workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    tags:        
+      - "v*"
 
 jobs:
   publish:
