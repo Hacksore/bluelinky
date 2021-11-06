@@ -71,7 +71,7 @@ const getHyundaiEnvironment = (): CanadianBrandEnvironment => {
 const getKiaEnvironment = (): CanadianBrandEnvironment => {
   return {
     brand: 'hyundai',
-    ...getEnvironment('myuvo.ca')
+    ...getEnvironment('kiaconnect.ca')
   };
 };
 
