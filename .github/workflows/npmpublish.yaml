@@ -3,7 +3,7 @@ name: npm
 on:
   # Allow manual
   workflow_dispatch:
-  push:
+  create:
     tags:        
       - "v*"
 
