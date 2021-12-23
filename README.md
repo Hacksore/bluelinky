@@ -89,3 +89,7 @@ The JSON file must respect [this format](https://github.com/neoPix/bluelinky-sta
 ## Show your support
 
 Give a ⭐️ if this project helped you!
+
+## Warnings
+Using Bluelinky may result in draining your 12V battery when refreshing from the car too often. 
+Make sure you have read and understand the terms of use of your Kia of Hyundai account before using Bluelinky.
