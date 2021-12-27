@@ -98,9 +98,9 @@ class BlueLinky<
 
       this.emit('ready', this.vehicles);
       return response;
-    } catch (error: any) {
+    } catch (error) {
       this.emit('error', error);
-      return error.message;
+      return (error as Error).message;
     }
   }
 
