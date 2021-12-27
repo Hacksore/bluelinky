@@ -11,7 +11,10 @@ import CanadianVehicle from './vehicles/canadian.vehicle';
 import { SessionController } from './controllers/controller';
 import { Vehicle } from './vehicles/vehicle';
 
-type BluelinkyConfigRegions = AmericanBlueLinkyConfig|CanadianBlueLinkyConfig|EuropeBlueLinkyConfig;
+type BluelinkyConfigRegions =
+  | AmericanBlueLinkyConfig
+  | CanadianBlueLinkyConfig
+  | EuropeBlueLinkyConfig;
 
 const DEFAULT_CONFIG = {
   username: '',
@@ -27,7 +30,11 @@ const DEFAULT_CONFIG = {
 class BlueLinky<
   T extends BluelinkyConfigRegions = AmericanBlueLinkyConfig,
   REGION = T['region'],
-  VEHICLE_TYPE extends Vehicle = (REGION extends REGIONS.US ? AmericanVehicle : REGION extends REGIONS.CA ? CanadianVehicle : EuropeanVehicle)
+  VEHICLE_TYPE extends Vehicle = REGION extends REGIONS.US
+    ? AmericanVehicle
+    : REGION extends REGIONS.CA
+    ? CanadianVehicle
+    : EuropeanVehicle
 > extends EventEmitter {
   private controller: SessionController;
   private vehicles: Array<VEHICLE_TYPE> = [];
@@ -65,12 +72,12 @@ class BlueLinky<
   }
 
   on(event: 'ready', fnc: (vehicles: VEHICLE_TYPE[]) => void): this;
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on(event: 'error', fnc: (error: any) => void): this;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  on(event: string|symbol, listener: (...args: any[]) => void): this {
+  on(event: string | symbol, listener: (...args: any[]) => void): this {
     return super.on(event, listener);
   }
 
@@ -82,7 +89,6 @@ class BlueLinky<
   }
 
   public async login(): Promise<string> {
-
     try {
       const response = await this.controller.login();
 
@@ -92,20 +98,23 @@ class BlueLinky<
 
       this.emit('ready', this.vehicles);
       return response;
-    } catch (error: any) {      
+    } catch (error: any) {
       this.emit('error', error);
       return error.message;
     }
   }
 
   async getVehicles(): Promise<VEHICLE_TYPE[]> {
-    return (await this.controller.getVehicles() as unknown[]) as VEHICLE_TYPE[] || [];
+    return ((await this.controller.getVehicles()) as unknown[] as VEHICLE_TYPE[]) || [];
   }
 
   public getVehicle(input: string): VEHICLE_TYPE | undefined {
     try {
       const foundCar = this.vehicles.find(car => {
-        return car.vin() === input || car.id() === input;
+        return (
+          car.vin().toLowerCase() === input.toLowerCase() ||
+          car.id().toLowerCase() === input.toLowerCase()
+        );
       });
 
       if (!foundCar && this.vehicles.length > 0) {
