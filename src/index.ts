@@ -88,14 +88,13 @@ class BlueLinky<
 
       // get all cars from the controller
       this.vehicles = await this.getVehicles();
-
       logger.debug(`Found ${this.vehicles.length} on the account`);
 
       this.emit('ready', this.vehicles);
       return response;
-    } catch (error) {      
+    } catch (error: any) {      
       this.emit('error', error);
-      return error;
+      return error.message;
     }
   }
 

@@ -27,10 +27,10 @@ export interface EuropeanBrandEnvironment {
   stamp: (stampsFile?: string) => Promise<string>;
   brandAuthUrl: (options: { language: EULanguages; serviceId: string; userId: string; }) => string;
 }
-const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60000): (...options: any[]) => Promise<T> => {
+const cacheResult = <T>(fn: (...options: []) => Promise<T>, durationInMS = 60000): (...options: []) => Promise<T> => {
   let cache: Promise<T> | null = null;
   let age: number | null = null;
-  return (...options: any[]) => {
+  return (...options: []) => {
     if(cache && age && (age + durationInMS) > Date.now()) {
       return cache;
     }

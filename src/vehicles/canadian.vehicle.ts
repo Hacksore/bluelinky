@@ -45,7 +45,8 @@ export default class CanadianVehicle extends Vehicle {
       ...DEFAULT_VEHICLE_STATUS_OPTIONS,
       ...input,
     };
-    logger.debug('Begin status request, polling car: ' + input.refresh);
+
+    logger.debug('Begin status request, polling car', statusConfig.refresh);
     try {
       const endpoint = statusConfig.refresh
         ? this.controller.environment.endpoints.remoteStatus
