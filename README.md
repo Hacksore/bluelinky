@@ -92,4 +92,4 @@ Give a ⭐️ if this project helped you!
 
 ## Warnings
 Using Bluelinky may result in draining your 12V battery when refreshing from the car too often. 
-Make sure you have read and understand the terms of use of your Kia of Hyundai account before using Bluelinky.
+Make sure you have read and understood the terms of use of your Kia or Hyundai account before using Bluelinky.
