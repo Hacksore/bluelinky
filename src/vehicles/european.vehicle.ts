@@ -165,10 +165,12 @@ export default class EuropeanVehicle extends Vehicle {
         );
         fullStatus.vehicleStatus = statusResponse.body.resMsg;
 
-        const locationResponse = this.updateRates(
-          await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`)
-        );
-        fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
+        try {
+          const locationResponse = this.updateRates(
+            await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`)
+          );
+          fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
+        } catch (err) { }
       }
 
       this._fullStatus = fullStatus;
