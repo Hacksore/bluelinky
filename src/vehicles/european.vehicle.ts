@@ -583,6 +583,8 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      logger.info(`Chargetargets set for ${this.vehicleConfig.id}`);
+      return;
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
     }
@@ -603,6 +605,8 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      logger.info(`Navigation set for ${this.vehicleConfig.id}`);
+      return;
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setNavigation');
     }
