@@ -94,11 +94,12 @@ describe('BlueLinky', () => {
 
   it('throws error when you pass invalid region', () => {
     expect(() => {
-      const client = new BlueLinky({
+      new BlueLinky({
         username: 'someone@gmail.com',
         password: 'hunter1',
         pin: '1234',
         brand: 'hyundai',
+        // @ts-ignore
         region: 'KR',
       });
     }).toThrowError('Your region is not supported yet.');
@@ -142,7 +143,7 @@ describe('BlueLinky', () => {
       region: 'US',
     });
 
-    client.on('ready', vehicles => {
+    client.on('ready', () => {
       const veh1 = client.getVehicle('JEST_TESTING_1');
       const veh2 = client.getVehicle('JEST_TESTING_2');
 
