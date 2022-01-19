@@ -504,7 +504,7 @@ export default class EuropeanVehicle extends Vehicle {
         },
       });
       return {
-        cumulated: response.body.resMsg.drivingInfo.map(line => ({
+        cumulated: response.body.resMsg.drivingInfo?.map(line => ({
           period: line.drivingPeriod,
           consumption: {
             total: line.totalPwrCsp,
@@ -516,7 +516,7 @@ export default class EuropeanVehicle extends Vehicle {
           regen: line.regenPwr,
           distance: line.calculativeOdo,
         })),
-        history: response.body.resMsg.drivingInfoDetail.map(line => ({
+        history: response.body.resMsg.drivingInfoDetail?.map(line => ({
           period: line.drivingPeriod,
           rawDate: line.drivingDate,
           date: line.drivingDate ? parseDate(line.drivingDate) : undefined,
