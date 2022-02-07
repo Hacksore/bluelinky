@@ -75,7 +75,7 @@ describe('EuropeanController', () => {
     controller.session.accessToken = 'MockToken';
 
     (got as any).mockReturnValueOnce({
-      body: ['stamp1', 'stamp2'],
+      body: {stamps: ['stamp1', 'stamp2'], generated: new Date().toISOString(), steps: 20000},
       statusCode: 200,
     });
 
