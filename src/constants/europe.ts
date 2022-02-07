@@ -7,6 +7,12 @@ export type EULanguages = 'cs'|'da'|'nl'|'en'|'fi'|'fr'|'de'|'it'|'pl'|'hu'|'no'
 export const EU_LANGUAGES: EULanguages[] = ['cs', 'da', 'nl', 'en', 'fi', 'fr', 'de', 'it', 'pl', 'hu', 'no', 'sk', 'es', 'sv'];
 export const DEFAULT_LANGUAGE: EULanguages = 'en';
 
+interface StampCollection {
+  stamps: string[];
+  generated: string;
+  frequency: number;
+}
+
 export interface EuropeanBrandEnvironment {
   brand: Brand;
   host: string;
@@ -40,21 +46,22 @@ const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60
   };
 };
 
-const ONE_DAY_IN_MS = 60000 * 60 * 24;
+const L15_MINUTES_IN_MS = 60000 * 15;
 
-const getStampList = async (file: string, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${file}.json`): Promise<string[]> => {
+const getStampList = async (file: string, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${file}.v2.json`): Promise<StampCollection> => {
   if (stampsFile.startsWith(('file://'))) {
     const [,path] = stampsFile.split('file://');
     const content = await promisify(readFile)(path);
     return JSON.parse(content.toString('utf-8'));
   }
   const { body } = await got(stampsFile, { json: true });
-  return body;
+  return body as StampCollection;
 };
 
-const getStamp = (brand: string, stampsTimeout: number = ONE_DAY_IN_MS) => cacheResult(async (stampsFile?: string) => {
-  const list = await getStampList(brand, stampsFile);
-  return list[Math.floor(Math.random() * list.length)];
+const getStamp = (brand: string, stampsTimeout: number = L15_MINUTES_IN_MS) => cacheResult(async (stampsFile?: string) => {
+  const { stamps, generated, frequency } = await getStampList(brand, stampsFile);
+  const position = ((Date.now() - new Date(generated).getTime()) / frequency) | 0;
+  return stamps[Math.min(position + Math.floor(Math.random() * 5), stamps.length - 1)];
 }, stampsTimeout);
 
 
