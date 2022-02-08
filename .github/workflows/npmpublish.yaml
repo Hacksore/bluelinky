@@ -3,9 +3,9 @@ name: npm
 on:
   # Allow manual
   workflow_dispatch:
-  push:
-    tags:        
-      - "v*"
+  # use publish even so when goes from draft -> released
+  release:
+    types: [published]
 
 jobs:
   publish:
