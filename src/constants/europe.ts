@@ -46,7 +46,9 @@ const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60
   };
 };
 
-const L15_MINUTES_IN_MS = 60000 * 15;
+// The stamp files are valuables for ~5.5 hours and are generated every hour
+// We're using 4 hours here by applying a 1 hour safety rule between the generation and the usage and an extra 0.5 hour for network safety
+const FOUR_HOURS = 60000 * 60 * 4;
 
 const getStampList = async (file: string, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${file}.v2.json`): Promise<StampCollection> => {
   if (stampsFile.startsWith(('file://'))) {
@@ -58,7 +60,7 @@ const getStampList = async (file: string, stampsFile = `https://raw.githubuserco
   return body as StampCollection;
 };
 
-const getStamp = (brand: string, stampsTimeout: number = L15_MINUTES_IN_MS) => cacheResult(async (stampsFile?: string) => {
+const getStamp = (brand: string, stampsTimeout: number = FOUR_HOURS) => cacheResult(async (stampsFile?: string) => {
   const { stamps, generated, frequency } = await getStampList(brand, stampsFile);
   const position = ((Date.now() - new Date(generated).getTime()) / frequency) | 0;
   return stamps[Math.min(position + Math.floor(Math.random() * 5), stamps.length - 1)];
