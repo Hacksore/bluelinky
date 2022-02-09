@@ -33,38 +33,31 @@ export interface EuropeanBrandEnvironment {
   stamp: (stampsFile?: string) => Promise<string>;
   brandAuthUrl: (options: { language: EULanguages; serviceId: string; userId: string; }) => string;
 }
-const cacheResult = <T>(fn: (...options: any[]) => Promise<T>, durationInMS = 60000): (...options: any[]) => Promise<T> => {
-  let cache: Promise<T> | null = null;
-  let age: number | null = null;
-  return (...options: any[]) => {
-    if(cache && age && (age + durationInMS) > Date.now()) {
-      return cache;
-    }
-    cache = fn(...options).catch(e => { cache = null; return Promise.reject(e); });
-    age = Date.now();
-    return cache;
-  };
-};
 
-// The stamp files are valuables for ~5.5 hours and are generated every hour
-// We're using 4 hours here by applying a 1 hour safety rule between the generation and the usage and an extra 0.5 hour for network safety
-const FOUR_HOURS = 60000 * 60 * 4;
+const cachedStamps = new Map<string, StampCollection>();
 
-const getStampList = async (file: string, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${file}.v2.json`): Promise<StampCollection> => {
+const getAndCacheStamps = async (file: string, stampsFile = `https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/${file}.v2.json`): Promise<StampCollection> => {
   if (stampsFile.startsWith(('file://'))) {
     const [,path] = stampsFile.split('file://');
     const content = await promisify(readFile)(path);
     return JSON.parse(content.toString('utf-8'));
   }
   const { body } = await got(stampsFile, { json: true });
+  cachedStamps.set(file, body as StampCollection);
   return body as StampCollection;
 };
 
-const getStamp = (brand: string, stampsTimeout: number = FOUR_HOURS) => cacheResult(async (stampsFile?: string) => {
-  const { stamps, generated, frequency } = await getStampList(brand, stampsFile);
-  const position = ((Date.now() - new Date(generated).getTime()) / frequency) | 0;
-  return stamps[Math.min(position + Math.floor(Math.random() * 5), stamps.length - 1)];
-}, stampsTimeout);
+
+const getStamp = (stampFileKey: string) => async (stampsFile?: string) => {
+  const { stamps, generated, frequency } = cachedStamps.get(stampFileKey) ?? await getAndCacheStamps(stampFileKey, stampsFile);
+  const generatedDate = new Date(generated);
+  const millisecondsSinceStampsGeneration = Date.now() - generatedDate.getTime();
+  const position = Math.floor(millisecondsSinceStampsGeneration / frequency);
+  if (position / stamps.length - 1 >= .9) {
+    cachedStamps.delete(stampFileKey);
+  }
+  return stamps[Math.min(position, stamps.length - 1)];
+};
 
 
 const getEndpoints = (baseUrl: string, clientId: string): EuropeanBrandEnvironment['endpoints'] => ({
@@ -77,7 +70,7 @@ const getEndpoints = (baseUrl: string, clientId: string): EuropeanBrandEnvironme
   silentSignIn: `${baseUrl}/api/v1/user/silentsignin`,
 });
 
-const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => {
+const getHyundaiEnvironment = (): EuropeanBrandEnvironment => {
   const host = 'prd.eu-ccapi.hyundai.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
@@ -91,7 +84,7 @@ const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
     GCMSenderID: '414998006775',
-    stamp: getStamp(`hyundai-${appId}`, stampsTimeout),
+    stamp: getStamp(`hyundai-${appId}`),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '64621b96-0f0d-11ec-82a8-0242ac130003';
       return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
@@ -99,7 +92,7 @@ const getHyundaiEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment
   };
 };
 
-const getKiaEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => {
+const getKiaEnvironment = (): EuropeanBrandEnvironment => {
   const host = 'prd.eu-ccapi.kia.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
@@ -113,7 +106,7 @@ const getKiaEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => 
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
     GCMSenderID: '345127537656',
-    stamp: getStamp(`kia-${appId}`, stampsTimeout),
+    stamp: getStamp(`kia-${appId}`),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '572e0304-5f8d-4b4c-9dd5-41aa84eed160';
       return `https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
@@ -121,12 +114,12 @@ const getKiaEnvironment = (stampsTimeout?: number): EuropeanBrandEnvironment => 
   };
 };
 
-export const getBrandEnvironment = (brand: Brand, stampsTimeout?: number): EuropeanBrandEnvironment => {
+export const getBrandEnvironment = (brand: Brand): EuropeanBrandEnvironment => {
   switch (brand) {
     case 'hyundai':
-      return Object.freeze(getHyundaiEnvironment(stampsTimeout));
+      return Object.freeze(getHyundaiEnvironment());
     case 'kia':
-      return Object.freeze(getKiaEnvironment(stampsTimeout));
+      return Object.freeze(getKiaEnvironment());
     default:
       throw new Error(`Constructor ${brand} is not managed.`);
   }
