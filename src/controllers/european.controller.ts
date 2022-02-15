@@ -19,7 +19,6 @@ import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
   stampsFile?: string;
-  stampsFileCacheDurationInMs?: number;
   region: 'EU';
 }
 
@@ -43,7 +42,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
     this.session.deviceId = uuidV4();
-    this._environment = getBrandEnvironment(userConfig.brand, userConfig.stampsFileCacheDurationInMs);
+    this._environment = getBrandEnvironment(userConfig.brand);
     this.authStrategies = {
       main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
       fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
