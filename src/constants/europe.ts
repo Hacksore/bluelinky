@@ -53,7 +53,7 @@ const getStamp = (stampFileKey: string) => async (stampsFile?: string) => {
   const generatedDate = new Date(generated);
   const millisecondsSinceStampsGeneration = Date.now() - generatedDate.getTime();
   const position = Math.floor(millisecondsSinceStampsGeneration / frequency);
-  if (position / stamps.length - 1 >= .9) {
+  if (position / (stamps.length - 1) >= .9) {
     cachedStamps.delete(stampFileKey);
   }
   return stamps[Math.min(position, stamps.length - 1)];
