@@ -7,6 +7,10 @@ export class ManagedBluelinkyError extends Error {
   }
 }
 
+export interface Stringifiable {
+  toString(): string;
+}
+
 export const manageBluelinkyError = (
   err: unknown,
   context?: string
