@@ -85,7 +85,7 @@ const getKiaEnvironment = ({ stampMode, stampsFile }: EnvironmentConfig): Europe
   };
 };
 
-export const getBrandEnvironment = ({ brand, stampMode = StampMode.LOCAL, stampsFile }: BrandEnvironmentConfig): EuropeanBrandEnvironment => {
+export const getBrandEnvironment = ({ brand, stampMode = StampMode.DISTANT, stampsFile }: BrandEnvironmentConfig): EuropeanBrandEnvironment => {
   switch (brand) {
     case 'hyundai':
       return Object.freeze(getHyundaiEnvironment({ stampMode, stampsFile }));
