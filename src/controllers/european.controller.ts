@@ -11,15 +11,21 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
-import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
+import { asyncMap, manageBluelinkyError, Stringifiable, uuidV4 } from '../tools/common.tools';
 import { AuthStrategy, Code } from './authStrategies/authStrategy';
 import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
 import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth.strategy';
 
+export enum StampMode {
+  LOCAL = 'LOCAL',
+  DISTANT = 'DISTANT'
+}
+
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
-  stampsFile?: string;
   region: 'EU';
+  stampMode?: StampMode,
+  stampsFile?: string;
 }
 
 interface EuropeanVehicleDescription {
@@ -42,7 +48,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
     }
     this.session.deviceId = uuidV4();
-    this._environment = getBrandEnvironment(userConfig.brand);
+    this._environment = getBrandEnvironment(userConfig);
     this.authStrategies = {
       main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
       fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
@@ -151,7 +157,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.main.name}`);
         authResult = await this.authStrategies.main.login({ password: this.userConfig.password, username: this.userConfig.username });
       } catch (e) {
-        logger.error(`@EuropeController.login: sign in with ${this.authStrategies.main.name} failed with error ${e.toString()}`);
+        logger.error(`@EuropeController.login: sign in with ${this.authStrategies.main.name} failed with error ${(e as Stringifiable).toString()}`);
         logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.fallback.name}`);
         authResult = await this.authStrategies.fallback.login({ password: this.userConfig.password, username: this.userConfig.username });
       }
@@ -168,7 +174,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
           'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+          'Stamp': await this.environment.stamp(),
         },
         body: {
           pushRegId: credentials.gcm.token,
@@ -199,7 +205,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
           'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+          'Stamp': await this.environment.stamp(),
         },
         body: formData.toString(),
         cookieJar: authResult.cookies,
@@ -237,7 +243,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         method: 'GET',
         headers: {
           ...this.defaultHeaders,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+          'Stamp': await this.environment.stamp(),
         },
         json: true,
       });
@@ -249,7 +255,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             method: 'GET',
             headers: {
               ...this.defaultHeaders,
-              'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+              'Stamp': await this.environment.stamp(),
             },
             json: true,
           }
@@ -296,7 +302,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       headers: {
         ...this.defaultHeaders,
         'Authorization': this.session.controlToken,
-        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+        'Stamp': await this.environment.stamp(),
       },
       json: true
     });
@@ -308,7 +314,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       baseUrl: this.environment.baseUrl,
       headers: {
         ...this.defaultHeaders,
-        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+        'Stamp': await this.environment.stamp(),
       },
       json: true
     });

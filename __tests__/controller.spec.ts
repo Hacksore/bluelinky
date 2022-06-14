@@ -23,6 +23,7 @@ const getController = region => {
     pin: '1234',
     vin: '4444444444444',
     vehicleId: undefined,
+    stampMode: 'LOCAL'
   });
 
   return controller;
@@ -73,11 +74,6 @@ describe('EuropeanController', () => {
   it('call getVehicles and check length', async () => {
     const controller = getController('EU');
     controller.session.accessToken = 'MockToken';
-
-    (got as any).mockReturnValueOnce({
-      body: {stamps: ['stamp1', 'stamp2'], generated: new Date().toISOString(), steps: 20000},
-      statusCode: 200,
-    });
 
     (got as any).mockReturnValueOnce({
       body: {
