@@ -22,28 +22,27 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
     this._environment = getBrandEnvironment(userConfig.brand);
   }
 
-  public get environment() : CanadianBrandEnvironment {
+  public get environment(): CanadianBrandEnvironment {
     return this._environment;
   }
 
   private vehicles: Array<CanadianVehicle> = [];
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
 
-  public async refreshAccessToken(): Promise<string> {    
+  public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
-    
+
     logger.debug('shouldRefreshToken: ' + shouldRefreshToken.toString());
 
     if (this.session.refreshToken && shouldRefreshToken) {
-
       // TODO: someone should find the refresh token API url then we dont have to do this hack
       // the previously used CA_ENDPOINTS.verifyToken did not refresh it only provided if the token was valid
       await this.login();
       logger.debug('Token refreshed');
       return 'Token refreshed';
     }
-    
-    logger.debug('Token not expired, no need to refresh');    
+
+    logger.debug('Token not expired, no need to refresh');
     return 'Token not expired, no need to refresh';
   }
 

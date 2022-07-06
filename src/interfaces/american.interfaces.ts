@@ -37,13 +37,13 @@ export interface AmericanEndpoints {
 }
 
 export interface RequestHeaders {
-  'access_token': string|undefined;
+  'access_token': string | undefined;
   'client_id': string;
   'Host': string;
   'User-Agent': string;
   'registrationId': string;
   'gen': string;
-  'username': string|undefined;
+  'username': string | undefined;
   'vin': string;
   'APPCLOUD-VIN': string;
   'Language': string;
@@ -51,6 +51,6 @@ export interface RequestHeaders {
   'encryptFlag': string;
   'from': string;
   'brandIndicator': string;
-  'bluelinkservicepin': string|undefined;
+  'bluelinkservicepin': string | undefined;
   'offset': string;
 }

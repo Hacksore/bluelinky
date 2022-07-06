@@ -33,7 +33,7 @@ export enum EVPlugTypes {
   UNPLUGED = 0,
   FAST = 1,
   PORTABLE = 2,
-  STATION = 3
+  STATION = 3,
 }
 
 export enum EVChargeModeTypes {
@@ -51,7 +51,7 @@ export interface VehicleStatus {
     range: number;
     rangeGas?: number;
     rangeEV?: number;
-    plugedTo? : EVPlugTypes;
+    plugedTo?: EVPlugTypes;
     estimatedCurrentChargeDuration?: number;
     estimatedFastChargeDuration?: number;
     estimatedPortableChargeDuration?: number;
@@ -87,7 +87,7 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
-  lastupdate: Date|null
+  lastupdate: Date | null;
 }
 
 // TODO: fix/update
@@ -99,7 +99,7 @@ export interface FullVehicleStatus {
     accuracy: { hdop: number; pdop: number };
     time: string;
   };
-  odometer: { value: number, unit: number };
+  odometer: { value: number; unit: number };
   vehicleStatus: {
     time: string;
     airCtrlOn: boolean;
@@ -122,16 +122,16 @@ export interface FullVehicleStatus {
       tirePressureWarningLampRL: number;
       tirePressureWarningLampRR: number;
     };
-    battery: { batSoc: number; batState: number; };
+    battery: { batSoc: number; batState: number };
     evStatus: {
       batteryCharge: boolean;
       batteryStatus: number;
       batteryPlugin: number;
-      remainTime2: { 
-        etc1: { value: number; unit: number; };
-        etc2: { value: number; unit: number; };
-        etc3: { value: number; unit: number; };
-        atc: { value: number; unit: number; };
+      remainTime2: {
+        etc1: { value: number; unit: number };
+        etc2: { value: number; unit: number };
+        etc3: { value: number; unit: number };
+        atc: { value: number; unit: number };
       };
       drvDistance: [
         {
@@ -264,7 +264,7 @@ export interface FullVehicleStatus {
       //   ]
       // }
     };
-  }
+  };
 }
 
 // TODO: remove
@@ -401,7 +401,6 @@ export interface VehicleStatusOptions {
   parsed: boolean;
 }
 
-
 // VEHICLE COMMANDS /////////////////////////////////////////////
 export interface VehicleCommandResponse {
   responseCode: number; // 0 is success
@@ -447,18 +446,18 @@ export interface VehicleMonthlyReport {
     durations: {
       drive: number;
       idle: number;
-    }
-  },
+    };
+  };
   breakdown: {
     ecuIdx: string;
     ecuStatus: string;
-  }[],
+  }[];
   vehicleStatus: {
     tpms: boolean;
     tirePressure: {
       all: boolean;
-    }
-  }
+    };
+  };
 }
 
 export interface VehicleTargetSOC {

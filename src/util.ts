@@ -20,7 +20,7 @@ const REGION_STEP_RANGES = {
     start: 16,
     end: 32,
     step: 0.5,
-  }
+  },
 };
 
 // Converts Kia's stupid temp codes to celsius
@@ -85,6 +85,5 @@ const MILISECONDS_PER_MINUTE = MILISECONDS_PER_SECOND * 60;
  * @returns The updated date
  */
 export const addMinutes = (date: Date, minutes: number): Date => {
-  return new Date(date.getTime() + (minutes * MILISECONDS_PER_MINUTE));
+  return new Date(date.getTime() + minutes * MILISECONDS_PER_MINUTE);
 };
-
