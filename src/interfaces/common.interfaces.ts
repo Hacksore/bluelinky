@@ -408,18 +408,12 @@ export interface VehicleCommandResponse {
 }
 
 export interface VehicleStartOptions {
-  airCtrl?: boolean | string;
-  igniOnDuration: number;
-  airTempvalue?: number;
-  defrost?: boolean | string;
-  heating1?: boolean | string;
-}
-
-export interface VehicleClimateOptions {
-  defrost: boolean;
-  windscreenHeating: boolean;
+  hvac: boolean | string;
+  duration: number;
   temperature: number;
-  unit: string;
+  defrost: boolean | string;
+  heatedFeatures: boolean | string;
+  unit?: 'C' | 'F';
 }
 
 export interface VehicleRegisterOptions {

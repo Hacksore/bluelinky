@@ -106,6 +106,7 @@ export default class CanadianVehicle extends Vehicle {
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
     } catch (err) {
+      // @ts-ignore
       throw err.message;
     }
   }
@@ -122,6 +123,7 @@ export default class CanadianVehicle extends Vehicle {
       await this.request(this.controller.environment.endpoints.lock, {}, { pAuth: preAuth });
       return 'Lock successful';
     } catch (err) {
+      // @ts-ignore
       throw err.message;
     }
   }
@@ -133,6 +135,7 @@ export default class CanadianVehicle extends Vehicle {
       await this.request(this.controller.environment.endpoints.unlock, {}, { pAuth: preAuth });
       return 'Unlock successful';
     } catch (err) {
+      // @ts-ignore
       throw err.message;
     }
   }
@@ -148,14 +151,14 @@ export default class CanadianVehicle extends Vehicle {
     try {
       const body = {
         hvacInfo: {
-          airCtrl: (startConfig.airCtrl ?? false) || (startConfig.defrost ?? false) ? 1 : 0,
+          airCtrl: (startConfig.hvac ?? false) || (startConfig.defrost ?? false) ? 1 : 0,
           defrost: startConfig.defrost ?? false,
           // postRemoteFatcStart: 1,
-          heating1: startConfig.heating1 ? 1 : 0,
+          heating1: startConfig.heatedFeatures ? 1 : 0,
         },
       };
 
-      const airTemp = startConfig.airTempvalue;
+      const airTemp = startConfig.temperature;
       // TODO: can we use getTempCode here from util?
       if (airTemp != null) {
         body.hvacInfo['airTemp'] = {
@@ -163,7 +166,7 @@ export default class CanadianVehicle extends Vehicle {
           unit: 0,
           hvacTempType: 1,
         };
-      } else if ((startConfig.airCtrl ?? false) || (startConfig.defrost ?? false)) {
+      } else if ((startConfig.hvac ?? false) || (startConfig.defrost ?? false)) {
         throw 'air temperature should be specified';
       }
 
@@ -180,6 +183,7 @@ export default class CanadianVehicle extends Vehicle {
 
       return 'Failed to start vehicle';
     } catch (err) {
+      // @ts-ignore
       throw err.message;
     }
   }

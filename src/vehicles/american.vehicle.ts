@@ -103,25 +103,26 @@ export default class AmericanVehicle extends Vehicle {
   public async start(startConfig: VehicleStartOptions): Promise<string> {
     const mergedConfig = {
       ...{
-        airCtrl: false,
-        igniOnDuration: 10,
-        airTempvalue: 70,
+        hvac: false,
+        duration: 10,
+        temperature: 70,
         defrost: false,
-        heating1: false,
-      },
+        heatedFeatures: false,
+        unit: 'F',
+      } as VehicleStartOptions,
       ...startConfig,
     };
 
     const body = {
       'Ims': 0,
-      'airCtrl': +mergedConfig.airCtrl, // use the unary method to convert to int
+      'airCtrl': +mergedConfig.hvac, // use the unary method to convert to int
       'airTemp': {
         'unit': 1,
-        'value': `${mergedConfig.airTempvalue}`,
+        'value': `${mergedConfig.temperature}`,
       },
       'defrost': mergedConfig.defrost,
-      'heating1': +mergedConfig.heating1, // use the unary method to convert to int
-      'igniOnDuration': mergedConfig.igniOnDuration,
+      'heating1': +mergedConfig.heatedFeatures, // use the unary method to convert to int
+      'igniOnDuration': mergedConfig.duration,
       'seatHeaterVentInfo': null, // need to figure out what this is
       'username': this.userConfig.username,
       'vin': this.vehicleConfig.vin,

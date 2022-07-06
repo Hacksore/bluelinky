@@ -3,7 +3,6 @@ import {
   FullVehicleStatus,
   VehicleLocation,
   VehicleOdometer,
-  VehicleClimateOptions,
   VehicleRegisterOptions,
 } from '../interfaces/common.interfaces';
 
@@ -22,7 +21,7 @@ export abstract class Vehicle {
   abstract fullStatus(input: VehicleStatusOptions): Promise<FullVehicleStatus | null>;
   abstract unlock(): Promise<string>;
   abstract lock(): Promise<string>;
-  abstract start(config: VehicleClimateOptions | VehicleStartOptions): Promise<string>;
+  abstract start(config: VehicleStartOptions): Promise<string>;
   abstract stop(): Promise<string>;
   abstract location(): Promise<VehicleLocation | null>;
   abstract odometer(): Promise<VehicleOdometer | null>;
