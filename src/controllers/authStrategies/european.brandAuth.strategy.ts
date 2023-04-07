@@ -3,7 +3,6 @@ import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
 import { AuthStrategy, Code, initSession } from './authStrategy';
 import Url, { URLSearchParams } from 'url';
-import logger from '../../logger';
 
 const stdHeaders = {
     'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1'
