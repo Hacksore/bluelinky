@@ -3,27 +3,26 @@ import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
 import { AuthStrategy, Code, initSession } from './authStrategy';
 import Url, { URLSearchParams } from 'url';
-import logger from '../../logger';
 
 const stdHeaders = {
-	'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1'
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1'
 };
 
 const manageGot302 = <T extends Buffer | string | Record<string, unknown>>(got: Promise<got.Response<T>>): Promise<got.Response<T>> => {
-	return got.catch((error) => {
-		if (error.name === 'HTTPError' && error.statusCode === 302) {
-			return error.response;
-		}
-		return Promise.reject(error);
-	});
+    return got.catch((error) => {
+        if (error.name === 'HTTPError' && error.statusCode === 302) {
+            return error.response;
+        }
+        return Promise.reject(error);
+    });
 };
 
 export class EuropeanBrandAuthStrategy implements AuthStrategy {
-	constructor(private readonly environment: EuropeanBrandEnvironment, private readonly language: EULanguages) { }
+    constructor(private readonly environment: EuropeanBrandEnvironment, private readonly language: EULanguages) { }
 
-	public get name(): string {
-		return 'EuropeanBrandAuthStrategy';
-	}
+    public get name(): string {
+        return 'EuropeanBrandAuthStrategy';
+    }
 
 	public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
 		const cookieJar = await initSession(this.environment, this.language, options?.cookieJar);
