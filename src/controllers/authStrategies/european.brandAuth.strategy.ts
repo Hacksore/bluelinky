@@ -55,7 +55,7 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				...stdHeaders
 			},
-            followRedirect: false,
+      followRedirect: false,
 		}));
 		if(!redirectTo) {
 			const errorMessage = /<span class="kc-feedback-text">(.+)<\/span>/gm.exec(afterAuthForm);
