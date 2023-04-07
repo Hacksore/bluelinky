@@ -11,7 +11,7 @@ const stdHeaders = {
 const manageGot302 = <T extends Buffer | string | Record<string, unknown>>(got: Promise<got.Response<T>>): Promise<got.Response<T>> => {
 	return got.catch((error) => {
 		if (error.name === 'HTTPError' && error.statusCode === 302) {
-				return error.response;
+			return error.response;
 		}
 		return Promise.reject(error);
 	});
@@ -21,7 +21,7 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 	constructor(private readonly environment: EuropeanBrandEnvironment, private readonly language: EULanguages) { }
 
 	public get name(): string {
-			return 'EuropeanBrandAuthStrategy';
+		return 'EuropeanBrandAuthStrategy';
 	}
 
 	public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
