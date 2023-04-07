@@ -3,7 +3,6 @@ import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
 import { AuthStrategy, Code, initSession } from './authStrategy';
 import Url, { URLSearchParams } from 'url';
-import logger from '../../logger';
 
 const stdHeaders = {
 	'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1'
@@ -19,10 +18,10 @@ const manageGot302 = <T extends Buffer | string | Record<string, unknown>>(got: 
 };
 
 export class EuropeanBrandAuthStrategy implements AuthStrategy {
-	constructor(private readonly environment: EuropeanBrandEnvironment, private readonly language: EULanguages) { }
+  constructor(private readonly environment: EuropeanBrandEnvironment, private readonly language: EULanguages) { }
 
 	public get name(): string {
-		return 'EuropeanBrandAuthStrategy';
+			return 'EuropeanBrandAuthStrategy';
 	}
 
 	public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
@@ -56,6 +55,7 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 				'Content-Type': 'application/x-www-form-urlencoded',
 				...stdHeaders
 			},
+            followRedirect: false,
 		}));
 		if(!redirectTo) {
 			const errorMessage = /<span class="kc-feedback-text">(.+)<\/span>/gm.exec(afterAuthForm);
@@ -108,19 +108,10 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
 			url = authResult.url;
 			htmlPage = authResult.body;
 		}
-		const { intUserId: appUser } = Url.parse(url, true).query;
-		if (!appUser) {
-			logger.warn('@EuropeanBrandAuthStrategy.login: Cannot find the argument userId, please use the following url and connect from a browser.');
-			logger.warn(this.environment.endpoints.session);
-			throw new Error(`@EuropeanBrandAuthStrategy.login: Cannot find the argument userId in ${url}.
-	Please use the following url and connect from a browser, it may probably ask you to "Change your password" or "Accept the new conditions"
-	Once done, try again.
-	${this.environment.endpoints.session}`);
-		}
 		const { body, statusCode } = await got.post(this.environment.endpoints.silentSignIn, {
 			cookieJar,
 			body: {
-				intUserId: appUser
+				intUserId: ''
 			},
 			json: true,
 			headers: {
