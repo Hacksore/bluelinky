@@ -1,4 +1,4 @@
-import { REGION } from '../constants';
+import { ChargeTarget, REGION } from '../constants';
 
 export type Brand = 'kia' | 'hyundai';
 
@@ -51,7 +51,7 @@ export interface VehicleStatus {
     range: number;
     rangeGas?: number;
     rangeEV?: number;
-    plugedTo? : EVPlugTypes;
+    plugedTo?: EVPlugTypes;
     estimatedCurrentChargeDuration?: number;
     estimatedFastChargeDuration?: number;
     estimatedPortableChargeDuration?: number;
@@ -87,7 +87,7 @@ export interface VehicleStatus {
       all: boolean;
     };
   };
-  lastupdate: Date|null
+  lastupdate: Date | null
 }
 
 // TODO: fix/update
@@ -127,7 +127,7 @@ export interface FullVehicleStatus {
       batteryCharge: boolean;
       batteryStatus: number;
       batteryPlugin: number;
-      remainTime2: { 
+      remainTime2: {
         etc1: { value: number; unit: number; };
         etc2: { value: number; unit: number; };
         etc3: { value: number; unit: number; };
@@ -506,4 +506,92 @@ export interface VehicleDayTrip {
     };
     distance: number;
   }[];
+}
+
+export const enum OffPeakPowerFlag {
+  OffPeakPreferred = 1,
+  OffPeakOnly = 2,
+}
+
+export const enum RangeUnit {
+  Kilometers = 1,
+  //TODO determine enum value for miles
+}
+
+export interface Range {
+  value: number,
+  unit: RangeUnit,
+}
+
+export interface SocTarget {
+  targetSOClevel: ChargeTarget,
+  plugType: EVChargeModeTypes,
+  dte?: {
+    rangeByFuel: {
+      evModeRange: Range,
+      totalAvailableRange: Range
+    }
+    type: number //TODO determine the meaning of this
+  }
+}
+
+export const enum Weekday {
+  Monday = 1,
+  Tyesday = 2,
+  Wednesday = 3,
+  Thursday = 4,
+  Friday = 5,
+  Saturday = 6,
+  Sunday = 0,
+
+  Unknown = 9
+}
+/** AM or PM */
+export const enum TimeSection {
+  AM = 0,
+  PM = 1
+}
+
+/** A time of day, in the vehicle's time zone. */
+export interface Time {
+  /** String of 4 digits, '1200' through '1259' and '0100' through '1159' */
+  time: string,
+  timeSection: TimeSection
+}
+
+export interface ReservChargeInfoDetail {
+  reservInfo: {
+    day: Weekday[],
+    time: Time,
+  }
+  reservChargeSet: boolean,
+  reservFatcSet: {
+    defrost: boolean,
+    airTemp: {  //TODO decode the deeper meaning of this.
+      value: string,
+      unit: number,
+      hvacTempType: number
+    },
+    airCtrl: number,
+    heating1: number
+
+  }
+}
+
+export interface ReservationCharge {
+  reservChargeInfo: { reservChargeInfoDetail: ReservChargeInfoDetail },
+  reserveChargeInfo2: { reservChargeInfoDetail: ReservChargeInfoDetail },
+  offpeakPowerInfo: {
+    offPeakPowerTime1: {
+      starttime: Time,
+      endtime: Time
+    },
+    offPeakPowerFlag: OffPeakPowerFlag
+  },
+  reservFlag: number, //TODO determine the meaning of this
+  ect: {
+    start: { day: Weekday, time: Time },
+    end: { day: Weekday, time: Time }
+  },
+  targetSOClist: SocTarget[]
 }

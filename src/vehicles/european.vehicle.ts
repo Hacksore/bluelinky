@@ -20,6 +20,7 @@ import {
   EVChargeModeTypes,
   VehicleDayTrip,
   VehicleMonthTrip,
+  ReservationCharge,
 } from '../interfaces/common.interfaces';
 
 import logger from '../logger';
@@ -43,9 +44,9 @@ export default class EuropeanVehicle extends Vehicle {
     reset?: Date;
     updatedAt?: Date;
   } = {
-    max: -1,
-    current: -1,
-  };
+      max: -1,
+      current: -1,
+    };
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: EuropeanController) {
     super(vehicleConfig, controller);
@@ -371,23 +372,23 @@ export default class EuropeanVehicle extends Vehicle {
           breakdown: rawData.breakdown,
           driving: rawData.driving
             ? {
-                distance: rawData.driving?.runDistance,
-                startCount: rawData.driving?.engineStartCount,
-                durations: {
-                  idle: rawData.driving?.engineIdleTime,
-                  drive: rawData.driving?.engineOnTime,
-                },
-              }
+              distance: rawData.driving?.runDistance,
+              startCount: rawData.driving?.engineStartCount,
+              durations: {
+                idle: rawData.driving?.engineIdleTime,
+                drive: rawData.driving?.engineOnTime,
+              },
+            }
             : undefined,
           vehicleStatus: rawData.vehicleStatus
             ? {
-                tpms: rawData.vehicleStatus?.tpmsSupport
-                  ? Boolean(rawData.vehicleStatus?.tpmsSupport)
-                  : undefined,
-                tirePressure: {
-                  all: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll == '1',
-                },
-              }
+              tpms: rawData.vehicleStatus?.tpmsSupport
+                ? Boolean(rawData.vehicleStatus?.tpmsSupport)
+                : undefined,
+              tirePressure: {
+                all: rawData.vehicleStatus?.tirePressure?.tirePressureLampAll == '1',
+              },
+            }
             : undefined,
         };
       }
@@ -432,10 +433,10 @@ export default class EuropeanVehicle extends Vehicle {
         return {
           days: Array.isArray(rawData?.tripDayList)
             ? rawData?.tripDayList.map(day => ({
-                dayRaw: day.tripDayInMonth,
-                date: day.tripDayInMonth ? parseDate(day.tripDayInMonth) : undefined,
-                tripsCount: day.tripCntDay,
-              }))
+              dayRaw: day.tripDayInMonth,
+              date: day.tripDayInMonth ? parseDate(day.tripDayInMonth) : undefined,
+              tripsCount: day.tripCntDay,
+            }))
             : [],
           durations: {
             drive: rawData?.tripDrvTime,
@@ -464,22 +465,22 @@ export default class EuropeanVehicle extends Vehicle {
             },
             trips: Array.isArray(day.tripList)
               ? day.tripList.map(trip => {
-                  const start = parseDate(`${day.tripDay}${trip.tripTime}`);
-                  return {
-                    timeRaw: trip.tripTime,
-                    start,
-                    end: addMinutes(start, trip.tripDrvTime),
-                    durations: {
-                      drive: trip.tripDrvTime,
-                      idle: trip.tripIdleTime,
-                    },
-                    speed: {
-                      avg: trip.tripAvgSpeed,
-                      max: trip.tripMaxSpeed,
-                    },
-                    distance: trip.tripDist,
-                  };
-                })
+                const start = parseDate(`${day.tripDay}${trip.tripTime}`);
+                return {
+                  timeRaw: trip.tripTime,
+                  start,
+                  end: addMinutes(start, trip.tripDrvTime),
+                  durations: {
+                    drive: trip.tripDrvTime,
+                    idle: trip.tripIdleTime,
+                  },
+                  speed: {
+                    avg: trip.tripAvgSpeed,
+                    max: trip.tripMaxSpeed,
+                  },
+                  distance: trip.tripDist,
+                };
+              })
               : [],
           }));
         }
@@ -605,6 +606,37 @@ export default class EuropeanVehicle extends Vehicle {
       );
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setNavigation');
+    }
+  }
+
+
+  public async getChargeSchedule(): Promise<ReservationCharge> {
+    const http = await this.controller.getVehicleHttpService();
+    try {
+      const response = this.updateRates(await http.get(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/reservation/charge`));
+      const result = response.body.resMsg as ReservationCharge;
+      return result;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.getChargeSchedule');
+    }
+  }
+
+  /** Warning: doesn't work yet. 
+   * Returns a 503 error when called, 
+   * even when Android app works fine */
+  public async setChargeSchedule(schedule: ReservationCharge): Promise<unknown> {
+    const http = await this.controller.getVehicleHttpService();
+    try {
+      const response = this.updateRates(await http.post(
+        `/api/v2/spa/vehicles/${this.vehicleConfig.id}/reservation/charge`, {
+        body: schedule
+      })
+      );
+      return response;
+    } catch (err) {
+      throw manageBluelinkyError(err, 'EuropeVehicle.setChargeSchedule');
+
     }
   }
 
