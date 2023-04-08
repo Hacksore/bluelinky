@@ -8,7 +8,7 @@ export interface CanadianBrandEnvironment {
   endpoints: {
     login: string;
     logout: string;
-    vehicleList:string;
+    vehicleList: string;
     vehicleInfo: string;
     status: string;
     remoteStatus: string;
@@ -24,7 +24,7 @@ export interface CanadianBrandEnvironment {
     setChargeTarget: string;
     stopCharge: string;
     startCharge: string;
-  }
+  };
 }
 
 const getEndpoints = (baseUrl: string) => ({
@@ -64,14 +64,14 @@ const getEnvironment = (host: string): Omit<CanadianBrandEnvironment, 'brand'> =
 const getHyundaiEnvironment = (): CanadianBrandEnvironment => {
   return {
     brand: 'hyundai',
-    ...getEnvironment('mybluelink.ca')
+    ...getEnvironment('mybluelink.ca'),
   };
 };
 
 const getKiaEnvironment = (): CanadianBrandEnvironment => {
   return {
     brand: 'hyundai',
-    ...getEnvironment('kiaconnect.ca')
+    ...getEnvironment('kiaconnect.ca'),
   };
 };
 

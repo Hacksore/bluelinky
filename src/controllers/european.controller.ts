@@ -1,4 +1,10 @@
-import { getBrandEnvironment, EuropeanBrandEnvironment, DEFAULT_LANGUAGE, EULanguages, EU_LANGUAGES } from './../constants/europe';
+import {
+  getBrandEnvironment,
+  EuropeanBrandEnvironment,
+  DEFAULT_LANGUAGE,
+  EULanguages,
+  EU_LANGUAGES,
+} from './../constants/europe';
 import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import * as pr from 'push-receiver';
 import got, { GotInstance, GotJSONFn } from 'got';
@@ -11,15 +17,21 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
-import { asyncMap, manageBluelinkyError, uuidV4 } from '../tools/common.tools';
+import { asyncMap, manageBluelinkyError, Stringifiable, uuidV4 } from '../tools/common.tools';
 import { AuthStrategy, Code } from './authStrategies/authStrategy';
 import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
 import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth.strategy';
 
+export enum StampMode {
+  LOCAL = 'LOCAL',
+  DISTANT = 'DISTANT',
+}
+
 export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
   language?: EULanguages;
-  stampsFile?: string;
   region: 'EU';
+  stampMode?: StampMode;
+  stampsFile?: string;
 }
 
 interface EuropeanVehicleDescription {
@@ -39,10 +51,14 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     super(userConfig);
     this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
     if (!EU_LANGUAGES.includes(this.userConfig.language)) {
-      throw new Error(`The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(', ')} are.`);
+      throw new Error(
+        `The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(
+          ', '
+        )} are.`
+      );
     }
     this.session.deviceId = uuidV4();
-    this._environment = getBrandEnvironment(userConfig.brand);
+    this._environment = getBrandEnvironment(userConfig);
     this.authStrategies = {
       main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
       fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
@@ -132,9 +148,11 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         },
         json: true,
       });
-  
+
       this.session.controlToken = 'Bearer ' + response.body.controlToken;
-      this.session.controlTokenExpiresAt = Math.floor(Date.now() / 1000 + response.body.expiresTime);
+      this.session.controlTokenExpiresAt = Math.floor(
+        Date.now() / 1000 + response.body.expiresTime
+      );
       return 'PIN entered OK, The pin is valid for 10 minutes';
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeController.pin');
@@ -146,37 +164,54 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       if (!this.userConfig.password || !this.userConfig.username) {
         throw new Error('@EuropeController.login: username and password must be defined.');
       }
-      let authResult: { code: Code, cookies: CookieJar }|null = null;
+      let authResult: { code: Code; cookies: CookieJar } | null = null;
       try {
-        logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.main.name}`);
-        authResult = await this.authStrategies.main.login({ password: this.userConfig.password, username: this.userConfig.username });
+        logger.debug(
+          `@EuropeController.login: Trying to sign in with ${this.authStrategies.main.name}`
+        );
+        authResult = await this.authStrategies.main.login({
+          password: this.userConfig.password,
+          username: this.userConfig.username,
+        });
       } catch (e) {
-        logger.error(`@EuropeController.login: sign in with ${this.authStrategies.main.name} failed with error ${e.toString()}`);
-        logger.debug(`@EuropeController.login: Trying to sign in with ${this.authStrategies.fallback.name}`);
-        authResult = await this.authStrategies.fallback.login({ password: this.userConfig.password, username: this.userConfig.username });
+        logger.error(
+          `@EuropeController.login: sign in with ${
+          this.authStrategies.main.name
+          } failed with error ${(e as Stringifiable).toString()}`
+        );
+        logger.debug(
+          `@EuropeController.login: Trying to sign in with ${this.authStrategies.fallback.name}`
+        );
+        authResult = await this.authStrategies.fallback.login({
+          password: this.userConfig.password,
+          username: this.userConfig.username,
+        });
       }
       logger.debug('@EuropeController.login: Authenticated properly with user and password');
 
       const credentials = await pr.register(this.environment.GCMSenderID);
-      const notificationReponse = await got(`${this.environment.baseUrl}/api/v1/spa/notifications/register`, {
-        method: 'POST',
-        headers: {
-          'ccsp-service-id': this.environment.clientId,
-          'Content-Type': 'application/json;charset=UTF-8',
-          'Host': this.environment.host,
-          'Connection': 'Keep-Alive',
-          'Accept-Encoding': 'gzip',
-          'User-Agent': 'okhttp/3.10.0',
-          'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
-        },
-        body: {
-          pushRegId: credentials.gcm.token,
-          pushType: 'GCM',
-          uuid: this.session.deviceId,
-        },
-        json: true,
-      });
+      const notificationReponse = await got(
+        `${this.environment.baseUrl}/api/v1/spa/notifications/register`,
+        {
+          method: 'POST',
+          headers: {
+            'ccsp-service-id': this.environment.clientId,
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Host': this.environment.host,
+            'Connection': 'Keep-Alive',
+            'Accept-Encoding': 'gzip',
+            'User-Agent': 'okhttp/3.10.0',
+            'ccsp-application-id': this.environment.appId,
+            'Stamp': await this.environment.stamp(),
+          },
+          body: {
+            pushRegId: credentials.gcm.token,
+            pushType: 'GCM',
+            uuid: this.session.deviceId,
+          },
+          json: true,
+        }
+      );
 
       if (notificationReponse) {
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
@@ -199,7 +234,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           'User-Agent': 'okhttp/3.10.0',
           'grant_type': 'authorization_code',
           'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+          'Stamp': await this.environment.stamp(),
         },
         body: formData.toString(),
         cookieJar: authResult.cookies,
@@ -237,39 +272,42 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         method: 'GET',
         headers: {
           ...this.defaultHeaders,
-          'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+          'Stamp': await this.environment.stamp(),
         },
         json: true,
       });
-  
-      this.vehicles = await asyncMap<EuropeanVehicleDescription, EuropeanVehicle>(response.body.resMsg.vehicles, async v => {
-        const vehicleProfileReponse = await got(
-          `${this.environment.baseUrl}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
-          {
-            method: 'GET',
-            headers: {
-              ...this.defaultHeaders,
-              'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
-            },
-            json: true,
-          }
-        );
-  
-        const vehicleProfile = vehicleProfileReponse.body.resMsg;
-  
-        const vehicleConfig = {
-          nickname: v.nickname,
-          name: v.vehicleName,
-          regDate: v.regDate,
-          brandIndicator: 'H',
-          id: v.vehicleId,
-          vin: vehicleProfile.vinInfo[0].basic.vin,
-          generation: vehicleProfile.vinInfo[0].basic.modelYear,
-        } as VehicleRegisterOptions;
-  
-        logger.debug(`@EuropeController.getVehicles: Added vehicle ${vehicleConfig.id}`);
-        return new EuropeanVehicle(vehicleConfig, this);
-      });
+
+      this.vehicles = await asyncMap<EuropeanVehicleDescription, EuropeanVehicle>(
+        response.body.resMsg.vehicles,
+        async v => {
+          const vehicleProfileReponse = await got(
+            `${this.environment.baseUrl}/api/v1/spa/vehicles/${v.vehicleId}/profile`,
+            {
+              method: 'GET',
+              headers: {
+                ...this.defaultHeaders,
+                'Stamp': await this.environment.stamp(),
+              },
+              json: true,
+            }
+          );
+
+          const vehicleProfile = vehicleProfileReponse.body.resMsg;
+
+          const vehicleConfig = {
+            nickname: v.nickname,
+            name: v.vehicleName,
+            regDate: v.regDate,
+            brandIndicator: 'H',
+            id: v.vehicleId,
+            vin: vehicleProfile.vinInfo[0].basic.vin,
+            generation: vehicleProfile.vinInfo[0].basic.modelYear,
+          } as VehicleRegisterOptions;
+
+          logger.debug(`@EuropeController.getVehicles: Added vehicle ${vehicleConfig.id}`);
+          return new EuropeanVehicle(vehicleConfig, this);
+        }
+      );
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeController.getVehicles');
     }
@@ -280,10 +318,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
   private async checkControlToken(): Promise<void> {
     await this.refreshAccessToken();
     if (this.session?.controlTokenExpiresAt !== undefined) {
-      if (
-        !this.session.controlToken ||
-        Date.now() / 1000 > this.session.controlTokenExpiresAt
-      ) {
+      if (!this.session.controlToken || Date.now() / 1000 > this.session.controlTokenExpiresAt) {
         await this.enterPin();
       }
     }
@@ -296,9 +331,9 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       headers: {
         ...this.defaultHeaders,
         'Authorization': this.session.controlToken,
-        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+        'Stamp': await this.environment.stamp(),
       },
-      json: true
+      json: true,
     });
   }
 
@@ -308,9 +343,9 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       baseUrl: this.environment.baseUrl,
       headers: {
         ...this.defaultHeaders,
-        'Stamp': await this.environment.stamp(this.userConfig.stampsFile),
+        'Stamp': await this.environment.stamp(),
       },
-      json: true
+      json: true,
     });
   }
 

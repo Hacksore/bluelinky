@@ -20,7 +20,7 @@ const REGION_STEP_RANGES = {
     start: 16,
     end: 32,
     step: 0.5,
-  }
+  },
 };
 
 // Converts Kia's stupid temp codes to celsius
@@ -42,7 +42,7 @@ export const celciusToTempCode = (region: REGION, temperature: number): string =
   return `${hexCode.split('x')[1].toUpperCase()}H`.padStart(3, '0');
 };
 
-export const tempCodeToCelsius = (region: REGION, code: string): number => { 
+export const tempCodeToCelsius = (region: REGION, code: string): number => {
   // create a range
   const { start, end, step } = REGION_STEP_RANGES[region];
   const tempRange = floatRange(start, end, step);
@@ -60,16 +60,19 @@ export const tempCodeToCelsius = (region: REGION, code: string): number => {
  * @returns The parsed date
  */
 export const parseDate = (str: string): Date => {
-	const year = parseInt(str.substring(0, 4));
-	const month = parseInt(str.substring(4, 6));
-	const day = parseInt(str.substring(6, 8));
+  const year = parseInt(str.substring(0, 4));
+  const month = parseInt(str.substring(4, 6));
+  if (str.length <= 6) {
+    return new Date(year, month - 1);
+  }
+  const day = parseInt(str.substring(6, 8));
   if (str.length <= 8) {
     return new Date(year, month - 1, day);
   }
-	const hour = parseInt(str.substring(8, 10));
-	const minute = parseInt(str.substring(10, 12));
-	const second = parseInt(str.substring(12, 14));
-	return new Date(year, month - 1, day, hour, minute, second);
+  const hour = parseInt(str.substring(8, 10));
+  const minute = parseInt(str.substring(10, 12));
+  const second = parseInt(str.substring(12, 14));
+  return new Date(year, month - 1, day, hour, minute, second);
 };
 
 const MILISECONDS_PER_SECOND = 1000;
@@ -82,6 +85,5 @@ const MILISECONDS_PER_MINUTE = MILISECONDS_PER_SECOND * 60;
  * @returns The updated date
  */
 export const addMinutes = (date: Date, minutes: number): Date => {
-  return new Date(date.getTime() + (minutes * MILISECONDS_PER_MINUTE));
+  return new Date(date.getTime() + minutes * MILISECONDS_PER_MINUTE);
 };
-

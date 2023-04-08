@@ -20,10 +20,25 @@ const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
   };
 };
 
+const getKiaEnvironment = (): AmericaBrandEnvironment => {
+  const host = 'api.owners.kia.com';
+  const path = '/apigw/v1/'
+  const baseUrl = `https://${host}${path}`;
+  return {
+    brand: 'kia',
+    host,
+    baseUrl,
+    clientId: 'MWAMOBILE',
+    clientSecret: '98er-w34rf-ibf3-3f6h',
+  };
+};
+
 export const getBrandEnvironment = (brand: Brand): AmericaBrandEnvironment => {
   switch (brand) {
     case 'hyundai':
       return Object.freeze(getHyundaiEnvironment());
+    case 'kia':
+      return Object.freeze(getKiaEnvironment());
     default:
       throw new Error(`Constructor ${brand} is not managed.`);
   }

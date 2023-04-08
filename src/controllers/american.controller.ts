@@ -86,7 +86,7 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
       });
 
       logger.debug(response.body);
-      
+
       if (response.statusCode !== 200) {
         return 'login bad';
       }
@@ -109,17 +109,20 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
 
   async getVehicles(): Promise<Array<Vehicle>> {
     try {
-      const response = await got(`${this.environment.baseUrl}/ac/v2/enrollment/details/${this.userConfig.username}`, {
-        method: 'GET',
-        headers: {
-          'access_token': this.session.accessToken,
-          'client_id': this.environment.clientId,
-          'Host': this.environment.host,
-          'User-Agent': 'okhttp/3.12.0',
-          'payloadGenerated': '20200226171938',
-          'includeNonConnectedVehicles': 'Y',
-        },
-      });
+      const response = await got(
+        `${this.environment.baseUrl}/ac/v2/enrollment/details/${this.userConfig.username}`,
+        {
+          method: 'GET',
+          headers: {
+            'access_token': this.session.accessToken,
+            'client_id': this.environment.clientId,
+            'Host': this.environment.host,
+            'User-Agent': 'okhttp/3.12.0',
+            'payloadGenerated': '20200226171938',
+            'includeNonConnectedVehicles': 'Y',
+          },
+        }
+      );
 
       const data = JSON.parse(response.body);
 

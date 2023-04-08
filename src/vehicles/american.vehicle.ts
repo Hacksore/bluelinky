@@ -103,25 +103,26 @@ export default class AmericanVehicle extends Vehicle {
   public async start(startConfig: VehicleStartOptions): Promise<string> {
     const mergedConfig = {
       ...{
-        airCtrl: false,
-        igniOnDuration: 10,
-        airTempvalue: 70,
+        hvac: false,
+        duration: 10,
+        temperature: 70,
         defrost: false,
-        heating1: false,
-      },
+        heatedFeatures: false,
+        unit: 'F',
+      } as VehicleStartOptions,
       ...startConfig,
     };
 
     const body = {
       'Ims': 0,
-      'airCtrl': +mergedConfig.airCtrl, // use the unary method to convert to int
+      'airCtrl': +mergedConfig.hvac, // use the unary method to convert to int
       'airTemp': {
         'unit': 1,
-        'value': `${mergedConfig.airTempvalue}`,
+        'value': `${mergedConfig.temperature}`,
       },
       'defrost': mergedConfig.defrost,
-      'heating1': +mergedConfig.heating1, // use the unary method to convert to int
-      'igniOnDuration': mergedConfig.igniOnDuration,
+      'heating1': +mergedConfig.heatedFeatures, // use the unary method to convert to int
+      'igniOnDuration': mergedConfig.duration,
       'seatHeaterVentInfo': null, // need to figure out what this is
       'username': this.userConfig.username,
       'vin': this.vehicleConfig.vin,
@@ -209,7 +210,9 @@ export default class AmericanVehicle extends Vehicle {
         ignition: vehicleStatus?.engine,
         accessory: vehicleStatus?.acc,
         // try ev range first then fallback to ice range
-        range: vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.totalAvailableRange?.value || vehicleStatus?.dte?.value,
+        range:
+          vehicleStatus?.evStatus?.drvDistance[0]?.rangeByFuel?.totalAvailableRange?.value ||
+          vehicleStatus?.dte?.value,
         charging: vehicleStatus?.evStatus?.batteryCharge,
         batteryCharge12v: vehicleStatus?.battery?.batSoc,
         batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
@@ -296,7 +299,10 @@ export default class AmericanVehicle extends Vehicle {
     // if we refreshed token make sure to apply it to the request
     options.headers.access_token = this.controller.session.accessToken;
 
-    const response = await got(`${this.controller.environment.baseUrl}/${service}`, { throwHttpErrors: false, ...options });
+    const response = await got(`${this.controller.environment.baseUrl}/${service}`, {
+      throwHttpErrors: false,
+      ...options,
+    });
 
     if (response?.body) {
       logger.debug(response.body);

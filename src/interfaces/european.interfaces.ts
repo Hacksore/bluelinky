@@ -15,7 +15,7 @@ export interface EUPOIInformation {
     alt: number;
     lon: number;
     type: 0;
-  },
+  };
   addr: string;
   zip: string;
   placeid: string;
@@ -25,30 +25,30 @@ export interface EUPOIInformation {
 export enum historyDrivingPeriod {
   DAY = 0,
   MONTH = 1,
-  ALL = 2
+  ALL = 2,
 }
 
 export enum historyCumulatedTypes {
   TOTAL = 0,
   AVERAGE = 1,
-  TODAY = 2
+  TODAY = 2,
 }
 
 export interface EUDriveHistory {
-  period: historyCumulatedTypes,
+  period: historyCumulatedTypes;
   consumption: {
-    total: number,
-    engine: number,
-    climate: number,
-    devices: number,
-    battery: number
-  },
-  regen: number,
-  distance: number
+    total: number;
+    engine: number;
+    climate: number;
+    devices: number;
+    battery: number;
+  };
+  regen: number;
+  distance: number;
 }
 
 export interface EUDatedDriveHistory extends Omit<EUDriveHistory, 'period'> {
-  period: historyDrivingPeriod,
+  period: historyDrivingPeriod;
   rawDate: string;
-  date: Date,
+  date: Date;
 }

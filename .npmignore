@@ -1,5 +1,15 @@
-lib/
 config*.json
 .env
 .DS_Store
 .rpt2_cache
+src/
+.github/
+__tests__/
+babel.config.js
+debug.ts
+jest.config.js
+rollup.config.js                                                 
+tsconfig.json  
+.editorconfig                                                    
+.eslintrc.js                                                     
+.prettierrc  
