@@ -176,7 +176,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       } catch (e) {
         logger.error(
           `@EuropeController.login: sign in with ${
-            this.authStrategies.main.name
+          this.authStrategies.main.name
           } failed with error ${(e as Stringifiable).toString()}`
         );
         logger.debug(
