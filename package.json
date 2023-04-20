@@ -1,6 +1,6 @@
 {
   "name": "bluelinky",
-  "version": "8.0.0-alpha.2",
+  "version": "8.1.0",
   "description": "An unofficial nodejs API wrapper for Hyundai bluelink",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
