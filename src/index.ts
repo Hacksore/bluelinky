@@ -1,6 +1,7 @@
 import { AmericanBlueLinkyConfig, AmericanController } from './controllers/american.controller';
 import { EuropeanController, EuropeBlueLinkyConfig } from './controllers/european.controller';
 import { CanadianBlueLinkyConfig, CanadianController } from './controllers/canadian.controller';
+import { ChineseBlueLinkConfig, ChineseController} from './controllers/chinese.controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
 import { Session } from './interfaces/common.interfaces';
@@ -8,13 +9,15 @@ import { REGIONS } from './constants';
 import AmericanVehicle from './vehicles/american.vehicle';
 import EuropeanVehicle from './vehicles/european.vehicle';
 import CanadianVehicle from './vehicles/canadian.vehicle';
+import ChineseVehicle from './vehicles/chinese.vehicle';
 import { SessionController } from './controllers/controller';
 import { Vehicle } from './vehicles/vehicle';
 
 type BluelinkyConfigRegions =
   | AmericanBlueLinkyConfig
   | CanadianBlueLinkyConfig
-  | EuropeBlueLinkyConfig;
+  | EuropeBlueLinkyConfig
+  | ChineseBlueLinkConfig;
 
 const DEFAULT_CONFIG = {
   username: '',
@@ -34,7 +37,10 @@ class BlueLinky<
     ? AmericanVehicle
     : REGION extends REGIONS.CA
     ? CanadianVehicle
+    : REGION extends REGIONS.CN
+    ? ChineseVehicle
     : EuropeanVehicle
+    
 > extends EventEmitter {
   private controller: SessionController;
   private vehicles: Array<VEHICLE_TYPE> = [];
@@ -59,6 +65,9 @@ class BlueLinky<
         break;
       case REGIONS.CA:
         this.controller = new CanadianController(this.config as CanadianBlueLinkyConfig);
+        break;
+      case REGIONS.CN:
+        this.controller = new ChineseController(this.config as ChineseBlueLinkConfig);
         break;
       default:
         throw new Error('Your region is not supported yet.');

@@ -21,6 +21,11 @@ const REGION_STEP_RANGES = {
     end: 32,
     step: 0.5,
   },
+  CN: {
+    start: 14,
+    end: 30,
+    step:0.5
+  }
 };
 
 // Converts Kia's stupid temp codes to celsius

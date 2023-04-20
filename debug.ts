@@ -45,7 +45,7 @@ const askForRegionInput = () => {
         type: 'list',
         name: 'region',
         message: 'What Region are you in?',
-        choices: ['US', 'EU', 'CA'],
+        choices: ['CN','US', 'EU', 'CA'],
       },
       {
         type: 'list',
@@ -157,7 +157,7 @@ async function performCommand(command) {
         const startRes = await vehicle.start({
           airCtrl: false,
           igniOnDuration: 10,
-          airTempvalue: 70,
+          airTempvalue: 24,
           defrost: false,
           heating1: false,
         });
