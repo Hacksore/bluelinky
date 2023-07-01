@@ -206,7 +206,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           },
           body: {
             pushRegId: credentials.gcm.token,
-            pushType: 'GCM',
+            pushType: 'APNS',
             uuid: this.session.deviceId,
           },
           json: true,
