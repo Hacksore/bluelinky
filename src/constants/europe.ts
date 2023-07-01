@@ -106,7 +106,7 @@ const getKiaEnvironment = ({
   const host = 'prd.eu-ccapi.kia.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
-  const appId = 'e7bcd186-a5fd-410d-92cb-6876a42288bd';
+  const appId = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
   return {
     brand: 'kia',
     host,
