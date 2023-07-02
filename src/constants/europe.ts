@@ -80,7 +80,7 @@ const getHyundaiEnvironment = ({
   const host = 'prd.eu-ccapi.hyundai.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
-  const appId = '014d2225-8495-4735-812d-2616334fd15d';
+  const appId = '1eba27d2-9a5b-4eba-8ec7-97eb6c62fb51';
   return {
     brand: 'hyundai',
     host,
@@ -106,7 +106,7 @@ const getKiaEnvironment = ({
   const host = 'prd.eu-ccapi.kia.com:8080';
   const baseUrl = `https://${host}`;
   const clientId = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
-  const appId = 'e7bcd186-a5fd-410d-92cb-6876a42288bd';
+  const appId = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
   return {
     brand: 'kia',
     host,
