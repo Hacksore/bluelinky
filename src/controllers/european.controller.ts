@@ -188,8 +188,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         });
       }
       logger.debug('@EuropeController.login: Authenticated properly with user and password');
-
-      const credentials = await pr.register(this.environment.GCMSenderID);
+      const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
       const notificationReponse = await got(
         `${this.environment.baseUrl}/api/v1/spa/notifications/register`,
         {
@@ -205,8 +204,8 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             'Stamp': await this.environment.stamp(),
           },
           body: {
-            pushRegId: credentials.gcm.token,
-            pushType: 'GCM',
+            pushRegId: genRanHex(64),
+            pushType: 'APNS',
             uuid: this.session.deviceId,
           },
           json: true,
