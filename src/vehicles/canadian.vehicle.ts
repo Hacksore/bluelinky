@@ -18,16 +18,38 @@ import {
   RawVehicleStatus,
   FullVehicleStatus,
   EVChargeModeTypes,
+  VehicleInfo,
+  VehicleFeatureEntry,
 } from '../interfaces/common.interfaces';
-
 import { Vehicle } from './vehicle';
 import { celciusToTempCode, parseDate } from '../util';
 import { CanadianController } from '../controllers/canadian.controller';
 import { ManagedBluelinkyError } from '../tools/common.tools';
 
+
+export interface CanadianInfo {
+  vehicle: VehicleInfo;
+  features: {
+    seatHeatVent: {
+      drvSeatHeatOption: number;
+      astSeatHeatOption: number;
+      rlSeatHeatOption: number;
+      rrSeatHeatOption: number;
+    };
+    hvacTempType: number;
+    targetMinSoc: number;
+    strgWhlHeatingOption: number;
+  };
+  featuresModel: {
+    features: [VehicleFeatureEntry];
+  };
+  status: RawVehicleStatus;
+}
+
 export default class CanadianVehicle extends Vehicle {
   public region = REGIONS.CA;
   private timeOffset = -(new Date().getTimezoneOffset() / 60);
+  private _info: CanadianInfo | null = null;
 
   constructor(public vehicleConfig: VehicleRegisterOptions, public controller: CanadianController) {
     super(vehicleConfig, controller);
@@ -48,60 +70,70 @@ export default class CanadianVehicle extends Vehicle {
 
     logger.debug('Begin status request, polling car', statusConfig.refresh);
     try {
-      const endpoint = statusConfig.refresh
-        ? this.controller.environment.endpoints.remoteStatus
-        : this.controller.environment.endpoints.status;
-      const response = await this.request(endpoint, {});
-      const vehicleStatus = response.result?.status;
+      let vehicleStatus: RawVehicleStatus | null = null;
+      if (statusConfig.useInfo) {
+        await this.setInfo(statusConfig.refresh);
+        if (this._info) {
+          vehicleStatus = this._info.status;
+        }
+      } else {
+        const endpoint = statusConfig.refresh
+          ? this.controller.environment.endpoints.remoteStatus
+          : this.controller.environment.endpoints.status;
+        const response = await this.request(endpoint, {});
+        vehicleStatus = response.result?.status;
 
-      if (response?.error) {
-        throw response?.error?.errorDesc;
+        if (response?.error) {
+          throw response?.error?.errorDesc;
+        }
       }
-
       logger.debug(vehicleStatus);
-      const parsedStatus: VehicleStatus = {
-        chassis: {
-          hoodOpen: vehicleStatus?.hoodOpen,
-          trunkOpen: vehicleStatus?.trunkOpen,
-          locked: vehicleStatus?.doorLock,
-          openDoors: {
-            frontRight: !!vehicleStatus?.doorOpen?.frontRight,
-            frontLeft: !!vehicleStatus?.doorOpen?.frontLeft,
-            backLeft: !!vehicleStatus?.doorOpen?.backLeft,
-            backRight: !!vehicleStatus?.doorOpen?.backRight,
+      let parsedStatus: VehicleStatus | null = null;
+      if (vehicleStatus) {
+        parsedStatus = {
+          chassis: {
+            hoodOpen: vehicleStatus?.hoodOpen,
+            trunkOpen: vehicleStatus?.trunkOpen,
+            locked: vehicleStatus?.doorLock,
+            openDoors: {
+              frontRight: !!vehicleStatus?.doorOpen?.frontRight,
+              frontLeft: !!vehicleStatus?.doorOpen?.frontLeft,
+              backLeft: !!vehicleStatus?.doorOpen?.backLeft,
+              backRight: !!vehicleStatus?.doorOpen?.backRight,
+            },
+            tirePressureWarningLamp: {
+              rearLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearLeft,
+              frontLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontLeft,
+              frontRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontRight,
+              rearRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearRight,
+              all: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampAll,
+            },
           },
-          tirePressureWarningLamp: {
-            rearLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearLeft,
-            frontLeft: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontLeft,
-            frontRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampFrontRight,
-            rearRight: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampRearRight,
-            all: !!vehicleStatus?.tirePressureLamp?.tirePressureWarningLampAll,
+          climate: {
+            active: vehicleStatus?.airCtrlOn,
+            steeringwheelHeat: !!vehicleStatus?.steerWheelHeat,
+            sideMirrorHeat: false,
+            rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
+            defrost: vehicleStatus?.defrost,
+            temperatureSetpoint: vehicleStatus?.airTemp?.value,
+            temperatureUnit: vehicleStatus?.airTemp?.unit,
           },
-        },
-        climate: {
-          active: vehicleStatus?.airCtrlOn,
-          steeringwheelHeat: !!vehicleStatus?.steerWheelHeat,
-          sideMirrorHeat: false,
-          rearWindowHeat: !!vehicleStatus?.sideBackWindowHeat,
-          defrost: vehicleStatus?.defrost,
-          temperatureSetpoint: vehicleStatus?.airTemp?.value,
-          temperatureUnit: vehicleStatus?.airTemp?.unit,
-        },
 
-        // TODO: fix props for parsed???
-        // Seems some of the translation would have to account for EV and ICE
-        // as they are often in different locations on the response
-        // example EV status is in lib/__mock__/canadianStatus.json
-        engine: {
-          ignition: vehicleStatus?.engine,
-          accessory: vehicleStatus?.acc,
-          range: vehicleStatus?.dte?.value,
-          charging: vehicleStatus?.evStatus?.batteryCharge,
-          batteryCharge12v: vehicleStatus?.battery?.batSoc,
-          batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
-        },
-        lastupdate: vehicleStatus?.time ? parseDate(vehicleStatus?.lastStatusDate) : null,
-      };
+          // TODO: fix props for parsed???
+          // Seems some of the translation would have to account for EV and ICE
+          // as they are often in different locations on the response
+          // example EV status is in lib/__mock__/canadianStatus.json
+          engine: {
+            ignition: vehicleStatus?.engine,
+            accessory: vehicleStatus?.acc,
+            range: vehicleStatus?.dte?.value,
+            charging: vehicleStatus?.evStatus?.batteryCharge,
+            batteryCharge12v: vehicleStatus?.battery?.batSoc,
+            batteryChargeHV: vehicleStatus?.evStatus?.batteryStatus,
+          },
+          lastupdate: parseDate(vehicleStatus?.lastStatusDate),
+        };
+      }
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
       return this._status;
@@ -289,8 +321,17 @@ export default class CanadianVehicle extends Vehicle {
   }
 
   // TODO: @Seb to take a look at doing this
-  public odometer(): Promise<VehicleOdometer | null> {
-    throw new Error('Method not implemented.');
+  public async odometer(): Promise<VehicleOdometer | null> {
+    try {
+      await this.setInfo();
+      if (this._info) {
+        return { unit: this._info.vehicle.odometer, value: this._info.vehicle.odometerUnit };
+      } else {
+        throw 'error: no info';
+      }
+    } catch (err) {
+      throw 'error: ' + err;
+    }
   }
 
   public async location(): Promise<VehicleLocation> {
@@ -325,7 +366,7 @@ export default class CanadianVehicle extends Vehicle {
 
   // TODO: not sure how to type a dynamic response
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
+  private async request(endpoint: string, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
 
     // add logic for token refresh to ensure we don't use a stale token
@@ -357,6 +398,23 @@ export default class CanadianVehicle extends Vehicle {
       }
 
       return response.body;
+    } catch (err) {
+      throw 'error: ' + err;
+    }
+  }
+
+  private async setInfo(refresh = false): Promise<void> {
+    if (this._info !== null && !refresh) {
+      return;
+    }
+    try {
+      const preAuth = await this.getPreAuth();
+      const response = await this.request(
+        this.controller.environment.endpoints.vehicleInfo,
+        {},
+        { pAuth: preAuth }
+      );
+      this._info = response.result as CanadianInfo;
     } catch (err) {
       throw 'error: ' + err;
     }
