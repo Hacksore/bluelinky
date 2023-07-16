@@ -31,12 +31,7 @@ const apiCalls = [
 
 let client: BlueLinky;
 let vehicle;
-const { username, password, pin } = config;
-
-let { useInfo } = config;
-if (!useInfo) {
-  useInfo = false
-}
+const { username, password, pin, useInfo = false } = config;
 
 const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
