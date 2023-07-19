@@ -65,7 +65,7 @@ export interface VehicleStatus {
     steeringwheelHeat: boolean;
     sideMirrorHeat: boolean;
     rearWindowHeat: boolean;
-    temperatureSetpoint: number;
+    temperatureSetpoint: number | string;
     temperatureUnit: number;
     defrost: boolean;
   };
@@ -399,6 +399,7 @@ export interface VehicleOdometer {
 export interface VehicleStatusOptions {
   refresh: boolean;
   parsed: boolean;
+  useInfo?: boolean;
 }
 
 // VEHICLE COMMANDS /////////////////////////////////////////////
