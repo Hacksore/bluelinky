@@ -31,7 +31,7 @@ const apiCalls = [
 
 let client: BlueLinky;
 let vehicle;
-const { username, password, pin, useInfo = false } = config;
+const { username, password, pin } = config;
 
 const onReadyHandler = <T extends Vehicle>(vehicles: T[]) => {
   vehicle = vehicles[0];
@@ -122,7 +122,6 @@ async function performCommand(command) {
         const status = await vehicle.status({
           refresh: false,
           parsed: true,
-          useInfo,
         });
         console.log('status : ' + JSON.stringify(status, null, 2));
         break;
@@ -130,7 +129,6 @@ async function performCommand(command) {
         const statusU = await vehicle.status({
           refresh: false,
           parsed: false,
-          useInfo,
         });
         console.log('status : ' + JSON.stringify(statusU, null, 2));
         break;
@@ -138,7 +136,6 @@ async function performCommand(command) {
         const statusR = await vehicle.status({
           refresh: true,
           parsed: true,
-          useInfo,
         });
         console.log('status remote : ' + JSON.stringify(statusR, null, 2));
         break;
@@ -146,7 +143,6 @@ async function performCommand(command) {
         const fullStatus = await vehicle.fullStatus({
           refresh: false,
           parsed: false,
-          useInfo,
         });
         console.log('full status cached : ' + JSON.stringify(fullStatus, null, 2));
         break;
@@ -154,7 +150,6 @@ async function performCommand(command) {
         const fullStatusR = await vehicle.fullStatus({
           refresh: true,
           parsed: false,
-          useInfo,
         });
         console.log('full status remote : ' + JSON.stringify(fullStatusR, null, 2));
         break;
