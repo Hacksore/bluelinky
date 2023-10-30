@@ -114,7 +114,6 @@ export default class AmericanVehicle extends Vehicle {
     };
 
     const body = {
-      'Ims': 0,
       'airCtrl': +mergedConfig.hvac, // use the unary method to convert to int
       'airTemp': {
         'unit': 1,
@@ -122,13 +121,10 @@ export default class AmericanVehicle extends Vehicle {
       },
       'defrost': mergedConfig.defrost,
       'heating1': +mergedConfig.heatedFeatures, // use the unary method to convert to int
-      'igniOnDuration': mergedConfig.duration,
       'seatHeaterVentInfo': null, // need to figure out what this is
-      'username': this.userConfig.username,
-      'vin': this.vehicleConfig.vin,
     };
 
-    const response = await this._request('/ac/v2/rcs/rsc/start', {
+    const response = await this._request('/ac/v2/evc/fatc/start', {
       method: 'POST',
       headers: {
         ...this.getDefaultHeaders(),
