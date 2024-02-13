@@ -12,8 +12,9 @@
     "format": "prettier --write './src/**/*.{js,jsx,ts,tsx}'",
     "prepublishOnly": "npm run build",
     "test": "jest --verbose",
-    "debug": "cross-env LOG_LEVEL=debug ts-node debug.ts",
+    "debug": "ts-node debug.ts",
     "eu:export:cfb": "cross-env LOG_LEVEL=debug ts-node ./scripts/export_eu_cfb.ts",
+    "au:export:cfb": "cross-env LOG_LEVEL=debug ts-node ./scripts/export_au_cfb.ts",
     "test-ca": "npm run build && node test-ca.js",
     "watch": "tsc -w"
   },

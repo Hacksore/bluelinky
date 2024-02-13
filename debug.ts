@@ -45,20 +45,20 @@ const askForRegionInput = () => {
         type: 'list',
         name: 'region',
         message: 'What Region are you in?',
-        choices: ['CN','US', 'EU', 'CA'],
+        choices: ['CN', 'US', 'EU', 'CA', 'AU'],
       },
       {
         type: 'list',
         name: 'brand',
         message: 'Which brand are you using?',
         choices: ['hyundai', 'kia'],
-      }
+      },
     ])
     .then(answers => {
       if (answers.command == 'exit') {
         return;
       } else {
-        console.log(answers)
+        console.log(answers);
         console.log('Logging in...');
         createInstance(answers.region, answers.brand);
       }
@@ -72,7 +72,7 @@ const createInstance = (region, brand) => {
     password,
     region,
     brand,
-    pin
+    pin,
   });
   client.on('ready', onReadyHandler);
 };
@@ -187,31 +187,30 @@ async function performCommand(command) {
       case 'drvInfo':
         const info = await vehicle.driveHistory();
         console.log('drvInfo : ');
-        console.dir(info,{ depth: null });
+        console.dir(info, { depth: null });
         break;
       case 'tripInfo':
         const currentYear = new Date().getFullYear();
-        const { year, month, day } = await inquirer
-          .prompt([
-            {
-              type: 'list',
-              name: 'year',
-              message: 'Which year?',
-              choices: new Array(currentYear - 2015).fill(0).map((_, i) => currentYear - i),
-            },
-            {
-              type: 'list',
-              name: 'month',
-              message: 'Which month?',
-              choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            },
-            {
-              type: 'list',
-              name: 'day',
-              message: 'Which day (0 to ignore the day)?',
-              choices: new Array(32).fill(0).map((_, i) => i),
-            }
-          ]);
+        const { year, month, day } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'year',
+            message: 'Which year?',
+            choices: new Array(currentYear - 2015).fill(0).map((_, i) => currentYear - i),
+          },
+          {
+            type: 'list',
+            name: 'month',
+            message: 'Which month?',
+            choices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          },
+          {
+            type: 'list',
+            name: 'day',
+            message: 'Which day (0 to ignore the day)?',
+            choices: new Array(32).fill(0).map((_, i) => i),
+          },
+        ]);
         const trips = await vehicle.tripInfo({ year, month, day: day === 0 ? undefined : day });
         console.log('trips : ' + JSON.stringify(trips, null, 2));
         break;
@@ -226,21 +225,20 @@ async function performCommand(command) {
         await vehicle.stopCharge();
         break;
       case 'setChargeTargets':
-        const { fast, slow } = await inquirer
-          .prompt([
-            {
-              type: 'list',
-              name: 'fast',
-              message: 'What fast charge limit do you which to set?',
-              choices: [50, 60, 70, 80, 90, 100],
-            },
-            {
-              type: 'list',
-              name: 'slow',
-              message: 'What slow charge limit do you which to set?',
-              choices: [50, 60, 70, 80, 90, 100],
-            }
-          ]);
+        const { fast, slow } = await inquirer.prompt([
+          {
+            type: 'list',
+            name: 'fast',
+            message: 'What fast charge limit do you which to set?',
+            choices: [50, 60, 70, 80, 90, 100],
+          },
+          {
+            type: 'list',
+            name: 'slow',
+            message: 'What slow charge limit do you which to set?',
+            choices: [50, 60, 70, 80, 90, 100],
+          },
+        ]);
         await vehicle.setChargeTargets({ fast, slow });
         console.log('targets : OK');
         break;

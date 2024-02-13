@@ -1,7 +1,7 @@
 import { AmericanBlueLinkyConfig, AmericanController } from './controllers/american.controller';
 import { EuropeanController, EuropeBlueLinkyConfig } from './controllers/european.controller';
 import { CanadianBlueLinkyConfig, CanadianController } from './controllers/canadian.controller';
-import { ChineseBlueLinkConfig, ChineseController} from './controllers/chinese.controller';
+import { ChineseBlueLinkConfig, ChineseController } from './controllers/chinese.controller';
 import { EventEmitter } from 'events';
 import logger from './logger';
 import { Session } from './interfaces/common.interfaces';
@@ -12,12 +12,15 @@ import CanadianVehicle from './vehicles/canadian.vehicle';
 import ChineseVehicle from './vehicles/chinese.vehicle';
 import { SessionController } from './controllers/controller';
 import { Vehicle } from './vehicles/vehicle';
+import { AustraliaBlueLinkyConfig, AustraliaController } from './controllers/australia.controller';
+import AustraliaVehicle from './vehicles/australia.vehicle';
 
 type BluelinkyConfigRegions =
   | AmericanBlueLinkyConfig
   | CanadianBlueLinkyConfig
   | EuropeBlueLinkyConfig
-  | ChineseBlueLinkConfig;
+  | ChineseBlueLinkConfig
+  | AustraliaBlueLinkyConfig;
 
 const DEFAULT_CONFIG = {
   username: '',
@@ -30,7 +33,7 @@ const DEFAULT_CONFIG = {
   vehicleId: undefined,
 };
 
-class BlueLinky<
+export class BlueLinky<
   T extends BluelinkyConfigRegions = AmericanBlueLinkyConfig,
   REGION = T['region'],
   VEHICLE_TYPE extends Vehicle = REGION extends REGIONS.US
@@ -39,8 +42,9 @@ class BlueLinky<
     ? CanadianVehicle
     : REGION extends REGIONS.CN
     ? ChineseVehicle
+    : REGION extends REGIONS.AU
+    ? AustraliaVehicle
     : EuropeanVehicle
-    
 > extends EventEmitter {
   private controller: SessionController;
   private vehicles: Array<VEHICLE_TYPE> = [];
@@ -68,6 +72,9 @@ class BlueLinky<
         break;
       case REGIONS.CN:
         this.controller = new ChineseController(this.config as ChineseBlueLinkConfig);
+        break;
+      case REGIONS.AU:
+        this.controller = new AustraliaController(this.config as AustraliaBlueLinkyConfig);
         break;
       default:
         throw new Error('Your region is not supported yet.');
