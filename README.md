@@ -47,7 +47,8 @@ Ensure you have a `config.json` that matches the structure of the following, wit
   "password": "password",
   "pin": "pin",
   "brand": "kia" or "hyundai",
-  "vin": "vin"
+  "vin": "vin",
+  "useInfo": false
 }
 ```
 Run an install for all the dependencies, `npm install`
