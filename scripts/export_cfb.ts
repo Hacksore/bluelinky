@@ -16,7 +16,7 @@ export const exportCfb = async (
   }) => EuropeanBrandEnvironment | AustraliaBrandEnvironment
 ) => {
   console.debug(`Pulling image ${dockerImage}`);
-  // execSync(`docker pull ${dockerImage}`);
+  execSync(`docker pull ${dockerImage}`);
   const brandCFB = {
     kia: '',
     hyundai: '',
@@ -69,7 +69,7 @@ export const exportCfb = async (
   const cfbFile = `// Auto generated file on ${new Date().toISOString()}
 // run \`npm run eu:export:cfb\` or \`npm run au:export:cfb\` respectively to update it
 
-${brandCFB.kia.length > 0 ? `export const kiaCFB = Buffer.from('${brandCFB.kia}', 'base64');` : ''}
+export const kiaCFB = Buffer.from('${brandCFB.kia}', 'base64');
 export const hyundaiCFB = Buffer.from('${brandCFB.hyundai}', 'base64');`;
 
   writeFileSync(join(__dirname, '..', 'src', 'constants', outputFilename), cfbFile);
