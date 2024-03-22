@@ -1,6 +1,7 @@
-import { EuropeBlueLinkyConfig, StampMode } from '../controllers/european.controller';
+import { REGIONS } from '../constants';
+import { EuropeBlueLinkyConfig } from '../controllers/european.controller';
 import { Brand } from '../interfaces/common.interfaces';
-import { getStampGenerator } from './europe.stamps';
+import { StampMode, getStampGenerator } from './stamps';
 
 export type EULanguages =
   | 'cs'
@@ -91,7 +92,14 @@ const getHyundaiEnvironment = ({
     basicToken:
       'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
     GCMSenderID: '414998006775',
-    stamp: getStampGenerator({ appId, brand: 'hyundai', mode: stampMode, stampsFile: stampsFile }),
+    stamp: getStampGenerator({
+      appId,
+      brand: 'hyundai',
+      mode: stampMode,
+      region: REGIONS.EU,
+      stampHost: 'https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/',
+      stampsFile: stampsFile,
+    }),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '64621b96-0f0d-11ec-82a8-0242ac130003';
       return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
@@ -116,7 +124,14 @@ const getKiaEnvironment = ({
     endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
     basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
     GCMSenderID: '345127537656',
-    stamp: getStampGenerator({ appId, brand: 'kia', mode: stampMode, stampsFile: stampsFile }),
+    stamp: getStampGenerator({
+      appId,
+      brand: 'kia',
+      mode: stampMode,
+      region: REGIONS.EU,
+      stampHost: 'https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/',
+      stampsFile: stampsFile,
+    }),
     brandAuthUrl({ language, serviceId, userId }) {
       const newAuthClientId = '572e0304-5f8d-4b4c-9dd5-41aa84eed160';
       return `https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;

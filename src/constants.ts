@@ -11,6 +11,10 @@ import {
   getBrandEnvironment as getCNBrandEnvironment,
   ChineseBrandEnvironment,
 } from './constants/china';
+import {
+  getBrandEnvironment as getAUBrandEnvironment,
+  AustraliaBrandEnvironment,
+} from './constants/australia';
 
 import { Brand, VehicleStatusOptions } from './interfaces/common.interfaces';
 
@@ -21,16 +25,19 @@ export const ALL_ENDPOINTS = {
     getEUBrandEnvironment({ brand }).endpoints,
   CN: (brand: Brand): ChineseBrandEnvironment['endpoints'] =>
     getCNBrandEnvironment({ brand }).endpoints,
+  AU: (brand: Brand): AustraliaBrandEnvironment['endpoints'] =>
+    getAUBrandEnvironment({ brand }).endpoints,
 };
 
 export const GEN2 = 2;
 export const GEN1 = 1;
-export type REGION = 'US' | 'CA' | 'EU' | 'CN';
+export type REGION = 'US' | 'CA' | 'EU' | 'CN' | 'AU';
 export enum REGIONS {
   US = 'US',
   CA = 'CA',
   EU = 'EU',
   CN = 'CN',
+  AU = 'AU',
 }
 
 // ev stuffz

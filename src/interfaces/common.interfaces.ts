@@ -417,6 +417,19 @@ export interface VehicleStartOptions {
   unit?: 'C' | 'F';
 }
 
+export enum VehicleWindowState {
+  CLOSED = 0,
+  OPEN = 1,
+  VENTILATION = 2,
+}
+
+export interface VehicleWindowsOptions {
+  backLeft: VehicleWindowState;
+  backRight: VehicleWindowState;
+  frontLeft: VehicleWindowState;
+  frontRight: VehicleWindowState;
+}
+
 export interface VehicleRegisterOptions {
   nickname: string;
   name: string;

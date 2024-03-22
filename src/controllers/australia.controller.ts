@@ -1,67 +1,45 @@
-import {
-  getBrandEnvironment,
-  EuropeanBrandEnvironment,
-  DEFAULT_LANGUAGE,
-  EULanguages,
-  EU_LANGUAGES,
-} from './../constants/europe';
-import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import got, { GotInstance, GotJSONFn } from 'got';
+import AustraliaVehicle from '../vehicles/australia.vehicle';
 import { Vehicle } from '../vehicles/vehicle';
-import EuropeanVehicle from '../vehicles/european.vehicle';
+import { AustraliaBrandEnvironment, getBrandEnvironment } from './../constants/australia';
+import { BlueLinkyConfig, Session } from './../interfaces/common.interfaces';
 import { SessionController } from './controller';
 
-import logger from '../logger';
 import { URLSearchParams } from 'url';
+import logger from '../logger';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { asyncMap, manageBluelinkyError, Stringifiable, uuidV4 } from '../tools/common.tools';
-import { AuthStrategy, Code } from './authStrategies/authStrategy';
-import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
-import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth.strategy';
+import { AustraliaAuthStrategy } from './authStrategies/australia.authStrategy';
+import { Code } from './authStrategies/authStrategy';
 import { StampMode } from '../constants/stamps';
 
-export interface EuropeBlueLinkyConfig extends BlueLinkyConfig {
-  language?: EULanguages;
-  region: 'EU';
+export interface AustraliaBlueLinkyConfig extends BlueLinkyConfig {
+  region: 'AU';
   stampMode?: StampMode;
   stampsFile?: string;
 }
 
-interface EuropeanVehicleDescription {
+interface AustraliaVehicleDescription {
   nickname: string;
   vehicleName: string;
   regDate: string;
   vehicleId: string;
 }
 
-export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
-  private _environment: EuropeanBrandEnvironment;
-  private authStrategies: {
-    main: AuthStrategy;
-    fallback: AuthStrategy;
-  };
-  constructor(userConfig: EuropeBlueLinkyConfig) {
+export class AustraliaController extends SessionController<AustraliaBlueLinkyConfig> {
+  private _environment: AustraliaBrandEnvironment;
+  private authStrategy: AustraliaAuthStrategy;
+  constructor(userConfig: AustraliaBlueLinkyConfig) {
     super(userConfig);
-    this.userConfig.language = userConfig.language ?? DEFAULT_LANGUAGE;
-    if (!EU_LANGUAGES.includes(this.userConfig.language)) {
-      throw new Error(
-        `The language code ${this.userConfig.language} is not managed. Only ${EU_LANGUAGES.join(
-          ', '
-        )} are.`
-      );
-    }
     this.session.deviceId = uuidV4();
     this._environment = getBrandEnvironment(userConfig);
-    this.authStrategies = {
-      main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
-      fallback: new EuropeanLegacyAuthStrategy(this._environment, this.userConfig.language),
-    };
-    logger.debug('EU Controller created');
+    this.authStrategy = new AustraliaAuthStrategy(this._environment);
+    logger.debug('AU Controller created');
   }
 
-  public get environment(): EuropeanBrandEnvironment {
+  public get environment(): AustraliaBrandEnvironment {
     return this._environment;
   }
 
@@ -74,7 +52,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     controlTokenExpiresAt: 0,
   };
 
-  private vehicles: Array<EuropeanVehicle> = [];
+  private vehicles: Array<AustraliaVehicle> = [];
 
   public async refreshAccessToken(): Promise<string> {
     const shouldRefreshToken = Math.floor(Date.now() / 1000 - this.session.tokenExpiresAt) >= -10;
@@ -118,7 +96,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       this.session.accessToken = 'Bearer ' + responseBody.access_token;
       this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeController.refreshAccessToken');
+      throw manageBluelinkyError(err, 'AustraliaController.refreshAccessToken');
     }
 
     logger.debug('Token refreshed');
@@ -150,39 +128,32 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       );
       return 'PIN entered OK, The pin is valid for 10 minutes';
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeController.pin');
+      throw manageBluelinkyError(err, 'AustraliaController.pin');
     }
   }
 
   public async login(): Promise<string> {
     try {
       if (!this.userConfig.password || !this.userConfig.username) {
-        throw new Error('@EuropeController.login: username and password must be defined.');
+        throw new Error('@AustraliaController.login: username and password must be defined.');
       }
       let authResult: { code: Code; cookies: CookieJar } | null = null;
       try {
         logger.debug(
-          `@EuropeController.login: Trying to sign in with ${this.authStrategies.main.name}`
+          `@AustraliaController.login: Trying to sign in with ${this.authStrategy.name}`
         );
-        authResult = await this.authStrategies.main.login({
+        authResult = await this.authStrategy.login({
           password: this.userConfig.password,
           username: this.userConfig.username,
         });
       } catch (e) {
-        logger.error(
-          `@EuropeController.login: sign in with ${
-            this.authStrategies.main.name
-          } failed with error ${(e as Stringifiable).toString()}`
+        throw new Error(
+          `@AustraliaController.login: sign in with ${this.authStrategy.name} failed with error ${(
+            e as Stringifiable
+          ).toString()}`
         );
-        logger.debug(
-          `@EuropeController.login: Trying to sign in with ${this.authStrategies.fallback.name}`
-        );
-        authResult = await this.authStrategies.fallback.login({
-          password: this.userConfig.password,
-          username: this.userConfig.username,
-        });
       }
-      logger.debug('@EuropeController.login: Authenticated properly with user and password');
+      logger.debug('@AustraliaController.login: Authenticated properly with user and password');
       const genRanHex = size =>
         [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
       const notificationReponse = await got(
@@ -201,7 +172,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           },
           body: {
             pushRegId: genRanHex(64),
-            pushType: 'APNS',
+            pushType: 'GCM',
             uuid: this.session.deviceId,
           },
           json: true,
@@ -211,7 +182,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       if (notificationReponse) {
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
       }
-      logger.debug('@EuropeController.login: Device registered');
+      logger.debug('@AustraliaController.login: Device registered');
 
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
@@ -236,7 +207,9 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       });
 
       if (response.statusCode !== 200) {
-        throw new Error(`@EuropeController.login: Could not manage to get token: ${response.body}`);
+        throw new Error(
+          `@AustraliaController.login: Could not manage to get token: ${response.body}`
+        );
       }
 
       if (response) {
@@ -245,11 +218,11 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         this.session.refreshToken = responseBody.refresh_token;
         this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
-      logger.debug('@EuropeController.login: Session defined properly');
+      logger.debug('@AustraliaController.login: Session defined properly');
 
       return 'Login success';
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeController.login');
+      throw manageBluelinkyError(err, 'AustraliaController.login');
     }
   }
 
@@ -272,7 +245,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         json: true,
       });
 
-      this.vehicles = await asyncMap<EuropeanVehicleDescription, EuropeanVehicle>(
+      this.vehicles = await asyncMap<AustraliaVehicleDescription, AustraliaVehicle>(
         response.body.resMsg.vehicles,
         async v => {
           const vehicleProfileReponse = await got(
@@ -299,12 +272,12 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             generation: vehicleProfile.vinInfo[0].basic.modelYear,
           } as VehicleRegisterOptions;
 
-          logger.debug(`@EuropeController.getVehicles: Added vehicle ${vehicleConfig.id}`);
-          return new EuropeanVehicle(vehicleConfig, this);
+          logger.debug(`@AustraliaController.getVehicles: Added vehicle ${vehicleConfig.id}`);
+          return new AustraliaVehicle(vehicleConfig, this);
         }
       );
     } catch (err) {
-      throw manageBluelinkyError(err, 'EuropeController.getVehicles');
+      throw manageBluelinkyError(err, 'AustraliaController.getVehicles');
     }
 
     return this.vehicles;
