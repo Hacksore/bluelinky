@@ -14,15 +14,16 @@ export default {
       format: 'cjs',
       name: 'index',
       file: 'dist/index.js',
-      exports: 'auto',
+      exports: 'named',
       banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
     },
     {
       format: 'esm',
       name: 'index',
+      exports: 'named',
       file: 'dist/index.esm.js',
       banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
-    }
+    },
   ],
   external: [...Object.keys(pkg.dependencies || {}), 'events', 'url', 'fs', 'util'],
   plugins: [
