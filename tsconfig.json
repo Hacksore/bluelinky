@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "emitDecoratorMetadata": true,
-    "declarationDir": "dist",
+    "declarationDir": "dist-types",
     "outDir": "dist",
     "lib": [ "es2015" ],
     "typeRoots": [

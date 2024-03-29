@@ -13,7 +13,7 @@ export default {
     {
       format: 'cjs',
       name: 'index',
-      file: 'dist/index.js',
+      file: 'dist/index.cjs',
       exports: 'named',
       banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
     },
