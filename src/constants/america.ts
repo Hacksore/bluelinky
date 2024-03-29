@@ -22,7 +22,7 @@ const getHyundaiEnvironment = (): AmericaBrandEnvironment => {
 
 const getKiaEnvironment = (): AmericaBrandEnvironment => {
   const host = 'api.owners.kia.com';
-  const path = '/apigw/v1/'
+  const path = '/apigw/v1/';
   const baseUrl = `https://${host}${path}`;
   return {
     brand: 'kia',

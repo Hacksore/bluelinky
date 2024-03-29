@@ -126,7 +126,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
       });
 
       this.session.controlToken = 'Bearer ' + response.body.controlToken;
-      logger.debug(`controlToken is : ${this.session.controlToken}`)
+      logger.debug(`controlToken is : ${this.session.controlToken}`);
       this.session.controlTokenExpiresAt = Math.floor(
         Date.now() / 1000 + response.body.expiresTime
       );
@@ -224,7 +224,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
         this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
       logger.debug('@ChinaController.login: Session defined properly');
-      logger.debug(`accessToken is ${this.session.accessToken}\n refreshToken is ${this.session.refreshToken}\n tokenExpiresAt : ${this.session.tokenExpiresAt}`)
+      logger.debug(`accessToken is ${this.session.accessToken}\n refreshToken is ${this.session.refreshToken}\n tokenExpiresAt : ${this.session.tokenExpiresAt}`);
       return 'Login success';
     } catch (err) {
       throw manageBluelinkyError(err, 'ChinaController.login');
