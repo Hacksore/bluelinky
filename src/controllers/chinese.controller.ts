@@ -46,7 +46,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
   public get environment(): ChineseBrandEnvironment {
     return this._environment;
   }
-ß
+ß;
   public session: Session = {
     accessToken: undefined,
     refreshToken: undefined,
