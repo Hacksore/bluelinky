@@ -1,4 +1,6 @@
 import got from 'got';
+import crypto from 'node:crypto';
+import { fetch, Agent } from  'undici';
 import { BlueLinkyConfig } from '../interfaces/common.interfaces';
 import { CanadianBrandEnvironment, getBrandEnvironment } from '../constants/canada';
 import { Vehicle } from '../vehicles/vehicle';
@@ -111,6 +113,40 @@ export class CanadianController extends SessionController<CanadianBlueLinkyConfi
   /* eslint-disable @typescript-eslint/no-explicit-any */
   private async request(endpoint, body: any, headers: any = {}): Promise<any | null> {
     logger.debug(`[${endpoint}] ${JSON.stringify(headers)} ${JSON.stringify(body)}`);
+    const [major,,] = process.versions.node.split('.').map(Number);
+    if (major >= 21) {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      logger.debug('Node version >= 21, using fetch instead of got');
+      const options = {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          from: this.environment.origin,
+          language: 0,
+          offset: this.timeOffset,
+          accessToken: this.session.accessToken,
+          Origin: 'https://kiaconnect.ca',
+          Referer: 'https://kiaconnect.ca/login',
+          'Content-Type': 'application/json',
+          ...headers,
+        },
+        dispatcher: new Agent({
+          connect: {
+            rejectUnauthorized: false,
+            secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT
+          }
+        }),
+      };
+      try {
+        const response = await fetch(endpoint, options);
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        logger.error(err);
+        return;
+      }
+    }
+
     try {
       const response = await got(endpoint, {
         method: 'POST',

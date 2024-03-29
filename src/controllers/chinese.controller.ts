@@ -3,7 +3,6 @@ import {
   ChineseBrandEnvironment,
 } from '../constants/china';
 import { BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
-import * as pr from 'push-receiver';
 import got, { GotInstance, GotJSONFn } from 'got';
 import { Vehicle } from '../vehicles/vehicle';
 import ChineseVehicle from '../vehicles/chinese.vehicle';

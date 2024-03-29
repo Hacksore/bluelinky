@@ -20,7 +20,7 @@ export async function initSession(
   await got(environment.endpoints.session, { cookieJar });
   await got(environment.endpoints.language, {
     method: 'POST',
-    body: `{"lang":"zh"}`,
+    body: '{"lang":"zh"}',
     cookieJar,
   });
   return cookieJar;

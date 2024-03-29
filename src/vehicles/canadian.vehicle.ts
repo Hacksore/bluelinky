@@ -1,4 +1,6 @@
 import got from 'got';
+import crypto from 'node:crypto';
+import { fetch, Agent } from  'undici';
 import logger from '../logger';
 
 import {
@@ -371,6 +373,45 @@ export default class CanadianVehicle extends Vehicle {
 
     // add logic for token refresh to ensure we don't use a stale token
     await this.controller.refreshAccessToken();
+
+    const [major,,] = process.versions.node.split('.').map(Number);
+    if (major >= 21) {
+      body = {
+        pin: this.userConfig.pin,
+        ...body
+      };
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      logger.debug('Node version >= 21, using fetch instead of got');
+      const options = {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: {
+          from: this.controller.environment.origin,
+          language: 0,
+          offset: this.timeOffset,
+          accessToken: this.controller.session.accessToken,
+          Origin: 'https://kiaconnect.ca',
+          Referer: 'https://kiaconnect.ca/login',
+          'Content-Type': 'application/json',
+          vehicleId: this.vehicleConfig.id,
+          ...headers,
+        },
+        dispatcher: new Agent({
+          connect: {
+            rejectUnauthorized: false,
+            secureOptions: crypto.constants.SSL_OP_LEGACY_SERVER_CONNECT
+          }
+        }),
+      };
+      try {
+        const response = await fetch(endpoint, options);
+        const data = await response.json();
+        return data;
+      } catch (err) {
+        logger.error(err);
+        return;
+      }
+    }
 
     const options = {
       method: 'POST',
