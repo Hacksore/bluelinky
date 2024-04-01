@@ -12,6 +12,7 @@ module.exports = {
     'no-console': 2,
     'quotes': [1, 'single', { 'avoidEscape': true }],
     'semi': [1, 'always'],
+    '@typescript-eslint/quotes': [1, 'single', { 'avoidEscape': true }],
   },
   env: {
     browser: true,

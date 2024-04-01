@@ -3,7 +3,6 @@ import {
   ChineseBrandEnvironment,
 } from '../constants/china';
 import { BlueLinkyConfig, Session } from '../interfaces/common.interfaces';
-import * as pr from 'push-receiver';
 import got, { GotInstance, GotJSONFn } from 'got';
 import { Vehicle } from '../vehicles/vehicle';
 import ChineseVehicle from '../vehicles/chinese.vehicle';
@@ -47,7 +46,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
   public get environment(): ChineseBrandEnvironment {
     return this._environment;
   }
-ß
+ß;
   public session: Session = {
     accessToken: undefined,
     refreshToken: undefined,
@@ -127,7 +126,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
       });
 
       this.session.controlToken = 'Bearer ' + response.body.controlToken;
-      logger.debug(`controlToken is : ${this.session.controlToken}`)
+      logger.debug(`controlToken is : ${this.session.controlToken}`);
       this.session.controlTokenExpiresAt = Math.floor(
         Date.now() / 1000 + response.body.expiresTime
       );
@@ -225,7 +224,7 @@ export class ChineseController extends SessionController<ChineseBlueLinkConfig> 
         this.session.tokenExpiresAt = Math.floor(Date.now() / 1000 + responseBody.expires_in);
       }
       logger.debug('@ChinaController.login: Session defined properly');
-      logger.debug(`accessToken is ${this.session.accessToken}\n refreshToken is ${this.session.refreshToken}\n tokenExpiresAt : ${this.session.tokenExpiresAt}`)
+      logger.debug(`accessToken is ${this.session.accessToken}\n refreshToken is ${this.session.refreshToken}\n tokenExpiresAt : ${this.session.tokenExpiresAt}`);
       return 'Login success';
     } catch (err) {
       throw manageBluelinkyError(err, 'ChinaController.login');
