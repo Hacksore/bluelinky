@@ -13,7 +13,7 @@ export default {
     {
       format: 'cjs',
       name: 'index',
-      file: 'dist/index.cjs',
+      file: 'j:/source/ioBroker/SmartHomeEnt/node_modules/bluelinky/dist/index.cjs',
       exports: 'named',
       banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
     },
@@ -21,7 +21,7 @@ export default {
       format: 'esm',
       name: 'index',
       exports: 'named',
-      file: 'dist/index.esm.js',
+      file: 'j:/source/ioBroker/SmartHomeEnt/node_modules/bluelinky/dist/index.esm.js',
       banner: '/* @preserve bluelinky / MIT License / https://github.com/Hacksore/bluelinky */',
     },
   ],
