@@ -6,3 +6,4 @@ config*.json
 .vs/
 .vscode/
 coverage/
+dist/
