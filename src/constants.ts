@@ -29,8 +29,6 @@ export const ALL_ENDPOINTS = {
     getAUBrandEnvironment({ brand }).endpoints,
 };
 
-export const GEN2 = 2;
-export const GEN1 = 1;
 export type REGION = 'US' | 'CA' | 'EU' | 'CN' | 'AU';
 export enum REGIONS {
   US = 'US',
