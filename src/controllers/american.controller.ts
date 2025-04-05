@@ -140,7 +140,7 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
           regDate: vehicleInfo.enrollmentDate,
           brandIndicator: vehicleInfo.brandIndicator,
           regId: vehicleInfo.regid,
-          generation: vehicleInfo.modelYear > 2016 ? '2' : '1',
+          generation: vehicleInfo.vehicleGeneration,
         } as VehicleRegisterOptions;
         return new AmericanVehicle(vehicleConfig, this);
       });
