@@ -165,6 +165,14 @@ export default class EuropeanVehicle extends Vehicle {
 
       const fullStatus = cachedResponse.body.resMsg.vehicleStatusInfo;
 
+      const ccs2Response = this.updateRates(
+        await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/carstatus/latest`)
+      );
+      
+      if (ccs2Response.body.resMsg.state.Vehicle != null) {
+        fullStatus.ccs2Status = ccs2Response.body.resMsg;
+      }
+
       if (statusConfig.refresh) {
         const statusResponse = this.updateRates(
           await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status`)
@@ -174,7 +182,7 @@ export default class EuropeanVehicle extends Vehicle {
         const locationResponse = this.updateRates(
           await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/location`)
         );
-        fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;
+        fullStatus.vehicleLocation = locationResponse.body.resMsg.gpsDetail;        
       }
 
       this._fullStatus = fullStatus;
@@ -200,11 +208,9 @@ export default class EuropeanVehicle extends Vehicle {
       const response = this.updateRates(
         await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status${cacheString}`)
       );
-
+  
       // handles refreshing data
-      const vehicleStatus = statusConfig.refresh
-        ? response.body.resMsg
-        : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
+      const vehicleStatus = statusConfig.refresh ? response.body.resMsg : response.body.resMsg.vehicleStatusInfo.vehicleStatus;
 
       const parsedStatus: VehicleStatus = {
         chassis: {
@@ -257,13 +263,12 @@ export default class EuropeanVehicle extends Vehicle {
 
       if (!parsedStatus.engine.range) {
         if (parsedStatus.engine.rangeEV || parsedStatus.engine.rangeGas) {
-          parsedStatus.engine.range =
-            (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
+          parsedStatus.engine.range = (parsedStatus.engine.rangeEV ?? 0) + (parsedStatus.engine.rangeGas ?? 0);
         }
       }
 
       this._status = statusConfig.parsed ? parsedStatus : vehicleStatus;
-
+      
       return this._status;
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.status');
