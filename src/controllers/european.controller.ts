@@ -34,6 +34,7 @@ interface EuropeanVehicleDescription {
   vehicleName: string;
   regDate: string;
   vehicleId: string;
+  ccuCCS2ProtocolSupport: number
 }
 
 export class EuropeanController extends SessionController<EuropeBlueLinkyConfig> {
@@ -297,6 +298,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
             id: v.vehicleId,
             vin: vehicleProfile.vinInfo[0].basic.vin,
             generation: vehicleProfile.vinInfo[0].basic.modelYear,
+            ccuCCS2ProtocolSupport: !!v.ccuCCS2ProtocolSupport
           } as VehicleRegisterOptions;
 
           logger.debug(`@EuropeController.getVehicles: Added vehicle ${vehicleConfig.id}`);
