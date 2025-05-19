@@ -360,11 +360,21 @@ export default class EuropeanVehicle extends Vehicle {
   public async odometer(): Promise<VehicleOdometer | null> {
     const http = await this.controller.getVehicleHttpService();
     try {
-      const response = this.updateRates(
-        await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`)
-      );
-      this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
-      return this._odometer;
+      if (this.vehicleConfig.ccuCCS2ProtocolSupport) {
+        const response = this.updateRates(
+          await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/carstatus/latest`)
+        );
+        this._odometer = response.body.resMsg.state.Vehicle.Drivetrain.Odometer;
+        return this._odometer;
+        
+      } else {
+
+        const response = this.updateRates(
+          await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`)
+        );
+        this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
+        return this._odometer;
+      }
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.odometer');
     }
