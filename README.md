@@ -12,7 +12,7 @@ npm install bluelinky
 
 ## Example
 ```javascript
-const BlueLinky = require('bluelinky');
+const {BlueLinky} = require('bluelinky');
 
 const client = new BlueLinky({
   username: 'someguy@example.com',
