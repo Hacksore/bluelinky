@@ -108,15 +108,27 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
+    let response;
+
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
-          body: {
-            action: 'close',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
+      if (this.vehicleConfig.ccuCCS2ProtocolSupport) {
+        response = this.updateRates(
+          await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/door`, {
+            body: {
+              command: 'close',
+            },
+          })
+        );
+      } else {
+        response = this.updateRates(
+          await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
+            body: {
+              action: 'close',
+              deviceId: this.controller.session.deviceId,
+            },
+          })
+        );
+      }
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} locked`);
         return 'Lock successful';
@@ -129,16 +141,26 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async unlock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
+    let response;
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
-          body: {
-            action: 'open',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
-
+      if (this.vehicleConfig.ccuCCS2ProtocolSupport) {
+        response = this.updateRates(
+          await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/door`, {
+            body: {
+              command: 'open',
+            },
+          })
+        );
+      } else {
+        response = this.updateRates(
+          await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
+            body: {
+              action: 'open',
+              deviceId: this.controller.session.deviceId,
+            },
+          })
+        );
+      }
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} unlocked`);
         return 'Unlock successful';
