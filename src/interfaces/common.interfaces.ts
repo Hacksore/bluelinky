@@ -408,13 +408,22 @@ export interface VehicleCommandResponse {
   responseDesc: string;
 }
 
+export type SeatHeaterVentInfo = {
+  // [key: string]: number // maybe other seats like 3rd row, etc. at some point maybe leave open for other potential enums in future ??
+  driverSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
+  passengerSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  rearLeftSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+  rearRightSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+} | null | undefined;
+
 export interface VehicleStartOptions {
   hvac: boolean | string;
   duration: number;
   temperature: number;
   defrost: boolean | string;
-  heatedFeatures: boolean | string;
+  heatedFeatures: number;
   unit?: 'C' | 'F';
+  seatClimateSettings?: SeatHeaterVentInfo;
 }
 
 export enum VehicleWindowState {

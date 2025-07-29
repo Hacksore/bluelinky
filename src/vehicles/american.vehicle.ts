@@ -12,13 +12,14 @@ import {
   RawVehicleStatus,
   VehicleStatusOptions,
   FullVehicleStatus,
+  SeatHeaterVentInfo
 } from '../interfaces/common.interfaces';
 import { RequestHeaders } from '../interfaces/american.interfaces';
 
 import { Vehicle } from './vehicle';
 import { URLSearchParams } from 'url';
 import { AmericanController } from '../controllers/american.controller';
-
+import { advClimateValidator } from '../constants/seatheatvent';
 export default class AmericanVehicle extends Vehicle {
   public region = REGIONS.US;
 
@@ -101,17 +102,46 @@ export default class AmericanVehicle extends Vehicle {
   }
 
   public async start(startConfig: VehicleStartOptions): Promise<string> {
+    logger.debug('try start: ', JSON.stringify(startConfig));
+    let seatClimateOptions: SeatHeaterVentInfo = null;
     const mergedConfig = {
       ...{
         hvac: false,
         duration: 10,
         temperature: 70,
         defrost: false,
-        heatedFeatures: false,
+        heatedFeatures: 0,
         unit: 'F',
+        seatClimateSettings: seatClimateOptions
       } as VehicleStartOptions,
       ...startConfig,
     };
+
+    logger.debug('mergedConfig: ', JSON.stringify(mergedConfig));
+    const advClimateOptionValidator = advClimateValidator(this.userConfig.brand, this.region);
+    logger.debug(`advClimateOptionValidator: ${JSON.stringify(advClimateOptionValidator)}`);
+    const result = {} as SeatHeaterVentInfo;
+    if (mergedConfig.seatClimateSettings) {
+      if (Object.keys(mergedConfig.seatClimateSettings).length > 0) {
+        logger.debug(`Seat climate settings found: ${JSON.stringify(mergedConfig.seatClimateSettings)}`);
+        Object.keys(advClimateOptionValidator.validSeats).forEach((key) => {
+          if (mergedConfig.seatClimateSettings![key]) {
+            if (advClimateOptionValidator.validStatus.includes(mergedConfig.seatClimateSettings![key])) {
+              logger.debug(`Adding seat climate setting for ${key} ==> ${advClimateOptionValidator.validSeats[key]} : ${mergedConfig.seatClimateSettings![key]}`);
+              result![advClimateOptionValidator.validSeats[key]] = mergedConfig.seatClimateSettings![key];
+            }
+          }
+        });
+        logger.debug(`Processed Climate Seat Options result: ${JSON.stringify(result)}`);
+        seatClimateOptions = result;
+      } else {
+        logger.debug('invalid seatClimateSettings Key Value');
+        seatClimateOptions = null;
+      }
+    } else {
+      logger.debug('no seatClimateSettings found');
+      seatClimateOptions = null;
+    }
 
     const body = {
       'Ims': 0,
@@ -121,13 +151,18 @@ export default class AmericanVehicle extends Vehicle {
         'value': `${mergedConfig.temperature}`,
       },
       'defrost': mergedConfig.defrost,
-      'heating1': +mergedConfig.heatedFeatures, // use the unary method to convert to int
+      'heating1': 0, // use the unary method to convert to int
       'igniOnDuration': mergedConfig.duration,
-      'seatHeaterVentInfo': null, // need to figure out what this is
+      'seatHeaterVentInfo': seatClimateOptions, //figured out what it is
       'username': this.userConfig.username,
       'vin': this.vehicleConfig.vin,
     };
+    if (advClimateOptionValidator.validHeats.includes(mergedConfig.heatedFeatures)) {
+      logger.debug('Valid heatedFeatures Value Found');
+      body.heating1 = mergedConfig.heatedFeatures;
+    }
 
+    logger.debug(`starting car with payload: ${JSON.stringify(body)}`);
     const response = await this._request('/ac/v2/rcs/rsc/start', {
       method: 'POST',
       headers: {
@@ -139,9 +174,11 @@ export default class AmericanVehicle extends Vehicle {
     });
 
     if (response.statusCode === 200) {
+      logger.debug(`Vehicle started successfully: ${response.body}`);
       return 'Vehicle started!';
     }
 
+    logger.error(`Failed to start vehicle: ${response.body}`);
     return 'Failed to start vehicle';
   }
 
