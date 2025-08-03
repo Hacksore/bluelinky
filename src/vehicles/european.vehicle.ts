@@ -1,9 +1,4 @@
-import {
-  REGIONS,
-  DEFAULT_VEHICLE_STATUS_OPTIONS,
-  POSSIBLE_CHARGE_LIMIT_VALUES,
-  ChargeTarget,
-} from '../constants';
+import {REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS, POSSIBLE_CHARGE_LIMIT_VALUES, ChargeTarget } from '../constants';
 import {
   VehicleStatus,
   FullVehicleStatus,
@@ -19,7 +14,7 @@ import {
   EVChargeModeTypes,
   VehicleDayTrip,
   VehicleMonthTrip,
-  VehicleStartOptions,
+  VehicleStartOptions 
 } from '../interfaces/common.interfaces';
 
 import logger from '../logger';
@@ -108,19 +103,25 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async lock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
+  
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
-          body: {
-            action: 'close',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
+      const isCCS2 = this.vehicleConfig.ccuCCS2ProtocolSupport;
+      const endpoint = isCCS2
+        ? `/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/door`
+        : `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`;
+  
+      const body = isCCS2
+        ? { command: 'close' }
+        : { action: 'close', deviceId: this.controller.session.deviceId };
+  
+      const response = this.updateRates(await http.post(endpoint, { body }));
+  
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} locked`);
+        await this.controller.register();
         return 'Lock successful';
       }
+  
       return 'Something went wrong!';
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.lock');
@@ -129,21 +130,25 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async unlock(): Promise<string> {
     const http = await this.controller.getVehicleHttpService();
+  
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`, {
-          body: {
-            action: 'open',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
-
+      const isCCS2 = this.vehicleConfig.ccuCCS2ProtocolSupport;
+      const endpoint = isCCS2
+        ? `/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/door`
+        : `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/door`;
+  
+      const body = isCCS2
+        ? { command: 'open' }
+        : { action: 'open', deviceId: this.controller.session.deviceId };
+  
+      const response = this.updateRates(await http.post(endpoint, { body }));
+  
       if (response.statusCode === 200) {
         logger.debug(`Vehicle ${this.vehicleConfig.id} unlocked`);
+        await this.controller.register();
         return 'Unlock successful';
       }
-
+  
       return 'Something went wrong!';
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.unlock');
@@ -359,22 +364,21 @@ export default class EuropeanVehicle extends Vehicle {
 
   public async odometer(): Promise<VehicleOdometer | null> {
     const http = await this.controller.getVehicleHttpService();
+  
     try {
-      if (this.vehicleConfig.ccuCCS2ProtocolSupport) {
-        const response = this.updateRates(
-          await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/carstatus/latest`)
-        );
-        this._odometer = response.body.resMsg.state.Vehicle.Drivetrain.Odometer;
-        return this._odometer;
-        
-      } else {
-
-        const response = this.updateRates(
-          await http.get(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`)
-        );
-        this._odometer = response.body.resMsg.vehicleStatusInfo.odometer as VehicleOdometer;
-        return this._odometer;
-      }
+      const isCCS2 = this.vehicleConfig.ccuCCS2ProtocolSupport;
+      const endpoint = isCCS2
+        ? `/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/carstatus/latest`
+        : `/api/v2/spa/vehicles/${this.vehicleConfig.id}/status/latest`;
+  
+      const response = this.updateRates(await http.get(endpoint));
+  
+      const odometer: VehicleOdometer = isCCS2
+        ? response.body.resMsg.state.Vehicle.Drivetrain.Odometer
+        : response.body.resMsg.vehicleStatusInfo.odometer;
+  
+      this._odometer = odometer;
+      return this._odometer;
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.odometer');
     }
@@ -406,46 +410,56 @@ export default class EuropeanVehicle extends Vehicle {
   }
 
   public async startCharge(): Promise<string> {
-    const http = await this.controller.getVehicleHttpService();
+    const http = await this.controller.getVehicleHttpService(this);
+    let response;
+  
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`, {
-          body: {
-            action: 'start',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
+      const isCCS2 = this.vehicleConfig.ccuCCS2ProtocolSupport;
+      const endpoint = isCCS2
+        ? `/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/charge`
+        : `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`;
 
+      const body = isCCS2
+        ? { command: 'start' }
+        : { action: 'start', deviceId: this.controller.session.deviceId };
+  
+      response = this.updateRates(await http.post(endpoint, { body }));
+  
       if (response.statusCode === 200) {
         logger.debug(`Send start charge command to Vehicle ${this.vehicleConfig.id}`);
+        await this.controller.register();
         return 'Start charge successful';
       }
-
-      throw 'Something went wrong!';
+  
+      throw new Error('Something went wrong!');
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.startCharge');
     }
   }
 
   public async stopCharge(): Promise<string> {
-    const http = await this.controller.getVehicleHttpService();
+    const http = await this.controller.getVehicleHttpService(this);
+    let response;
+  
     try {
-      const response = this.updateRates(
-        await http.post(`/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`, {
-          body: {
-            action: 'stop',
-            deviceId: this.controller.session.deviceId,
-          },
-        })
-      );
+      const isCCS2 = this.vehicleConfig.ccuCCS2ProtocolSupport;
+      const endpoint = isCCS2
+        ? `/api/v2/spa/vehicles/${this.vehicleConfig.id}/ccs2/control/charge`
+        : `/api/v2/spa/vehicles/${this.vehicleConfig.id}/control/charge`;
 
+      const body = isCCS2
+        ? { command: 'stop' }
+        : { action: 'stop', deviceId: this.controller.session.deviceId };
+  
+      response = this.updateRates(await http.post(endpoint, { body }));
+  
       if (response.statusCode === 200) {
         logger.debug(`Send stop charge command to Vehicle ${this.vehicleConfig.id}`);
+        await this.controller.register();
         return 'Stop charge successful';
       }
-
-      throw 'Something went wrong!';
+  
+      throw new Error('Something went wrong!');
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.stopCharge');
     }
@@ -466,6 +480,8 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      await this.controller.register();
+
       const rawData = response.body.resMsg?.monthlyReport;
       if (rawData) {
         return {
@@ -529,6 +545,7 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      await this.controller.register();
 
       if (!perDay) {
         const rawData = response.body.resMsg;
@@ -606,6 +623,8 @@ export default class EuropeanVehicle extends Vehicle {
           periodTarget: period,
         },
       });
+      await this.controller.register();
+
       return {
         cumulated: response.body.resMsg.drivingInfo?.map(line => ({
           period: line.drivingPeriod,
@@ -686,6 +705,8 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      await this.controller.register();
+
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setChargeTargets');
     }
@@ -706,6 +727,8 @@ export default class EuropeanVehicle extends Vehicle {
           },
         })
       );
+      await this.controller.register();
+
     } catch (err) {
       throw manageBluelinkyError(err, 'EuropeVehicle.setNavigation');
     }

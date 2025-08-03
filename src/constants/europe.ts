@@ -79,12 +79,14 @@ const getHyundaiEnvironment = ({
   stampsFile,
 }: EnvironmentConfig): EuropeanBrandEnvironment => {
   const host = 'prd.eu-ccapi.hyundai.com:8080';
+  const idpUrl = 'https://idpconnect-eu.hyundai.com';
   const baseUrl = `https://${host}`;
   const clientId = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
   const appId = '1eba27d2-9a5b-4eba-8ec7-97eb6c62fb51';
   return {
     brand: 'hyundai',
     host,
+    idpUrl,
     baseUrl,
     clientId,
     appId,
@@ -112,12 +114,15 @@ const getKiaEnvironment = ({
   stampsFile,
 }: EnvironmentConfig): EuropeanBrandEnvironment => {
   const host = 'prd.eu-ccapi.kia.com:8080';
+  const idpUrl = 'https://idpconnect-eu.kia.com';
   const baseUrl = `https://${host}`;
   const clientId = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
-  const appId = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
+//  const appId = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
+  const appId = '1518dd6b-2759-4995-9ae5-c9ad4a9ddad1';
   return {
     brand: 'kia',
     host,
+    idpUrl,
     baseUrl,
     clientId,
     appId,
@@ -141,7 +146,7 @@ const getKiaEnvironment = ({
 
 export const getBrandEnvironment = ({
   brand,
-  stampMode = StampMode.DISTANT,
+  stampMode = StampMode.LOCAL,
   stampsFile,
 }: BrandEnvironmentConfig): EuropeanBrandEnvironment => {
   switch (brand) {

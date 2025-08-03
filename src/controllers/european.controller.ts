@@ -16,7 +16,7 @@ import { URLSearchParams } from 'url';
 
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
-import { asyncMap, manageBluelinkyError, Stringifiable, uuidV4 } from '../tools/common.tools';
+import { asyncMap, manageBluelinkyError, Stringifiable } from '../tools/common.tools';
 import { AuthStrategy, Code } from './authStrategies/authStrategy';
 import { EuropeanBrandAuthStrategy } from './authStrategies/european.brandAuth.strategy';
 import { EuropeanLegacyAuthStrategy } from './authStrategies/european.legacyAuth.strategy';
@@ -53,7 +53,8 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         )} are.`
       );
     }
-    this.session.deviceId = uuidV4();
+//    this.session.deviceId = uuidV4();
+    this.session.deviceId = 'c629f223-3c53-4128-8a83-36bea6b74207';
     this._environment = getBrandEnvironment(userConfig);
     this.authStrategies = {
       main: new EuropeanBrandAuthStrategy(this._environment, this.userConfig.language),
@@ -70,7 +71,8 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     accessToken: undefined,
     refreshToken: undefined,
     controlToken: undefined,
-    deviceId: uuidV4(),
+//    deviceId: uuidV4(),
+    deviceId: 'c629f223-3c53-4128-8a83-36bea6b74207',
     tokenExpiresAt: 0,
     controlTokenExpiresAt: 0,
   };
@@ -155,6 +157,41 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
   }
 
+  public async register(): Promise<string> {
+/*
+      const genRanHex = size =>
+        [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+      const notificationReponse = await got(
+        `${this.environment.baseUrl}/api/v1/spa/notifications/register`,
+        {
+          method: 'POST',
+          headers: {
+            'ccsp-service-id': this.environment.clientId,
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Host': this.environment.host,
+            'Connection': 'Keep-Alive',
+            'Accept-Encoding': 'gzip',
+            'User-Agent': 'okhttp/3.10.0',
+            'ccsp-application-id': this.environment.appId,
+            'Stamp': await this.environment.stamp(),
+          },
+          body: {
+            pushRegId: genRanHex(64),
+            pushType: 'APNS',
+            uuid: this.session.deviceId,
+          },
+          json: true,
+        }
+      );
+
+      if (notificationReponse) {
+        this.session.deviceId = notificationReponse.body.resMsg.deviceId;
+      }
+      logger.debug('@EuropeController.login: Device registered');
+*/
+      return 'Registered again';
+  }
+
   public async login(): Promise<string> {
     try {
       if (!this.userConfig.password || !this.userConfig.username) {
@@ -202,7 +239,7 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
           },
           body: {
             pushRegId: genRanHex(64),
-            pushType: 'APNS',
+            pushType: 'GCM',
             uuid: this.session.deviceId,
           },
           json: true,
@@ -213,24 +250,25 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
         this.session.deviceId = notificationReponse.body.resMsg.deviceId;
       }
       logger.debug('@EuropeController.login: Device registered');
-
       const formData = new URLSearchParams();
       formData.append('grant_type', 'authorization_code');
-      formData.append('redirect_uri', this.environment.endpoints.redirectUri);
+      formData.append('redirect_uri', this.environment.endpoints.redirectUri ); //`${this.environment.baseUrl}/api/v1/user/oauth2/redirect`);
       formData.append('code', authResult.code);
+      formData.append('client_id', this.environment.clientId);
+      formData.append('client_secret','secret');
 
-      const response = await got(this.environment.endpoints.token, {
+      const response = await got(`${this.environment.idpUrl}/auth/api/v2/user/oauth2/token`, {
         method: 'POST',
         headers: {
-          'Authorization': this.environment.basicToken,
+          //'Authorization': this.environment.basicToken,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Host': this.environment.host,
-          'Connection': 'Keep-Alive',
+          //'Host': this.environment.host,
+          //'Connection': 'Keep-Alive',
           'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
-          'grant_type': 'authorization_code',
-          'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(),
+          //'grant_type': 'authorization_code',
+          //'ccsp-application-id': this.environment.appId,
+          'Stamp': false, // await this.environment.stamp(),
         },
         body: formData.toString(),
         cookieJar: authResult.cookies,
@@ -321,14 +359,18 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
     }
   }
 
-  public async getVehicleHttpService(): Promise<GotInstance<GotJSONFn>> {
+  public async getVehicleHttpService(vehicle?: EuropeanVehicle): Promise<GotInstance<GotJSONFn>> {
     await this.checkControlToken();
+    const ccuccs2 = Number (vehicle ? vehicle.vehicleConfig.ccuCCS2ProtocolSupport : false);
+    
     return got.extend({
       baseUrl: this.environment.baseUrl,
       headers: {
         ...this.defaultHeaders,
         'Authorization': this.session.controlToken,
+        'AuthorizationCCSP': this.session.controlToken,
         'Stamp': await this.environment.stamp(),
+        'Ccuccs2protocolsupport': ccuccs2,
       },
       json: true,
     });
