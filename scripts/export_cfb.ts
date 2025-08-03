@@ -6,6 +6,13 @@ import { AustraliaBrandEnvironment } from '../src/constants/australia';
 import { EuropeanBrandEnvironment } from '../src/constants/europe';
 import { Brand } from '../src/interfaces/common.interfaces';
 
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+// For ES modules, use this to get __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const brands: Brand[] = ['kia', 'hyundai'];
 
 export const exportCfb = async (

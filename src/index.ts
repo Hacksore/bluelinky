@@ -83,7 +83,6 @@ export class BlueLinky<
     if (config.autoLogin === undefined) {
       this.config.autoLogin = true;
     }
-
     this.onInit();
   }
 

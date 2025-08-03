@@ -1,5 +1,5 @@
-// Auto generated file on 2023-07-29T14:42:19.802Z
-// run `npm run eu:export:cfb` to update it
+// Auto generated file on 2025-05-29T08:11:22.949Z
+// run `npm run eu:export:cfb` or `npm run au:export:cfb` respectively to update it
 
-export const kiaCFB = Buffer.from('wLTVxwidmH8CfJYBWSnHD6E0huk0ozdiuygB4hLkM5XCgzAL1Dk5sE36d/bx5PFMQeU=', 'base64');
-export const hyundaiCFB = Buffer.from('RFtoRq/vDXJmRndoZaZQyfOot7OrIqGVFj96iY2WL3yyH5Z/pUvlUhqmCxD2t+D65SQ=', 'base64');
+export const kiaCFB = Buffer.from('wLTVxwidmH8CfJYBWSnHD6nSsqqZUwz9AX5LJDxLpcXe2W3rEo7rXdOWPfwSQyyQdf4=', 'base64');
+export const hyundaiCFB = Buffer.from('RFtoRq/vDXJmRndoZaZQya75jlGkdNy37JsbZ9KcZuqu9iHKAlIqC4CoCH96OnuwsDM=', 'base64');
