@@ -1,9 +1,4 @@
-import {
-  REGIONS,
-  DEFAULT_VEHICLE_STATUS_OPTIONS,
-  POSSIBLE_CHARGE_LIMIT_VALUES,
-  ChargeTarget,
-} from '../constants';
+import {REGIONS, DEFAULT_VEHICLE_STATUS_OPTIONS, POSSIBLE_CHARGE_LIMIT_VALUES, ChargeTarget } from '../constants';
 import {
   VehicleStatus,
   FullVehicleStatus,
@@ -19,7 +14,7 @@ import {
   EVChargeModeTypes,
   VehicleDayTrip,
   VehicleMonthTrip,
-  VehicleStartOptions,
+  VehicleStartOptions 
 } from '../interfaces/common.interfaces';
 
 import logger from '../logger';
