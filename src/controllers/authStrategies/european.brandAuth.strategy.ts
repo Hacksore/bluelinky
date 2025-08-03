@@ -32,7 +32,7 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
   }
 
 	public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
-    const cookieJar = await initSession(this.environment, this.language, options?.cookieJar);
+    const cookieJar = await initSession(this.environment, options?.cookieJar);
 		const { body: { userId, serviceId } } = await got(this.environment.endpoints.integration, {
 			cookieJar,
 			json: true,
