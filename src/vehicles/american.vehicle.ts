@@ -104,6 +104,7 @@ export default class AmericanVehicle extends Vehicle {
   public async start(startConfig: VehicleStartOptions): Promise<string> {
     logger.debug('try start: ', JSON.stringify(startConfig));
     let seatClimateOptions: SeatHeaterVentInfo = null;
+    let gen2ev = false;
     const mergedConfig = {
       ...{
         hvac: false,
@@ -117,11 +118,21 @@ export default class AmericanVehicle extends Vehicle {
       ...startConfig,
     };
 
+    let start_url = 'ac/v2/rcs/rsc/start';
+
+    if (this.vehicleConfig.engineType === 'EV') {
+      start_url = 'ac/v2/evc/fatc/start';
+      if (this.vehicleConfig.generation == '2') {
+        gen2ev = true;
+        logger.debug('gen2 EV vehicle - seat and climate duration options not supported');
+      }
+    }
+
     logger.debug('mergedConfig: ', JSON.stringify(mergedConfig));
     const advClimateOptionValidator = advClimateValidator(this.userConfig.brand, this.region);
     logger.debug(`advClimateOptionValidator: ${JSON.stringify(advClimateOptionValidator)}`);
     const result = {} as SeatHeaterVentInfo;
-    if (mergedConfig.seatClimateSettings) {
+    if (mergedConfig.seatClimateSettings && !gen2ev) {
       if (Object.keys(mergedConfig.seatClimateSettings).length > 0) {
         logger.debug(`Seat climate settings found: ${JSON.stringify(mergedConfig.seatClimateSettings)}`);
         Object.keys(advClimateOptionValidator.validSeats).forEach((key) => {
@@ -133,16 +144,19 @@ export default class AmericanVehicle extends Vehicle {
           }
         });
         logger.debug(`Processed Climate Seat Options result: ${JSON.stringify(result)}`);
-        seatClimateOptions = result;
+        Object.keys(!result).length > 0 ? seatClimateOptions = result : seatClimateOptions = null;
       } else {
         logger.debug('invalid seatClimateSettings Key Value');
         seatClimateOptions = null;
       }
     } else {
-      logger.debug('no seatClimateSettings found');
+      logger.debug('no seatClimateSettings found / gen 2 ev');
       seatClimateOptions = null;
     }
 
+
+    // using ... spread syntax to conditionally build body at the end 
+    // avoids typescript's *ahem* nuances changing things conditionally
     const body = {
       'Ims': 0,
       'airCtrl': +mergedConfig.hvac, // use the unary method to convert to int
@@ -150,20 +164,24 @@ export default class AmericanVehicle extends Vehicle {
         'unit': 1,
         'value': `${mergedConfig.temperature}`,
       },
+
       'defrost': mergedConfig.defrost,
-      'heating1': 0, // use the unary method to convert to int
-      'igniOnDuration': mergedConfig.duration,
-      'seatHeaterVentInfo': seatClimateOptions, //figured out what it is
+      ...(advClimateOptionValidator.validHeats.includes(mergedConfig.heatedFeatures) && {
+        'heating1': mergedConfig.heatedFeatures, // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
+      } || { 'heating1': 0 }), // default to Off if not valid
+      ...(!gen2ev && {
+        'igniOnDuration': mergedConfig.duration, // todo make conditional for gen 2 evs 
+      }),
+      ...(seatClimateOptions && {
+        'seatHeaterVentInfo': seatClimateOptions, // figured out what it is
+      }),
       'username': this.userConfig.username,
       'vin': this.vehicleConfig.vin,
     };
-    if (advClimateOptionValidator.validHeats.includes(mergedConfig.heatedFeatures)) {
-      logger.debug('Valid heatedFeatures Value Found');
-      body.heating1 = mergedConfig.heatedFeatures;
-    }
 
     logger.debug(`starting car with payload: ${JSON.stringify(body)}`);
-    const response = await this._request('/ac/v2/rcs/rsc/start', {
+
+    const response = await this._request(start_url, {
       method: 'POST',
       headers: {
         ...this.getDefaultHeaders(),

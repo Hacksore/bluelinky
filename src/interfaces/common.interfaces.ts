@@ -449,6 +449,7 @@ export interface VehicleRegisterOptions {
   id: string;
   generation: string;
   ccuCCS2ProtocolSupport?: boolean;
+  engineType?: 'ICE' | 'EV' | 'HEV' | 'PHEV'; // ICE = Internal Combustion Engine, EV = Electric Vehicle, HEV = Hybrid Electric Vehicle, PHEV = Plug-in Hybrid Electric Vehicle
 }
 
 export type DeepPartial<T> = {
