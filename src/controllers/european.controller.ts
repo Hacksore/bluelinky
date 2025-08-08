@@ -214,26 +214,27 @@ export class EuropeanController extends SessionController<EuropeBlueLinkyConfig>
       }
       logger.debug('@EuropeController.login: Device registered');
 
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'authorization_code');
-      formData.append('redirect_uri', this.environment.endpoints.redirectUri);
-      formData.append('code', authResult.code);
+      // Updated token exchange to use new endpoint based on Python fix
+      const tokenUrl = this.environment.brand === 'kia' 
+        ? 'https://idpconnect-eu.kia.com/auth/api/v2/user/oauth2/token'
+        : 'https://idpconnect-eu.hyundai.com/auth/api/v2/user/oauth2/token';
 
-      const response = await got(this.environment.endpoints.token, {
+      const tokenFormData = new URLSearchParams();
+      tokenFormData.append('grant_type', 'authorization_code');
+      tokenFormData.append('code', authResult.code);
+      tokenFormData.append('redirect_uri', `${this.environment.baseUrl}/api/v1/user/oauth2/redirect`);
+      tokenFormData.append('client_id', this.environment.clientId);
+      tokenFormData.append('client_secret', 'secret');
+
+      const response = await got(tokenUrl, {
         method: 'POST',
         headers: {
-          'Authorization': this.environment.basicToken,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Host': this.environment.host,
-          'Connection': 'Keep-Alive',
-          'Accept-Encoding': 'gzip',
           'User-Agent': 'okhttp/3.10.0',
-          'grant_type': 'authorization_code',
-          'ccsp-application-id': this.environment.appId,
-          'Stamp': await this.environment.stamp(),
         },
-        body: formData.toString(),
+        body: tokenFormData.toString(),
         cookieJar: authResult.cookies,
+        throwHttpErrors: false,
       });
 
       if (response.statusCode !== 200) {
