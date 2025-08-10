@@ -410,18 +410,18 @@ export interface VehicleCommandResponse {
 
 export type SeatHeaterVentInfo = {
   // [key: string]: number // maybe other seats like 3rd row, etc. at some point maybe leave open for other potential enums in future ??
-  driverSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8; // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
-  passengerSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  rearLeftSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-  rearRightSeat: undefined | null | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-} | null | undefined;
+  driverSeat?: number; // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
+  passengerSeat?: number;
+  rearLeftSeat?: number;
+  rearRightSeat?: number;
+} | null;
 
 export interface VehicleStartOptions {
   hvac: boolean | string;
   duration: number;
   temperature: number;
   defrost: boolean | string;
-  heatedFeatures: number;
+  heatedFeatures: number | boolean;
   unit?: 'C' | 'F';
   seatClimateSettings?: SeatHeaterVentInfo;
 }
@@ -449,7 +449,7 @@ export interface VehicleRegisterOptions {
   id: string;
   generation: string;
   ccuCCS2ProtocolSupport?: boolean;
-  engineType?: 'ICE' | 'EV' | 'HEV' | 'PHEV'; // ICE = Internal Combustion Engine, EV = Electric Vehicle, HEV = Hybrid Electric Vehicle, PHEV = Plug-in Hybrid Electric Vehicle
+  engineType?: 'ICE' | 'EV'; // ICE = Internal Combustion Engine, EV = Electric Vehicle, HEV = Hybrid Electric Vehicle, PHEV = Plug-in Hybrid Electric Vehicle
 }
 
 export type DeepPartial<T> = {

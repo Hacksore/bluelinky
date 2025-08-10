@@ -118,8 +118,11 @@ export default class AmericanVehicle extends Vehicle {
       ...startConfig,
     };
 
-    let start_url = 'ac/v2/rcs/rsc/start';
+    logger.debug(`mergedConfig:  ${JSON.stringify(mergedConfig)}`);
+    const advClimateOptionValidator = advClimateValidator(this.userConfig.brand, this.region);
+    logger.debug(`advClimateOptionValidator: ${JSON.stringify(advClimateOptionValidator)}`);
 
+    let start_url = 'ac/v2/rcs/rsc/start';
     if (this.vehicleConfig.engineType === 'EV') {
       start_url = 'ac/v2/evc/fatc/start';
       if (this.vehicleConfig.generation == '2') {
@@ -127,36 +130,52 @@ export default class AmericanVehicle extends Vehicle {
         logger.debug('gen2 EV vehicle - seat and climate duration options not supported');
       }
     }
+    logger.debug(`Using start URL: ${start_url}`);
 
-    logger.debug('mergedConfig: ', JSON.stringify(mergedConfig));
-    const advClimateOptionValidator = advClimateValidator(this.userConfig.brand, this.region);
-    logger.debug(`advClimateOptionValidator: ${JSON.stringify(advClimateOptionValidator)}`);
+    //keeping heate dFeatures backwards compatible
+    if (typeof mergedConfig.heatedFeatures === 'boolean') {
+      mergedConfig.heatedFeatures = mergedConfig.heatedFeatures ? 1 : 0;
+      logger.warn('heatedFeatures was boolean; is actually enum; please update code to use enum values');
+    } else if (typeof mergedConfig.heatedFeatures === 'number') {
+      if (advClimateOptionValidator.validHeats.includes(mergedConfig.heatedFeatures)) {
+        mergedConfig.heatedFeatures = advClimateOptionValidator.validHeats[mergedConfig.heatedFeatures];
+      } else {
+        logger.warn('heatedFeatures is not a valid enum, defaulting to 0');
+        mergedConfig.heatedFeatures = 0; // default to 0 if not valid
+      }
+    } else {
+      logger.warn('heatedFeatures is not a number or boolean, defaulting to 0');
+      mergedConfig.heatedFeatures = 0;
+    }
+
+    //processing seatClimateSettings
     const result = {} as SeatHeaterVentInfo;
     if (mergedConfig.seatClimateSettings && !gen2ev) {
-      if (Object.keys(mergedConfig.seatClimateSettings).length > 0) {
+      const controlled_seats = Object.keys(mergedConfig.seatClimateSettings);
+      if (controlled_seats.length > 0) {
         logger.debug(`Seat climate settings found: ${JSON.stringify(mergedConfig.seatClimateSettings)}`);
-        Object.keys(advClimateOptionValidator.validSeats).forEach((key) => {
-          if (mergedConfig.seatClimateSettings![key]) {
-            if (advClimateOptionValidator.validStatus.includes(mergedConfig.seatClimateSettings![key])) {
-              logger.debug(`Adding seat climate setting for ${key} ==> ${advClimateOptionValidator.validSeats[key]} : ${mergedConfig.seatClimateSettings![key]}`);
-              result![advClimateOptionValidator.validSeats[key]] = mergedConfig.seatClimateSettings![key];
-            }
+        controlled_seats.forEach((seat) => {
+          const targetSeat = advClimateOptionValidator.validSeats[seat] ? advClimateOptionValidator.validSeats[seat] : null;
+          const seatStatus = advClimateOptionValidator.validStatus.includes(mergedConfig.seatClimateSettings![seat]) ? mergedConfig.seatClimateSettings![seat] : null;
+          if (targetSeat && seatStatus) {
+            result![targetSeat] = seatStatus;
+          } else {
+            logger.warn(`invalid seat / seat climate option for ${seat}`);
           }
         });
-        logger.debug(`Processed Climate Seat Options result: ${JSON.stringify(result)}`);
-        Object.keys(!result).length > 0 ? seatClimateOptions = result : seatClimateOptions = null;
+        // logger.debug(`Processed Climate Seat Options result: ${JSON.stringify(result)}`);
       } else {
-        logger.debug('invalid seatClimateSettings Key Value');
-        seatClimateOptions = null;
+        logger.warn('invalid seatClimateSettings provided, defaulting to null');
       }
     } else {
       logger.debug('no seatClimateSettings found / gen 2 ev');
-      seatClimateOptions = null;
     }
-
+    // if after processing result is empty, default seatClimateOptions to null
+    Object.keys(result!).length > 0 ? seatClimateOptions = result : seatClimateOptions = null;
+    logger.debug(`Processed seatClimateOptions: ${JSON.stringify(seatClimateOptions)}`);
 
     // using ... spread syntax to conditionally build body at the end 
-    // avoids typescript's *ahem* nuances changing things conditionally
+    // avoids typescript's *ahem* nuances with changing things conditionally
     const body = {
       'Ims': 0,
       'airCtrl': +mergedConfig.hvac, // use the unary method to convert to int
@@ -164,16 +183,11 @@ export default class AmericanVehicle extends Vehicle {
         'unit': 1,
         'value': `${mergedConfig.temperature}`,
       },
-
       'defrost': mergedConfig.defrost,
-      ...(advClimateOptionValidator.validHeats.includes(mergedConfig.heatedFeatures) && {
-        'heating1': mergedConfig.heatedFeatures, // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
-      } || { 'heating1': 0 }), // default to Off if not valid
-      ...(!gen2ev && {
-        'igniOnDuration': mergedConfig.duration, // todo make conditional for gen 2 evs 
-      }),
-      ...(seatClimateOptions && {
-        'seatHeaterVentInfo': seatClimateOptions, // figured out what it is
+      'heating1': mergedConfig.heatedFeatures, // default to Off if not valid
+      ...(!gen2ev && { //gen2ev does not support duration or seatClimateOptions
+        'igniOnDuration': mergedConfig.duration,
+        'seatHeaterVentInfo': seatClimateOptions,  // figured out what it is
       }),
       'username': this.userConfig.username,
       'vin': this.vehicleConfig.vin,

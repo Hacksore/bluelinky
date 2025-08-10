@@ -3,7 +3,7 @@ import { REGION } from '../constants';
 
 export type advClimateMap = {
     validSeats: { [key: string]: string };
-    validStatus: (string | number)[];
+    validStatus: number[];
     validHeats: number[];
 };
 
@@ -33,15 +33,15 @@ const heatStatusMap = { //for heating1
     2: 'Rear Window',
     3: 'Steering Wheel',
     //     // # Seems to be the same as 1 but different region (EU) handed in seatlistlogic:
-    // 4: "Steering Wheel and Rear Window",
+    // 4: "Steering Wheel and Rear Window", /// todo be more graceful, handled in logic xxx
 };
 
 const createValidatorMapping = (region: REGION): advClimateMap => {
-    const convry: (string | number)[] = Object.keys(seatStatusMap).map((key) => Number(key));
-    convry.concat(Object.keys(seatStatusMap));
+    const convry: number[] = Object.keys(seatStatusMap).map((key) => Number(key));
+    // convry.concat(Object.keys(seatStatusMap));
     const heatstates: number[] = Object.keys(heatStatusMap).map((key) => Number(key));
     if (region === 'EU') {
-        heatstates.push(4); // EU has 4 as a valid heat state
+        heatstates.push(4); // EU has 4 as a valid heat state not actually implemented in the code
     }
     // heatstates = heatstates.concat(Object.keys(heatStatusMap));
     // match json input variations
