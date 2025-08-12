@@ -130,7 +130,7 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
         this.vehicles = [];
         return this.vehicles;
       }
-
+      // logger.debug(`Found vehicles on the account:: `, JSON.stringify(data.enrolledVehicleDetails));
       this.vehicles = data.enrolledVehicleDetails.map(vehicle => {
         const vehicleInfo = vehicle.vehicleDetails;
         const vehicleConfig = {
@@ -140,8 +140,15 @@ export class AmericanController extends SessionController<AmericanBlueLinkyConfi
           regDate: vehicleInfo.enrollmentDate,
           brandIndicator: vehicleInfo.brandIndicator,
           regId: vehicleInfo.regid,
-          generation: vehicleInfo.vehicleGeneration,
+          generation: vehicleInfo.vehicleGeneration
         } as VehicleRegisterOptions;
+
+        if (vehicleInfo.evStatus == 'N') {
+          vehicleConfig.engineType = 'ICE'; // Internal Combustion Engine
+        } else if (vehicleInfo.evStatus == 'E') {
+          vehicleConfig.engineType = 'EV'; // Electric Vehicle
+        }
+
         return new AmericanVehicle(vehicleConfig, this);
       });
 

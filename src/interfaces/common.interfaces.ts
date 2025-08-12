@@ -408,13 +408,22 @@ export interface VehicleCommandResponse {
   responseDesc: string;
 }
 
+export type SeatHeaterVentInfo = {
+  // [key: string]: number // maybe other seats like 3rd row, etc. at some point maybe leave open for other potential enums in future ??
+  driverSeat?: number; // 0 = Off, 1 = On, 2 = Low Cool, 3 = Medium Cool, 4 = High Cool, 5 = Low Heat, 6 = Medium Heat, 7 = High Heat
+  passengerSeat?: number;
+  rearLeftSeat?: number;
+  rearRightSeat?: number;
+} | null;
+
 export interface VehicleStartOptions {
   hvac: boolean | string;
   duration: number;
   temperature: number;
   defrost: boolean | string;
-  heatedFeatures: boolean | string;
+  heatedFeatures: number | boolean;
   unit?: 'C' | 'F';
+  seatClimateSettings?: SeatHeaterVentInfo;
 }
 
 export enum VehicleWindowState {
@@ -440,6 +449,7 @@ export interface VehicleRegisterOptions {
   id: string;
   generation: string;
   ccuCCS2ProtocolSupport?: boolean;
+  engineType?: 'ICE' | 'EV'; // ICE = Internal Combustion Engine, EV = Electric Vehicle, HEV = Hybrid Electric Vehicle, PHEV = Plug-in Hybrid Electric Vehicle
 }
 
 export type DeepPartial<T> = {
