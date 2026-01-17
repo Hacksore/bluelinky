@@ -14,7 +14,7 @@ import { URLSearchParams } from 'url';
 import { CookieJar } from 'tough-cookie';
 import { VehicleRegisterOptions } from '../interfaces/common.interfaces';
 import { asyncMap, manageBluelinkyError, Stringifiable, uuidV4 } from '../tools/common.tools';
-import { AuthStrategy, Code } from './authStrategies/authStrategy';
+import { Code } from './authStrategies/authStrategy';
 import { ChineseLegacyAuthStrategy } from './authStrategies/chinese.legacyAuth.strategy';
 
 export interface ChineseBlueLinkConfig extends BlueLinkyConfig {
@@ -31,7 +31,7 @@ interface ChineseVehicleDescription {
 export class ChineseController extends SessionController<ChineseBlueLinkConfig> {
   private _environment: ChineseBrandEnvironment;
   private authStrategies: {
-    main: AuthStrategy;
+    main: ChineseLegacyAuthStrategy;
   };
   constructor(userConfig: ChineseBlueLinkConfig) {
     super(userConfig);

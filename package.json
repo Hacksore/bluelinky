@@ -23,6 +23,7 @@
   "author": "Hacksore",
   "license": "MIT",
   "dependencies": {
+    "base64-js": "^1.5.1",
     "got": "^9.6.0",
     "push-receiver": "^2.1.1",
     "tough-cookie": "^4.0.0",

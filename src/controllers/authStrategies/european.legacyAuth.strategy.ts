@@ -19,7 +19,7 @@ export class EuropeanLegacyAuthStrategy implements AuthStrategy {
     options?: { cookieJar: CookieJar }
   ): Promise<{ code: Code; cookies: CookieJar }> {
     const cookieJar = await initSession(this.environment, options?.cookieJar);
-    const { body, statusCode } = await got(this.environment.endpoints.login, {
+    const { body, statusCode } = await got(this.environment.endpoints.loginURL, {
       method: 'POST',
       json: true,
       body: {

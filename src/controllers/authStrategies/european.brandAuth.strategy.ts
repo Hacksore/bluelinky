@@ -1,13 +1,8 @@
 import got from 'got';
 import { CookieJar } from 'tough-cookie';
 import { EULanguages, EuropeanBrandEnvironment } from '../../constants/europe';
-import { AuthStrategy, Code, initSession } from './authStrategy';
+import { AuthStrategy, Code, Token, initSession } from './authStrategy';
 import { URLSearchParams } from 'url';
-
-const stdHeaders = {
-  'User-Agent':
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 11_1 like Mac OS X) AppleWebKit/604.3.5 (KHTML, like Gecko) Version/11.0 Mobile/15B92 Safari/604.1',
-};
 
 export class EuropeanBrandAuthStrategy implements AuthStrategy {
   constructor(
@@ -19,100 +14,42 @@ export class EuropeanBrandAuthStrategy implements AuthStrategy {
     return 'EuropeanBrandAuthStrategy';
   }
 
-  public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code, cookies: CookieJar }> {
+  public async login(user: { username: string; password: string; }, options?: { cookieJar?: CookieJar }): Promise<{ code: Code | Token, cookies: CookieJar }> {
     const cookieJar = await initSession(this.environment, options?.cookieJar);
 
-    // Build the correct auth URL based on the new KIA/Hyundai authentication
-    const authHost = this.environment.brand === 'kia'
-      ? 'idpconnect-eu.kia.com'
-      : 'idpconnect-eu.hyundai.com';
+    const uri = this.environment.loginFormHost + this.environment.endpoints.tokenURL;
 
-    const authUrl = `https://${authHost}/auth/api/v2/user/oauth2/authorize?response_type=code&client_id=${this.environment.clientId}&redirect_uri=${this.environment.baseUrl}/api/v1/user/oauth2/redirect&lang=${this.language}&state=ccsp`;
+    const	headers = {
+      'Content-type': 'application/x-www-form-urlencoded',
+      'User-Agent':   'Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19_CCS_APP_AOS',
+    };
 
-    // Step 1: GET request to auth URL to get connector_session_key
-    const authResponse = await got(authUrl, {
-      cookieJar,
-      headers: stdHeaders,
+    const formData = new URLSearchParams();
+    formData.append('grant_type', 'refresh_token');
+    formData.append('refresh_token', user.password);
+    formData.append('client_id', this.environment.ccspServiceID);
+    formData.append('client_secret', this.environment.ccspServiceSecret);
+
+    const authResponse = await got.post(uri, {
+//      cookieJar,
+      headers: headers,
+      body: formData.toString(),
       followRedirect: true,
       throwHttpErrors: false,
     });
 
-    // Extract connector_session_key from the final URL after redirects
-    const urlToCheck = authResponse.url;
-
-    // Try multiple regex patterns to find the session key
-    let connectorSessionKey: string | null = null;
-
-    // Pattern 1: URL encoded
-    let match = urlToCheck.match(/connector_session_key%3D([0-9a-fA-F-]{36})/);
-    if (match) {
-      connectorSessionKey = match[1];
+    if (authResponse.statusCode !== 200) {
+      throw new Error(`@EuropeanBrandAuthStrategy.login: Could not get access_token from URL: ${uri}`);
     }
 
-    // Pattern 2: Not URL encoded
-    if (!connectorSessionKey) {
-      match = urlToCheck.match(/connector_session_key=([0-9a-fA-F-]{36})/);
-      if (match) {
-        connectorSessionKey = match[1];
-      }
+    const token = JSON.parse(authResponse.body) as Token;
+    if (! token.refresh_token && user.password != '') {
+      token.refresh_token = user.password;
     }
 
-    if (!connectorSessionKey) {
-      throw new Error(`@EuropeanBrandAuthStrategy.login: Could not extract connector_session_key from URL: ${urlToCheck}`);
-    }
-
-    // Step 2: POST to signin endpoint
-    const signinUrl = `https://${authHost}/auth/account/signin`;
-
-    const formData = new URLSearchParams();
-    formData.append('client_id', this.environment.clientId);
-    formData.append('encryptedPassword', 'false');
-    formData.append('orgHmgSid', '');
-    formData.append('password', user.password);
-    formData.append('redirect_uri', `${this.environment.baseUrl}/api/v1/user/oauth2/redirect`);
-    formData.append('state', 'ccsp');
-    formData.append('username', user.username);
-    formData.append('remember_me', 'false');
-    formData.append('connector_session_key', connectorSessionKey);
-    formData.append('_csrf', '');
-
-    const signinResponse = await got.post(signinUrl, {
-      cookieJar,
-      body: formData.toString(),
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        'origin': `https://${authHost}`,
-        ...stdHeaders
-      },
-      followRedirect: false,
-      throwHttpErrors: false,
-    });
-
-    if (signinResponse.statusCode !== 302) {
-      throw new Error(`@EuropeanBrandAuthStrategy.login: Signin failed with status ${signinResponse.statusCode}: ${signinResponse.body}`);
-    }
-
-    // Step 3: Extract authorization code from Location header
-    const location = signinResponse.headers.location;
-    if (!location) {
-      throw new Error('@EuropeanBrandAuthStrategy.login: No redirect location found after signin');
-    }
-
-    const codeMatch = location.match(/code=([0-9a-fA-F-]{36}\.[0-9a-fA-F-]{36}\.[0-9a-fA-F-]{36})/);
-    if (!codeMatch) {
-      // Try alternative patterns for different code formats
-      const altMatch = location.match(/code=([^&]+)/);
-      if (altMatch) {
-        const code = altMatch[1];
-        return { code: code as Code, cookies: cookieJar };
-      }
-      throw new Error(`@EuropeanBrandAuthStrategy.login: Could not extract authorization code from redirect location: ${location}`);
-    }
-
-    const code = codeMatch[1];
-
+    //const code = '';
     return {
-      code: code as Code,
+      code: token,
       cookies: cookieJar,
     };
   }

@@ -1,7 +1,6 @@
-import { REGIONS } from '../constants';
 import { EuropeBlueLinkyConfig } from '../controllers/european.controller';
 import { Brand } from '../interfaces/common.interfaces';
-import { StampMode, getStampGenerator } from './stamps';
+import * as base64 from 'base64-js';
 
 export type EULanguages =
   | 'cs'
@@ -40,115 +39,135 @@ export interface EuropeanBrandEnvironment {
   brand: Brand;
   host: string;
   baseUrl: string;
-  clientId: string;
-  appId: string;
-  endpoints: {
-    integration: string;
-    silentSignIn: string;
-    session: string;
-    login: string;
-    language: string;
-    redirectUri: string;
-    token: string;
-  };
+
+  ccspServiceID: string;
+  ccspServiceSecret: string;
+  ccspApplicationID: string;
+  cfb: string;
   basicToken: string;
-  GCMSenderID: string;
-  stamp: () => Promise<string>;
-  brandAuthUrl: (options: { language: EULanguages; serviceId: string; userId: string }) => string;
+  pushType: string;
+  loginFormHost: string;
+
+  endpoints: {
+    deviceIdURL: string;
+    integrationInfoURL: string;
+    silentSigninURL: string;
+    languageURL: string;
+    loginURL: string;
+    tokenURL: string;
+  };
+  stamp: { result: string | null; error: Error | null };
 }
 
 const getEndpoints = (
-  baseUrl: string,
-  clientId: string
+  baseUrl: string
 ): EuropeanBrandEnvironment['endpoints'] => ({
-  session: `${baseUrl}/api/v1/user/oauth2/authorize?response_type=code&state=test&client_id=${clientId}&redirect_uri=${baseUrl}/api/v1/user/oauth2/redirect`,
-  login: `${baseUrl}/api/v1/user/signin`,
-  language: `${baseUrl}/api/v1/user/language`,
-  redirectUri: `${baseUrl}/api/v1/user/oauth2/redirect`,
-  token: `${baseUrl}/api/v1/user/oauth2/token`,
-  integration: `${baseUrl}/api/v1/user/integrationinfo`,
-  silentSignIn: `${baseUrl}/api/v1/user/silentsignin`,
+  deviceIdURL:        `${baseUrl}/api/v1/spa/notifications/register`,
+  integrationInfoURL: `${baseUrl}/api/v1/user/integrationinfo`,
+  silentSigninURL:    `${baseUrl}/api/v1/user/silentsignin`,
+  languageURL:        `${baseUrl}/api/v1/user/language`,
+  loginURL:           `${baseUrl}/api/v1/user/signin`,
+  tokenURL:           '/auth/api/v2/user/oauth2/token',
 });
 
-type EnvironmentConfig = Required<Pick<EuropeBlueLinkyConfig, 'stampMode'>> &
-  Partial<Pick<EuropeBlueLinkyConfig, 'stampsFile'>>;
-type BrandEnvironmentConfig = Pick<EuropeBlueLinkyConfig, 'brand'> & Partial<EnvironmentConfig>;
+const getStamp = (cfb: string, ccspApplicationID: string): { result: string | null; error: Error | null } => {
+  try {
+      const cfb64 = base64.toByteArray(cfb);
+      
+      const timestamp = Math.floor(Date.now()).toString();
+      const raw = ccspApplicationID + ':' + timestamp;
+      const rawBytes = new TextEncoder().encode(raw);
 
-const getHyundaiEnvironment = ({
-  stampMode,
-  stampsFile,
-}: EnvironmentConfig): EuropeanBrandEnvironment => {
-  const host = 'prd.eu-ccapi.hyundai.com:8080';
-  const baseUrl = `https://${host}`;
-  const clientId = '6d477c38-3ca4-4cf3-9557-2a1929a94654';
-  const appId = '1eba27d2-9a5b-4eba-8ec7-97eb6c62fb51';
+      if (cfb64.length !== rawBytes.length) {
+        return {
+          result: null,
+          error: new Error(`cfb and raw length not equal: ${cfb64.length} != ${rawBytes.length}`)
+        };
+      }
+
+      const enc = new Uint8Array(cfb64.length);
+      for (let i = 0; i < cfb64.length; i++) {
+        enc[i] = cfb64[i] ^ rawBytes[i];
+      }
+
+      return {
+        result: base64.fromByteArray(enc),
+        error: null
+      };
+    } catch (err) {
+      return {
+        result: null,
+        error: err as Error
+      };
+    }
+};
+
+type BrandEnvironmentConfig = Pick<EuropeBlueLinkyConfig, 'brand'>;
+
+const getHyundaiEnvironment = (): EuropeanBrandEnvironment => {
+  const host =              'prd.eu-ccapi.hyundai.com:8080';
+  const baseUrl =           `https://${host}`;
+
+  const ccspServiceID =     '6d477c38-3ca4-4cf3-9557-2a1929a94654';
+  const ccspServiceSecret = 'KUy49XxPzLpLuoK0xhBC77W6VXhmtQR9iQhmIFjjoY4IpxsV';
+  const ccspApplicationID = '014d2225-8495-4735-812d-2616334fd15d';
+  const cfb =               'RFtoRq/vDXJmRndoZaZQyfOot7OrIqGVFj96iY2WL3yyH5Z/pUvlUhqmCxD2t+D65SQ=';
+  const basicToken =        'NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==';
+  const pushType =          'GCM';
+  const loginFormHost =     'https://idpconnect-eu.hyundai.com';
+
   return {
     brand: 'hyundai',
     host,
     baseUrl,
-    clientId,
-    appId,
-    endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
-    basicToken:
-      'Basic NmQ0NzdjMzgtM2NhNC00Y2YzLTk1NTctMmExOTI5YTk0NjU0OktVeTQ5WHhQekxwTHVvSzB4aEJDNzdXNlZYaG10UVI5aVFobUlGampvWTRJcHhzVg==',
-    GCMSenderID: '414998006775',
-    stamp: getStampGenerator({
-      appId,
-      brand: 'hyundai',
-      mode: stampMode,
-      region: REGIONS.EU,
-      stampHost: 'https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/',
-      stampsFile: stampsFile,
-    }),
-    brandAuthUrl({ language, serviceId, userId }) {
-      const newAuthClientId = '64621b96-0f0d-11ec-82a8-0242ac130003';
-      return `https://eu-account.hyundai.com/auth/realms/euhyundaiidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
-    },
+    ccspServiceID,
+    ccspServiceSecret,
+    ccspApplicationID,
+    cfb,
+    basicToken,
+    pushType,
+    loginFormHost,
+    endpoints: Object.freeze(getEndpoints(baseUrl)),
+    stamp: getStamp(cfb, ccspApplicationID),
   };
 };
 
-const getKiaEnvironment = ({
-  stampMode,
-  stampsFile,
-}: EnvironmentConfig): EuropeanBrandEnvironment => {
+const getKiaEnvironment = (): EuropeanBrandEnvironment => {
   const host = 'prd.eu-ccapi.kia.com:8080';
   const baseUrl = `https://${host}`;
-  const clientId = 'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
-  const appId = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
+
+  const ccspServiceID =     'fdc85c00-0a2f-4c64-bcb4-2cfb1500730a';
+  const ccspServiceSecret = 'secret';
+  const ccspApplicationID = 'a2b8469b-30a3-4361-8e13-6fceea8fbe74';
+  const cfb =               'wLTVxwidmH8CfJYBWSnHD6E0huk0ozdiuygB4hLkM5XCgzAL1Dk5sE36d/bx5PFMbZs=';
+  const basicToken =        'ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==';
+  const pushType =          'APNS';
+  const loginFormHost =     'https://idpconnect-eu.kia.com';
+
   return {
     brand: 'kia',
     host,
     baseUrl,
-    clientId,
-    appId,
-    endpoints: Object.freeze(getEndpoints(baseUrl, clientId)),
-    basicToken: 'Basic ZmRjODVjMDAtMGEyZi00YzY0LWJjYjQtMmNmYjE1MDA3MzBhOnNlY3JldA==',
-    GCMSenderID: '345127537656',
-    stamp: getStampGenerator({
-      appId,
-      brand: 'kia',
-      mode: stampMode,
-      region: REGIONS.EU,
-      stampHost: 'https://raw.githubusercontent.com/neoPix/bluelinky-stamps/master/',
-      stampsFile: stampsFile,
-    }),
-    brandAuthUrl({ language, serviceId, userId }) {
-      const newAuthClientId = '572e0304-5f8d-4b4c-9dd5-41aa84eed160';
-      return `https://eu-account.kia.com/auth/realms/eukiaidm/protocol/openid-connect/auth?client_id=${newAuthClientId}&scope=openid%20profile%20email%20phone&response_type=code&hkid_session_reset=true&redirect_uri=${baseUrl}/api/v1/user/integration/redirect/login&ui_locales=${language}&state=${serviceId}:${userId}`;
-    },
+    ccspServiceID,
+    ccspServiceSecret,
+    ccspApplicationID,
+    cfb,
+    basicToken,
+    pushType,
+    loginFormHost,
+    endpoints: Object.freeze(getEndpoints(baseUrl)),
+    stamp: getStamp(cfb, ccspApplicationID),
   };
 };
 
 export const getBrandEnvironment = ({
   brand,
-  stampMode = StampMode.DISTANT,
-  stampsFile,
 }: BrandEnvironmentConfig): EuropeanBrandEnvironment => {
   switch (brand) {
     case 'hyundai':
-      return Object.freeze(getHyundaiEnvironment({ stampMode, stampsFile }));
+      return Object.freeze(getHyundaiEnvironment());
     case 'kia':
-      return Object.freeze(getKiaEnvironment({ stampMode, stampsFile }));
+      return Object.freeze(getKiaEnvironment());
     default:
       throw new Error(`Constructor ${brand} is not managed.`);
   }
