@@ -1,6 +1,6 @@
 // moved all the US constants to its own file, we can use this file for shared constants
 import {
-  getBrandEnvironment as getCABrandEnvironment,
+    getBrandEnvironment as getCABrandEnvironment,
   CanadianBrandEnvironment,
 } from './constants/canada';
 import {
@@ -15,6 +15,10 @@ import {
   getBrandEnvironment as getAUBrandEnvironment,
   AustraliaBrandEnvironment,
 } from './constants/australia';
+import {
+  BrazilBrandEnvironment,
+  getBrandEnvironment as getBRBrandEnvironment,
+} from './constants/brazil';
 
 import { Brand, VehicleStatusOptions } from './interfaces/common.interfaces';
 
@@ -27,15 +31,17 @@ export const ALL_ENDPOINTS = {
     getCNBrandEnvironment({ brand }).endpoints,
   AU: (brand: Brand): AustraliaBrandEnvironment['endpoints'] =>
     getAUBrandEnvironment({ brand }).endpoints,
+  BR: (brand: Brand): BrazilBrandEnvironment['endpoints'] => getBRBrandEnvironment(brand).endpoints,
 };
 
-export type REGION = 'US' | 'CA' | 'EU' | 'CN' | 'AU';
+export type REGION = 'US' | 'CA' | 'EU' | 'CN' | 'AU' | 'BR';
 export enum REGIONS {
   US = 'US',
   CA = 'CA',
   EU = 'EU',
   CN = 'CN',
   AU = 'AU',
+  BR = 'BR',
 }
 
 // ev stuffz

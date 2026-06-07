@@ -14,13 +14,16 @@ import { SessionController } from './controllers/controller';
 import { Vehicle } from './vehicles/vehicle';
 import { AustraliaBlueLinkyConfig, AustraliaController } from './controllers/australia.controller';
 import AustraliaVehicle from './vehicles/australia.vehicle';
+import { BrazilianBlueLinkyConfig, BrazilianController } from './controllers/brazilian.controller';
+import BrazilianVehicle from './vehicles/brazilian.vehicle';
 
 type BluelinkyConfigRegions =
   | AmericanBlueLinkyConfig
   | CanadianBlueLinkyConfig
   | EuropeBlueLinkyConfig
   | ChineseBlueLinkConfig
-  | AustraliaBlueLinkyConfig;
+  | AustraliaBlueLinkyConfig
+  | BrazilianBlueLinkyConfig;
 
 const DEFAULT_CONFIG = {
   username: '',
@@ -44,6 +47,8 @@ export class BlueLinky<
     ? ChineseVehicle
     : REGION extends REGIONS.AU
     ? AustraliaVehicle
+    : REGION extends REGIONS.BR
+    ? BrazilianVehicle
     : EuropeanVehicle
 > extends EventEmitter {
   private controller: SessionController;
@@ -75,6 +80,9 @@ export class BlueLinky<
         break;
       case REGIONS.AU:
         this.controller = new AustraliaController(this.config as AustraliaBlueLinkyConfig);
+        break;
+      case REGIONS.BR:
+        this.controller = new BrazilianController(this.config as BrazilianBlueLinkyConfig);
         break;
       default:
         throw new Error('Your region is not supported yet.');
