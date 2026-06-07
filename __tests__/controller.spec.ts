@@ -2,8 +2,9 @@
 import got from 'got';
 
 import { AmericanController } from '../src/controllers/american.controller';
-import { EuropeanController } from '../src/controllers/european.controller';
+import { BrazilianController } from '../src/controllers/brazilian.controller';
 import { CanadianController } from '../src/controllers/canadian.controller';
+import { EuropeanController } from '../src/controllers/european.controller';
 
 jest.mock('got');
 
@@ -12,6 +13,7 @@ const getController = region => {
     US: AmericanController,
     EU: EuropeanController,
     CA: CanadianController,
+    BR: BrazilianController,
   };
 
   const controller = new referenceMap[region]({
@@ -23,7 +25,7 @@ const getController = region => {
     pin: '1234',
     vin: '4444444444444',
     vehicleId: undefined,
-    stampMode: 'LOCAL'
+    stampMode: 'LOCAL',
   });
 
   return controller;

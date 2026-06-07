@@ -1,9 +1,9 @@
 /* eslint-disable */
 // TODO: add all calls from EU and CA
 
+import inquirer from 'inquirer';
 import config from './config.json';
 import BlueLinky from './src';
-import inquirer from 'inquirer';
 import { Vehicle } from './src/vehicles/vehicle';
 
 const apiCalls = [
@@ -45,7 +45,7 @@ const askForRegionInput = () => {
         type: 'list',
         name: 'region',
         message: 'What Region are you in?',
-        choices: ['CN', 'US', 'EU', 'CA', 'AU'],
+        choices: ['CN', 'US', 'EU', 'CA', 'AU', 'BR'],
       },
       {
         type: 'list',
@@ -112,9 +112,9 @@ async function performCommand(command) {
         break;
       case 'vehicles':
         const vehicles = await client.getVehicles();
-         const response = vehicles.map(v => {
+        const response = vehicles.map(v => {
           const { name, vin, nickname, regDate, generation } = v.vehicleConfig;
-          return { name, vin, nickname, regDate, generation};
+          return { name, vin, nickname, regDate, generation };
         });
         console.log('vehicles', JSON.stringify(response, null, 2));
         break;

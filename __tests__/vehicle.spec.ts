@@ -13,6 +13,9 @@ import { CanadianController } from '../src/controllers/canadian.controller';
 import AMERICAN_STATUS_MOCK from './mock/americanStatus.json';
 import EUROPE_STATUS_MOCK from './mock/europeStatus.json';
 
+import BrazilianVehicle from '../src/vehicles/brazilian.vehicle';
+import { BrazilianController } from '../src/controllers/brazilian.controller';
+
 jest.mock('got');
 
 const gotMock = got as any;
@@ -29,6 +32,10 @@ const referenceMap = {
   CA: {
     controller: CanadianController,
     vehicle: CanadianVehicle,
+  },
+  BR: {
+    controller: BrazilianController,
+    vehicle: BrazilianVehicle,
   },
 };
 
@@ -162,7 +169,6 @@ describe('CanadianVehicle', () => {
     expect(vehicle.controller.session.accessToken).toEqual('JEST_TOKEN');
     expect(vehicle.controller.session.tokenExpiresAt).toBeGreaterThan(Math.floor(Date.now() / 1000));
     expect(vehicle.controller.session.tokenExpiresAt).toBeLessThan(Math.floor(Date.now() / 1000 + 20));
-
   });
 
   it('call lock commmand', async () => {
@@ -365,7 +371,7 @@ describe('EuropeanVehicle', () => {
   //   });
 
   //   gotMock.mockClear();
-    
+
   //   await vehicle.checkControlToken();
 
   //   // should update control token
